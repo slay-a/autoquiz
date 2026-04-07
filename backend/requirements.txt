@@ -1,0 +1,28 @@
+# API
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+python-multipart==0.0.9
+
+# Document parsing
+PyMuPDF==1.24.10
+python-docx==1.1.2
+python-pptx==1.0.2
+
+# RAG pipeline
+llama-index==0.11.10
+llama-index-embeddings-openai==0.2.5
+llama-index-vector-stores-postgres==0.2.0
+
+# Database / Auth
+supabase==2.7.4
+
+# Async jobs
+celery==5.4.0
+redis==5.1.0
+
+# LLM
+openai==1.51.0
+
+# Config
+python-dotenv==1.0.1
+pydantic-settings==2.5.2

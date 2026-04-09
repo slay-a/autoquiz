@@ -13,7 +13,7 @@ export default function App() {
             isActive ? "text-brand-600 font-medium" : "text-gray-600 hover:text-gray-900"
           }
         >
-          Instructor
+          Dashboard
         </NavLink>
         <NavLink
           to="/quiz"
@@ -21,7 +21,7 @@ export default function App() {
             isActive ? "text-brand-600 font-medium" : "text-gray-600 hover:text-gray-900"
           }
         >
-          Student
+          Quiz
         </NavLink>
       </nav>
 

@@ -7,6 +7,7 @@ __pycache__/
 venv/
 env/
 .env
+.env.*
 *.egg-info/
 dist/
 build/
@@ -16,7 +17,8 @@ build/
 # Node
 node_modules/
 dist/
-.DS_Store
+.env.local
+.env.*.local
 
 # Supabase
 supabase/.branches
@@ -39,3 +41,8 @@ Thumbs.db
 # Logs
 *.log
 celerybeat-schedule
+celerybeat-schedule.db
+
+# Secrets / certs
+*.pem
+*.key

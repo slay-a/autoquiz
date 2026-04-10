@@ -1,85 +1,194 @@
--- Run this in Supabase SQL Editor after enabling the vector extension.
--- Dashboard → Database → Extensions → enable "vector"
+-- ─────────────────────────────────────────────────────────────
+-- AutoQuiz — Full Schema
+-- Run this in Supabase SQL Editor (Dashboard → SQL Editor → New query)
+-- ─────────────────────────────────────────────────────────────
 
--- ── Extensions ────────────────────────────────────────────────────────────────
+-- 1. Extensions
 create extension if not exists vector;
 
--- ── Processing Jobs ───────────────────────────────────────────────────────────
-create table processing_jobs (
+-- ─── 2. Profiles ──────────────────────────────────────────────
+create table if not exists profiles (
+  id          uuid references auth.users(id) on delete cascade primary key,
+  email       text not null,
+  full_name   text not null,
+  role        text not null check (role in ('instructor', 'student')),
+  created_at  timestamptz default now()
+);
+
+-- Auto-create profile on signup
+create or replace function handle_new_user()
+returns trigger language plpgsql security definer as $$
+begin
+  insert into profiles (id, email, full_name, role)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data->>'full_name', 'User'),
+    coalesce(new.raw_user_meta_data->>'role', 'student')
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function handle_new_user();
+
+-- ─── 3. Classes ───────────────────────────────────────────────
+create table if not exists classes (
+  id            uuid primary key default gen_random_uuid(),
+  name          text not null,
+  description   text,
+  class_code    text unique not null,
+  instructor_id uuid references profiles(id) on delete cascade not null,
+  created_at    timestamptz default now()
+);
+
+-- ─── 4. Class Members ─────────────────────────────────────────
+create table if not exists class_members (
+  class_id    uuid references classes(id) on delete cascade,
+  student_id  uuid references profiles(id) on delete cascade,
+  joined_at   timestamptz default now(),
+  primary key (class_id, student_id)
+);
+
+-- ─── 5. Uploaded Files ────────────────────────────────────────
+create table if not exists uploaded_files (
+  file_id       text primary key,
+  filename      text not null,
+  uploaded_by   uuid references profiles(id),
+  class_id      uuid references classes(id),
+  created_at    timestamptz default now()
+);
+
+-- ─── 6. Processing Jobs ───────────────────────────────────────
+create table if not exists processing_jobs (
   job_id        text primary key,
   file_id       text not null,
   filename      text not null,
-  status        text not null default 'queued',   -- queued | in_progress | success | failed
-  stage         text,                              -- upload | extract | clean | section | chunk
+  status        text not null default 'queued',
+  stage         text,
   error_code    text,
   error_message text,
+  uploaded_by   uuid references profiles(id),
   created_at    timestamptz default now(),
   updated_at    timestamptz default now()
 );
 
--- auto-update updated_at
 create or replace function update_updated_at()
-returns trigger as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$ language plpgsql;
-
+returns trigger language plpgsql as $$
+begin new.updated_at = now(); return new; end;
+$$;
+drop trigger if exists jobs_updated_at on processing_jobs;
 create trigger jobs_updated_at
   before update on processing_jobs
   for each row execute function update_updated_at();
 
--- ── Chunks (with pgvector embeddings) ─────────────────────────────────────────
-create table chunks (
+-- ─── 7. Chunks + Vector Store ─────────────────────────────────
+create table if not exists chunks (
   chunk_id      text primary key,
   file_id       text not null,
   section_id    text,
   section_title text,
   page_numbers  int[],
   text          text not null,
-  embedding     vector(1536),   -- text-embedding-3-small output dimension
+  embedding     vector(1536),
   created_at    timestamptz default now()
 );
 
--- Vector similarity search index (cosine)
-create index on chunks using ivfflat (embedding vector_cosine_ops)
-  with (lists = 100);
+create index if not exists chunks_embedding_idx
+  on chunks using ivfflat (embedding vector_cosine_ops) with (lists = 100);
 
--- Full-text search index for keyword search
-create index on chunks using gin (to_tsvector('english', text));
+create index if not exists chunks_fts_idx
+  on chunks using gin (to_tsvector('english', text));
 
--- ── Supabase RPC for vector search ───────────────────────────────────────────
 create or replace function match_chunks(
   query_embedding vector(1536),
-  match_count     int default 10,
-  filter_file_id  text default null
+  match_count     int     default 10,
+  filter_file_id  text    default null
 )
 returns table (
-  chunk_id      text,
-  file_id       text,
-  text          text,
-  section_title text,
-  page_numbers  int[],
-  similarity    float
+  chunk_id      text, file_id text, text text,
+  section_title text, page_numbers int[], similarity float
 )
-language sql stable
-as $$
-  select
-    chunk_id,
-    file_id,
-    text,
-    section_title,
-    page_numbers,
-    1 - (embedding <=> query_embedding) as similarity
+language sql stable as $$
+  select chunk_id, file_id, text, section_title, page_numbers,
+         1 - (embedding <=> query_embedding) as similarity
   from chunks
-  where
-    (filter_file_id is null or file_id = filter_file_id)
+  where filter_file_id is null or file_id = filter_file_id
   order by embedding <=> query_embedding
   limit match_count;
 $$;
 
--- ── Supabase Storage bucket (run once) ────────────────────────────────────────
--- Create via Dashboard → Storage → New Bucket → name: "uploads", private: true
--- Or uncomment below if using Supabase CLI:
--- insert into storage.buckets (id, name, public) values ('uploads', 'uploads', false);
+-- ─── 8. Saved Quizzes ─────────────────────────────────────────
+create table if not exists saved_quizzes (
+  id              uuid primary key default gen_random_uuid(),
+  title           text not null,
+  topic           text not null,
+  difficulty      text not null default 'medium',
+  file_id         text,
+  created_by      uuid references profiles(id) on delete cascade not null,
+  class_id        uuid references classes(id) on delete set null,
+  is_shared       boolean default false,
+  outside_sources boolean default false,
+  questions       jsonb not null,
+  created_at      timestamptz default now()
+);
+
+-- ─── 9. Flashcard Sets ────────────────────────────────────────
+create table if not exists flashcard_sets (
+  id          uuid primary key default gen_random_uuid(),
+  title       text not null,
+  quiz_id     uuid references saved_quizzes(id) on delete set null,
+  created_by  uuid references profiles(id) on delete cascade not null,
+  class_id    uuid references classes(id) on delete set null,
+  is_shared   boolean default false,
+  is_public   boolean default false,
+  share_code  text,
+  set_type    text,             -- 'all' | 'wrong' | 'custom'
+  cards       jsonb not null,  -- [{front, back, source_page}]
+  created_at  timestamptz default now()
+);
+
+-- ─── 10. RLS (permissive for now — tighten per-column later) ──
+alter table profiles        enable row level security;
+alter table classes         enable row level security;
+alter table class_members   enable row level security;
+alter table saved_quizzes   enable row level security;
+alter table flashcard_sets  enable row level security;
+alter table uploaded_files  enable row level security;
+alter table processing_jobs enable row level security;
+alter table chunks          enable row level security;
+
+-- Allow authenticated users full access (tighten to owner-only later)
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='profiles' and policyname='auth_all') then
+    create policy auth_all on profiles for all to authenticated using (true) with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename='classes' and policyname='auth_all') then
+    create policy auth_all on classes for all to authenticated using (true) with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename='class_members' and policyname='auth_all') then
+    create policy auth_all on class_members for all to authenticated using (true) with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename='saved_quizzes' and policyname='auth_all') then
+    create policy auth_all on saved_quizzes for all to authenticated using (true) with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename='flashcard_sets' and policyname='auth_all') then
+    create policy auth_all on flashcard_sets for all to authenticated using (true) with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename='uploaded_files' and policyname='auth_all') then
+    create policy auth_all on uploaded_files for all to authenticated using (true) with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename='processing_jobs' and policyname='auth_all') then
+    create policy auth_all on processing_jobs for all to authenticated using (true) with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename='chunks' and policyname='auth_all') then
+    create policy auth_all on chunks for all to authenticated using (true) with check (true);
+  end if;
+end $$;
+
+-- ─── 11. Storage bucket (run once) ───────────────────────────
+-- Dashboard → Storage → New Bucket → name: "uploads" → private

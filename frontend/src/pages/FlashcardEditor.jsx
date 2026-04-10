@@ -1,0 +1,275 @@
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+import { useAuth } from "../contexts/AuthContext";
+import { genShareCode, copyToClipboard, shareUrl } from "../lib/sharing";
+import {
+  ChevronLeft, Plus, Trash2, Edit3, Check,
+  Copy, Globe, Lock, Loader2, GripVertical, Save
+} from "lucide-react";
+
+export default function FlashcardEditor() {
+  const { id } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [set, setSet]       = useState(null);
+  const [cards, setCards]   = useState([]);
+  const [title, setTitle]   = useState("");
+  const [editingIdx, setEditingIdx] = useState(null);
+  const [editCard, setEditCard]     = useState({ front: "", back: "", explanation: "" });
+  const [newCard, setNewCard]       = useState({ front: "", back: "", explanation: "" });
+  const [showNew, setShowNew]       = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [copied, setCopied]         = useState(false);
+  const [loading, setLoading]       = useState(true);
+
+  useEffect(() => { fetchSet(); }, [id]);
+
+  async function fetchSet() {
+    const { data } = await supabase.from("flashcard_sets").select("*").eq("id", id).single();
+    if (data) {
+      setSet(data);
+      setCards(data.cards ?? []);
+      setTitle(data.title);
+    }
+    setLoading(false);
+  }
+
+  async function save() {
+    setSaving(true);
+    await supabase.from("flashcard_sets")
+      .update({ title, cards })
+      .eq("id", id);
+    setSaving(false);
+    navigate(`/flashcards/${id}`);
+  }
+
+  async function deleteSet() {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    await supabase.from("flashcard_sets").delete().eq("id", id);
+    navigate("/student");
+  }
+
+  function startEdit(idx) {
+    setEditingIdx(idx);
+    setEditCard({ ...cards[idx] });
+  }
+
+  function saveEdit(idx) {
+    const updated = [...cards];
+    updated[idx] = editCard;
+    setCards(updated);
+    setEditingIdx(null);
+  }
+
+  function deleteCard(idx) {
+    setCards((c) => c.filter((_, i) => i !== idx));
+  }
+
+  function addCard() {
+    if (!newCard.front.trim() || !newCard.back.trim()) return;
+    setCards((c) => [...c, { ...newCard }]);
+    setNewCard({ front: "", back: "", explanation: "" });
+    setShowNew(false);
+  }
+
+  async function togglePublic() {
+    const newVal = !set.is_public;
+    let share_code = set.share_code;
+    if (newVal && !share_code) share_code = genShareCode();
+
+    await supabase.from("flashcard_sets")
+      .update({ is_public: newVal, share_code })
+      .eq("id", id);
+    setSet((s) => ({ ...s, is_public: newVal, share_code }));
+  }
+
+  async function copyShare() {
+    const url = shareUrl("flashcards", id);
+    await copyToClipboard(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 text-violet-400 animate-spin" /></div>;
+  if (!set) return <p className="text-gray-500">Set not found.</p>;
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div>
+        <Link to={`/flashcards/${id}`} className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600 mb-3">
+          <ChevronLeft className="w-4 h-4" /> Back to study
+        </Link>
+        <div className="flex items-center gap-3">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-xl font-bold text-gray-900 bg-transparent border-b-2 border-transparent hover:border-violet-200 focus:border-violet-400 outline-none flex-1 pb-1"
+          />
+          <button onClick={save} disabled={saving} className="btn-primary text-xs">
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            Save
+          </button>
+        </div>
+      </div>
+
+      {/* Share bar */}
+      <div className="card p-4 flex items-center gap-3 flex-wrap">
+        <span className="text-sm text-gray-500">{cards.length} cards</span>
+        <div className="flex-1" />
+        <button onClick={copyShare} className="btn-secondary text-xs">
+          {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? "Copied!" : "Copy link"}
+        </button>
+        <button
+          onClick={togglePublic}
+          className={`btn-secondary text-xs ${set.is_public ? "text-violet-600 border-violet-300 bg-violet-50" : ""}`}
+        >
+          {set.is_public ? <Globe className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+          {set.is_public ? "Public" : "Make public"}
+        </button>
+        {set.share_code && (
+          <span className="badge bg-gray-100 text-gray-600 font-mono">{set.share_code}</span>
+        )}
+      </div>
+
+      {/* Cards list */}
+      <div className="space-y-3">
+        {cards.map((card, idx) => (
+          <div key={idx} className="card p-4">
+            {editingIdx === idx ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Front</label>
+                    <textarea
+                      value={editCard.front}
+                      onChange={(e) => setEditCard({ ...editCard, front: e.target.value })}
+                      rows={2}
+                      className="input resize-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Back (Answer)</label>
+                    <textarea
+                      value={editCard.back}
+                      onChange={(e) => setEditCard({ ...editCard, back: e.target.value })}
+                      rows={2}
+                      className="input resize-none text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Explanation (optional)</label>
+                  <textarea
+                    value={editCard.explanation ?? ""}
+                    onChange={(e) => setEditCard({ ...editCard, explanation: e.target.value })}
+                    rows={1}
+                    className="input resize-none text-sm"
+                    placeholder="Add context or explanation..."
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => saveEdit(idx)} className="btn-primary text-xs">
+                    <Check className="w-3.5 h-3.5" /> Save
+                  </button>
+                  <button onClick={() => setEditingIdx(null)} className="btn-secondary text-xs">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-3">
+                <GripVertical className="w-4 h-4 text-gray-200 mt-1 flex-shrink-0" />
+                <div className="flex-1 grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400 mb-1">Front</p>
+                    <p className="text-sm text-gray-800">{card.front}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-400 mb-1">Back</p>
+                    <p className="text-sm text-gray-800">{card.back}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button onClick={() => startEdit(idx)} className="p-1.5 text-gray-300 hover:text-violet-500 transition-colors">
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => deleteCard(idx)} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Add new card */}
+        {showNew ? (
+          <div className="card p-4 border-violet-200 space-y-3 animate-slide-up">
+            <h3 className="text-sm font-semibold text-gray-700">New Card</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Front</label>
+                <textarea
+                  autoFocus
+                  value={newCard.front}
+                  onChange={(e) => setNewCard({ ...newCard, front: e.target.value })}
+                  rows={2}
+                  className="input resize-none text-sm"
+                  placeholder="Question or term..."
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Back</label>
+                <textarea
+                  value={newCard.back}
+                  onChange={(e) => setNewCard({ ...newCard, back: e.target.value })}
+                  rows={2}
+                  className="input resize-none text-sm"
+                  placeholder="Answer or definition..."
+                />
+              </div>
+            </div>
+            <input
+              value={newCard.explanation}
+              onChange={(e) => setNewCard({ ...newCard, explanation: e.target.value })}
+              className="input text-sm"
+              placeholder="Explanation (optional)..."
+            />
+            <div className="flex gap-2">
+              <button onClick={addCard} disabled={!newCard.front.trim() || !newCard.back.trim()}
+                className="btn-primary text-xs">
+                <Plus className="w-3.5 h-3.5" /> Add Card
+              </button>
+              <button onClick={() => setShowNew(false)} className="btn-secondary text-xs">Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <button onClick={() => setShowNew(true)}
+            className="w-full card p-4 border-dashed text-gray-400 hover:text-violet-600 hover:border-violet-300 transition-all flex items-center justify-center gap-2 text-sm font-medium">
+            <Plus className="w-4 h-4" /> Add a card
+          </button>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pb-8">
+        <button
+          onClick={deleteSet}
+          className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-600 transition-colors"
+        >
+          <Trash2 className="w-4 h-4" /> Delete set
+        </button>
+        <div className="flex gap-3">
+          <button onClick={() => navigate(`/flashcards/${id}`)} className="btn-secondary">Cancel</button>
+          <button onClick={save} disabled={saving} className="btn-primary">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save & close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

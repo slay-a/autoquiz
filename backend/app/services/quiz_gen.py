@@ -1,6 +1,7 @@
 """
 E3 — Generate high-quality questions from retrieved context.
 Uses GPT-4o with structured JSON output.
+Supports outside_sources mode (draw beyond provided context).
 """
 
 import json
@@ -11,16 +12,21 @@ from app.models.schemas import QuizQuestion, QuizOption
 
 _openai = OpenAI(api_key=settings.openai_api_key)
 
-SYSTEM_PROMPT = """You are an expert quiz creator. Given source passages, generate quiz questions.
+SYSTEM_PROMPT = """You are an expert quiz creator. Generate quiz questions based on the provided material.
 Always respond with valid JSON only. Do not include any text outside the JSON object."""
 
-QUESTION_SCHEMA = """
+SYSTEM_PROMPT_OUTSIDE = """You are an expert quiz creator with broad academic knowledge.
+Generate quiz questions using both the provided material AND your broader knowledge on the topic.
+For questions derived from outside the provided material, add [Outside Source] at the start of the explanation.
+Always respond with valid JSON only. Do not include any text outside the JSON object."""
+
+SCHEMA = """
 {
   "questions": [
     {
       "type": "mcq" | "true_false" | "short_answer",
       "question": "...",
-      "options": [{"label": "A", "text": "..."}, ...],  // only for mcq
+      "options": [{"label": "A", "text": "..."}, ...],
       "answer": "...",
       "explanation": "..."
     }
@@ -35,45 +41,51 @@ def generate_quiz(
     num_questions: int = 5,
     difficulty: str = "medium",
     question_types: list[str] = ["mcq", "true_false", "short_answer"],
+    outside_sources: bool = False,
 ) -> list[QuizQuestion]:
-    context = "\n\n---\n\n".join(
-        f"[Page(s) {c.get('page_numbers', [])} | Section: {c.get('section_title', 'N/A')}]\n{c['text']}"
-        for c in chunks
-    )
+    if chunks:
+        context = "\n\n---\n\n".join(
+            f"[Page(s) {c.get('page_numbers', [])} | Section: {c.get('section_title', 'N/A')}]\n{c['text']}"
+            for c in chunks
+        )
+        context_block = f"Source material:\n{context}"
+    else:
+        context_block = "(No source material uploaded — generate from your knowledge of the topic.)"
+
+    system = SYSTEM_PROMPT_OUTSIDE if outside_sources else SYSTEM_PROMPT
 
     user_prompt = f"""Topic: {topic}
 Difficulty: {difficulty}
-Question types to use: {', '.join(question_types)}
+Question types to include: {', '.join(question_types)}
 Number of questions: {num_questions}
 
-Source material:
-{context}
+{context_block}
 
-Generate {num_questions} questions grounded strictly in the source material above.
+Generate exactly {num_questions} questions grounded in the material{" and your broader knowledge" if outside_sources else ""}.
+Mix question types as specified. For difficulty=hard, require deep understanding not just recall.
 Respond with JSON matching this schema:
-{QUESTION_SCHEMA}"""
+{SCHEMA}"""
 
     response = _openai.chat.completions.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system},
             {"role": "user", "content": user_prompt},
         ],
         response_format={"type": "json_object"},
-        temperature=0.3,
+        temperature=0.6,  # enough variation for regeneration to feel different
     )
 
     raw = json.loads(response.choices[0].message.content)
     questions = []
 
-    for i, q in enumerate(raw.get("questions", [])):
+    source_chunk_ids = [c["chunk_id"] for c in chunks] if chunks else []
+    page_numbers = sorted({p for c in chunks for p in (c.get("page_numbers") or [])}) if chunks else []
+
+    for q in raw.get("questions", []):
         options = None
         if q.get("type") == "mcq" and q.get("options"):
             options = [QuizOption(label=o["label"], text=o["text"]) for o in q["options"]]
-
-        # Map source chunks for citation
-        source_chunk_ids = [c["chunk_id"] for c in chunks]
-        page_numbers = sorted({p for c in chunks for p in (c.get("page_numbers") or [])})
 
         questions.append(QuizQuestion(
             question_id=str(uuid.uuid4()),

@@ -1,13 +1,21 @@
 """
 E2 — Retrieve the right content for a given topic.
-Hybrid search: keyword (full-text) + vector (semantic) via Supabase pgvector.
+Primary: vector search via pgvector.
+Fallback: if file hasn't been processed yet, extract text directly from storage
+and do simple keyword-based relevance scoring — no embeddings needed.
 """
 
+import re
+from pathlib import Path
 from openai import OpenAI
 from app.core.config import settings
 from app.core.supabase import get_supabase
+from app.utils.parsers import SUPPORTED_EXTENSIONS
 
 _openai = OpenAI(api_key=settings.openai_api_key)
+
+# GPT-4o context limit we're comfortable using per request
+MAX_CONTEXT_CHARS = 80_000
 
 
 def embed_query(text: str) -> list[float]:
@@ -19,47 +27,92 @@ def embed_query(text: str) -> list[float]:
 
 
 def hybrid_search(topic: str, file_id: str | None = None, top_k: int = 10) -> list[dict]:
-    """
-    Combines:
-      1. Vector search via pgvector (semantic similarity)
-      2. Full-text keyword search via Postgres tsvector
-    Results are merged and ranked by combined score.
-    """
     supabase = get_supabase()
-    embedding = embed_query(topic)
 
-    # ── Vector search ─────────────────────────────────────────────────────────
-    vector_params = {
-        "query_embedding": embedding,
-        "match_count": top_k,
-    }
+    # ── Vector search (only works if file has been embedded) ─────────────────
+    embedding = embed_query(topic)
+    vector_params = {"query_embedding": embedding, "match_count": top_k}
     if file_id:
         vector_params["filter_file_id"] = file_id
 
     vector_results = supabase.rpc("match_chunks", vector_params).execute()
 
-    # ── Keyword search ────────────────────────────────────────────────────────
-    query = supabase.table("chunks").select(
-        "chunk_id, file_id, text, section_title, page_numbers"
-    ).text_search("text", topic)
-
-    if file_id:
-        query = query.eq("file_id", file_id)
-
-    keyword_results = query.limit(top_k).execute()
-
-    # ── Merge & deduplicate ───────────────────────────────────────────────────
-    seen: dict[str, dict] = {}
-
+    results = []
     for row in (vector_results.data or []):
-        seen[row["chunk_id"]] = {**row, "score": row.get("similarity", 0.0)}
+        results.append({**row, "score": row.get("similarity", 0.0)})
 
-    for row in (keyword_results.data or []):
-        cid = row["chunk_id"]
-        if cid in seen:
-            seen[cid]["score"] = min(1.0, seen[cid]["score"] + 0.1)  # boost on both hits
-        else:
-            seen[cid] = {**row, "score": 0.5}
+    if results:
+        return sorted(results, key=lambda x: x["score"], reverse=True)[:top_k]
 
-    merged = sorted(seen.values(), key=lambda x: x["score"], reverse=True)
-    return merged[:top_k]
+    # ── Fallback: file not yet embedded — extract text directly ───────────────
+    if file_id:
+        return _sync_extract_and_search(file_id, topic, top_k)
+
+    return []
+
+
+def _sync_extract_and_search(file_id: str, topic: str, top_k: int) -> list[dict]:
+    """
+    Downloads the raw file from Supabase Storage, extracts text, and returns
+    the most relevant page-chunks using simple keyword scoring.
+    No embeddings required — works immediately after upload.
+    """
+    supabase = get_supabase()
+
+    # Find the file in storage
+    try:
+        listing = supabase.storage.from_("uploads").list(file_id)
+        if not listing:
+            return []
+        filename = listing[0]["name"]
+        file_bytes = supabase.storage.from_("uploads").download(f"{file_id}/{filename}")
+    except Exception:
+        return []
+
+    # Parse
+    ext = Path(filename).suffix.lower()
+    parser = SUPPORTED_EXTENSIONS.get(ext)
+    if not parser:
+        return []
+
+    try:
+        pages = parser(file_bytes)
+    except Exception:
+        return []
+
+    if not pages:
+        return []
+
+    # Score each page by keyword overlap with the topic
+    topic_words = set(re.findall(r"\w+", topic.lower()))
+    # Remove common stop words so we match on meaningful terms
+    stop = {"the", "a", "an", "is", "in", "of", "and", "or", "to", "for", "with", "on", "at", "by"}
+    topic_words -= stop
+
+    scored = []
+    for page_num, text in pages:
+        page_words = set(re.findall(r"\w+", text.lower()))
+        overlap = len(topic_words & page_words)
+        scored.append((overlap, page_num, text))
+
+    # Sort by relevance — always return at least top pages even if no overlap
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top_pages = scored[:max(top_k, 10)]  # take more pages to give GPT context
+
+    # Bundle into pseudo-chunks that fit in context
+    chunks = []
+    total_chars = 0
+    for overlap, page_num, text in top_pages:
+        if total_chars + len(text) > MAX_CONTEXT_CHARS:
+            break
+        chunks.append({
+            "chunk_id": f"sync-{page_num}",
+            "file_id": file_id,
+            "text": text,
+            "section_title": None,
+            "page_numbers": [page_num],
+            "score": overlap,
+        })
+        total_chars += len(text)
+
+    return chunks

@@ -77,7 +77,8 @@ function AppInner() {
 
 function RoleRedirect() {
   const { user, profile, loading } = useAuth();
-  if (loading) return null; // wait — AuthProvider will resolve
+  // Wait while loading OR while user is set but profile hasn't arrived yet
+  if (loading || (user && !profile)) return null;
   if (!user || !profile) return <Navigate to="/login" replace />;
   return <Navigate to={profile.role === "instructor" ? "/instructor" : "/student"} replace />;
 }

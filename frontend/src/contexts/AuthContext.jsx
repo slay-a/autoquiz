@@ -7,11 +7,11 @@ const PROFILE_KEY = "aq_profile";
 function getCachedProfile() {
   try { return JSON.parse(localStorage.getItem(PROFILE_KEY)); } catch { return null; }
 }
-function cacheProfile(p)    { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch {} }
+function cacheProfile(p)     { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch {} }
 function clearProfileCache() { try { localStorage.removeItem(PROFILE_KEY); } catch {} }
 
-// Read the Supabase session from localStorage synchronously (no network needed).
-// Supabase v2 stores it under sb-<ref>-auth-token.
+// Read the Supabase session from localStorage synchronously (no network).
+// Supabase v2 stores it under sb-<projectRef>-auth-token.
 function getStoredUser() {
   try {
     const key = Object.keys(localStorage).find(
@@ -19,7 +19,7 @@ function getStoredUser() {
     );
     if (!key) return null;
     const stored = JSON.parse(localStorage.getItem(key));
-    // Only use if the access token has more than 60s of life left
+    // Only trust it if the access token has >60 s left
     if (stored?.user && stored.expires_at > Date.now() / 1000 + 60) {
       return stored.user;
     }
@@ -28,13 +28,13 @@ function getStoredUser() {
 }
 
 export function AuthProvider({ children }) {
-  // Initialize synchronously from localStorage — no spinner flash for returning users
   const storedUser    = getStoredUser();
   const cachedProfile = getCachedProfile();
   const hasInstant    = !!(storedUser && cachedProfile?.id === storedUser.id);
 
   const [user, setUser]       = useState(storedUser);
   const [profile, setProfile] = useState(hasInstant ? cachedProfile : null);
+  // loading = false immediately when we can reconstruct state from localStorage
   const [loading, setLoading] = useState(!hasInstant);
 
   async function fetchProfile(userId, { background = false } = {}) {
@@ -55,21 +55,15 @@ export function AuthProvider({ children }) {
         cacheProfile(data);
       }
     } catch {
-      await supabase.auth.signOut();
-      setUser(null);
-      setProfile(null);
-      clearProfileCache();
+      // network error — keep existing state, don't sign out
     } finally {
       if (!background) setLoading(false);
     }
   }
 
   useEffect(() => {
-    // Hard cap — never stuck longer than 4s
     const timeout = setTimeout(() => {
-      setUser(null);
-      setProfile(null);
-      clearProfileCache();
+      // Absolute fallback — never stuck longer than 4 s
       setLoading(false);
     }, 4000);
 
@@ -77,7 +71,14 @@ export function AuthProvider({ children }) {
       .then(async ({ data: { session }, error }) => {
         clearTimeout(timeout);
 
-        if (error || !session) {
+        if (error) {
+          // Network / service error — don't wipe optimistic state, just unblock
+          setLoading(false);
+          return;
+        }
+
+        if (!session) {
+          // Confirmed: no active session
           setUser(null);
           setProfile(null);
           clearProfileCache();
@@ -110,17 +111,20 @@ export function AuthProvider({ children }) {
           setLoading(false);
           return;
         }
-        if (session?.user) {
+
+        if (event === "SIGNED_IN" && session?.user) {
+          // Keep loading=true (or set it) while we fetch the profile so that
+          // RoleRedirect / ProtectedRoute don't see user-without-profile.
+          setLoading(true);
           setUser(session.user);
-          if (event === "SIGNED_IN") {
-            await fetchProfile(session.user.id);
-          }
+          await fetchProfile(session.user.id);
+          // fetchProfile's finally sets loading=false
         }
       }
     );
 
     return () => {
-      clearTimeout(timeout);           // prevent stale timeout firing (Strict Mode)
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);

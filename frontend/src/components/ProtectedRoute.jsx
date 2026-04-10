@@ -4,7 +4,8 @@ import { useAuth } from "../contexts/AuthContext";
 export default function ProtectedRoute({ children, allowedRole }) {
   const { user, profile, loading } = useAuth();
 
-  if (loading) {
+  // Wait while loading OR while user is set but profile hasn't arrived yet
+  if (loading || (user && !profile)) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-7 h-7 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
@@ -12,7 +13,7 @@ export default function ProtectedRoute({ children, allowedRole }) {
     );
   }
 
-  // Not logged in OR profile missing (auth context already signed them out)
+  // Not logged in
   if (!user || !profile) return <Navigate to="/login" replace />;
 
   // Wrong role

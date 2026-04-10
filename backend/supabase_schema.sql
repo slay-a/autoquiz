@@ -152,7 +152,26 @@ create table if not exists flashcard_sets (
   created_at  timestamptz default now()
 );
 
--- ─── 10. RLS (permissive for now — tighten per-column later) ──
+-- ─── 10. Class Notes ─────────────────────────────────────────
+create table if not exists class_notes (
+  id           uuid primary key default gen_random_uuid(),
+  class_id     uuid references classes(id) on delete cascade not null,
+  created_by   uuid references profiles(id) on delete cascade not null,
+  title        text not null,
+  topic        text not null,
+  file_id      text,
+  content      jsonb not null,
+  is_published boolean default false,
+  created_at   timestamptz default now(),
+  updated_at   timestamptz default now()
+);
+
+drop trigger if exists notes_updated_at on class_notes;
+create trigger notes_updated_at
+  before update on class_notes
+  for each row execute function update_updated_at();
+
+-- ─── 11. RLS (permissive for now — tighten per-column later) ──
 alter table profiles        enable row level security;
 alter table classes         enable row level security;
 alter table class_members   enable row level security;
@@ -161,6 +180,7 @@ alter table flashcard_sets  enable row level security;
 alter table uploaded_files  enable row level security;
 alter table processing_jobs enable row level security;
 alter table chunks          enable row level security;
+alter table class_notes     enable row level security;
 
 -- Allow authenticated users full access (tighten to owner-only later)
 do $$ begin
@@ -187,6 +207,9 @@ do $$ begin
   end if;
   if not exists (select 1 from pg_policies where tablename='chunks' and policyname='auth_all') then
     create policy auth_all on chunks for all to authenticated using (true) with check (true);
+  end if;
+  if not exists (select 1 from pg_policies where tablename='class_notes' and policyname='auth_all') then
+    create policy auth_all on class_notes for all to authenticated using (true) with check (true);
   end if;
 end $$;
 

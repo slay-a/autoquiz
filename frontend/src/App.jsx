@@ -12,6 +12,7 @@ import QuizStudy from "./pages/QuizStudy";
 import FlashcardStudy from "./pages/FlashcardStudy";
 import FlashcardEditor from "./pages/FlashcardEditor";
 import Notes from "./pages/Notes";
+import ClassNoteView from "./pages/ClassNoteView";
 
 import { Sparkles, LogOut, BookOpen, PlusCircle, LayoutDashboard } from "lucide-react";
 
@@ -67,6 +68,7 @@ function AppInner() {
           <Route path="/flashcards/:id"      element={<ProtectedRoute><FlashcardStudy /></ProtectedRoute>} />
           <Route path="/flashcards/:id/edit" element={<ProtectedRoute><FlashcardEditor /></ProtectedRoute>} />
           <Route path="/notes"               element={<ProtectedRoute allowedRole="student"><Notes /></ProtectedRoute>} />
+          <Route path="/class-note/:id"     element={<ProtectedRoute allowedRole="student"><ClassNoteView /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

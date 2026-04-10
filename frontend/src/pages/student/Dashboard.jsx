@@ -20,45 +20,56 @@ export default function StudentDashboard() {
   const [joining, setJoining]       = useState(false);
   const [joinError, setJoinError]   = useState(null);
 
-  useEffect(() => { fetchAll(); }, [user]);
+  useEffect(() => {
+    if (!user?.id) return;
+    fetchAll();
+  }, [user]);
 
   async function fetchAll() {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const [
-      { data: myQ },
-      { data: fsets },
-      { data: memberships },
-    ] = await Promise.all([
-      supabase.from("saved_quizzes").select("*").eq("created_by", user.id).order("created_at", { ascending: false }),
-      supabase.from("flashcard_sets").select("*").eq("created_by", user.id).order("created_at", { ascending: false }),
-      supabase.from("class_members")
-        .select("class_id, classes(id, name, class_code, saved_quizzes(*), class_notes(*))")
-        .eq("student_id", user.id),
-    ]);
+    try {
+      const [
+        { data: myQ },
+        { data: fsets },
+        { data: memberships },
+      ] = await Promise.all([
+        supabase.from("saved_quizzes").select("*").eq("created_by", user.id).order("created_at", { ascending: false }),
+        supabase.from("flashcard_sets").select("*").eq("created_by", user.id).order("created_at", { ascending: false }),
+        supabase.from("class_members")
+          .select("class_id, classes(id, name, class_code, saved_quizzes(*), class_notes(*))")
+          .eq("student_id", user.id),
+      ]);
 
-    setMyQuizzes(myQ ?? []);
-    setFlashcardSets(fsets ?? []);
+      setMyQuizzes(myQ ?? []);
+      setFlashcardSets(fsets ?? []);
 
-    const joinedClasses = memberships?.map((m) => m.classes) ?? [];
-    setClasses(joinedClasses);
+      const joinedClasses = (memberships ?? [])
+        .map((m) => m.classes)
+        .filter(Boolean);
+      setClasses(joinedClasses);
 
-    // Only show quizzes explicitly shared by instructor
-    const sharedQs = joinedClasses.flatMap((c) =>
-      (c.saved_quizzes ?? [])
-        .filter((q) => q.is_shared)
-        .map((q) => ({ ...q, className: c.name }))
-    );
-    setClassQuizzes(sharedQs);
+      // Only show quizzes explicitly shared by instructor
+      const sharedQs = joinedClasses.flatMap((c) =>
+        (c.saved_quizzes ?? [])
+          .filter((q) => q.is_shared)
+          .map((q) => ({ ...q, className: c.name }))
+      );
+      setClassQuizzes(sharedQs);
 
-    // Only show published notes
-    const publishedNotes = joinedClasses.flatMap((c) =>
-      (c.class_notes ?? [])
-        .filter((n) => n.is_published)
-        .map((n) => ({ ...n, className: c.name }))
-    );
-    setClassNotes(publishedNotes);
-
-    setLoading(false);
+      // Only show published notes
+      const publishedNotes = joinedClasses.flatMap((c) =>
+        (c.class_notes ?? [])
+          .filter((n) => n.is_published)
+          .map((n) => ({ ...n, className: c.name }))
+      );
+      setClassNotes(publishedNotes);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function joinClass() {

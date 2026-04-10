@@ -113,12 +113,20 @@ export function AuthProvider({ children }) {
         }
 
         if (event === "SIGNED_IN" && session?.user) {
-          // Keep loading=true (or set it) while we fetch the profile so that
-          // RoleRedirect / ProtectedRoute don't see user-without-profile.
-          setLoading(true);
-          setUser(session.user);
-          await fetchProfile(session.user.id);
-          // fetchProfile's finally sets loading=false
+          // Supabase fires SIGNED_IN on every tab focus / token refresh,
+          // not just on real sign-in. If the user hasn't actually changed,
+          // skip — otherwise we'd hand downstream consumers a new `user`
+          // object reference on every focus, re-triggering their effects
+          // (e.g. StudentDashboard refetch) and potentially hanging the UI.
+          setUser((prev) => (prev?.id === session.user.id ? prev : session.user));
+
+          // Only flip loading + refetch profile if this is a genuinely new user.
+          setProfile((prevProfile) => {
+            if (prevProfile?.id === session.user.id) return prevProfile;
+            setLoading(true);
+            fetchProfile(session.user.id);
+            return prevProfile;
+          });
         }
       }
     );

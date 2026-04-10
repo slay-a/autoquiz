@@ -20,8 +20,10 @@ export default function FlashcardEditor() {
   const [newCard, setNewCard]       = useState({ front: "", back: "", explanation: "" });
   const [showNew, setShowNew]       = useState(false);
   const [saving, setSaving]         = useState(false);
+  const [deleting, setDeleting]     = useState(false);
   const [copied, setCopied]         = useState(false);
   const [loading, setLoading]       = useState(true);
+  const [deleteError, setDeleteError] = useState(null);
 
   useEffect(() => { fetchSet(); }, [id]);
 
@@ -46,8 +48,15 @@ export default function FlashcardEditor() {
 
   async function deleteSet() {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    await supabase.from("flashcard_sets").delete().eq("id", id);
-    navigate("/student");
+    setDeleting(true);
+    setDeleteError(null);
+    const { error } = await supabase.from("flashcard_sets").delete().eq("id", id);
+    if (error) {
+      setDeleteError("Delete failed — please try again.");
+      setDeleting(false);
+    } else {
+      navigate("/student");
+    }
   }
 
   function startEdit(idx) {
@@ -256,12 +265,17 @@ export default function FlashcardEditor() {
 
       {/* Footer */}
       <div className="flex items-center justify-between pb-8">
-        <button
-          onClick={deleteSet}
-          className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-600 transition-colors"
-        >
-          <Trash2 className="w-4 h-4" /> Delete set
-        </button>
+        <div className="flex flex-col items-start gap-1">
+          <button
+            onClick={deleteSet}
+            disabled={deleting}
+            className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+          >
+            {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+            {deleting ? "Deleting…" : "Delete set"}
+          </button>
+          {deleteError && <p className="text-xs text-red-500">{deleteError}</p>}
+        </div>
         <div className="flex gap-3">
           <button onClick={() => navigate(`/flashcards/${id}`)} className="btn-secondary">Cancel</button>
           <button onClick={save} disabled={saving} className="btn-primary">

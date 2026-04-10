@@ -2,13 +2,20 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 const AuthContext = createContext(null);
+const PROFILE_KEY = "aq_profile";
+
+function getCachedProfile() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY)); } catch { return null; }
+}
+function cacheProfile(p)  { try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch {} }
+function clearProfileCache() { try { localStorage.removeItem(PROFILE_KEY); } catch {} }
 
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(getCachedProfile);  // instant from cache
   const [loading, setLoading] = useState(true);
 
-  async function fetchProfile(userId) {
+  async function fetchProfile(userId, { background = false } = {}) {
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -17,29 +24,30 @@ export function AuthProvider({ children }) {
         .single();
 
       if (error || !data) {
-        // User exists in auth but no profile row — kill the session so we
-        // never end up with user≠null + profile=null (causes blank screen loop)
         await supabase.auth.signOut();
         setUser(null);
         setProfile(null);
+        clearProfileCache();
       } else {
         setProfile(data);
+        cacheProfile(data);
       }
     } catch {
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);
+      clearProfileCache();
     } finally {
-      setLoading(false);
+      if (!background) setLoading(false);
     }
   }
 
   useEffect(() => {
-    // Hard cap — never stuck longer than 5s
     const timeout = setTimeout(async () => {
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);
+      clearProfileCache();
       setLoading(false);
     }, 5000);
 
@@ -47,16 +55,26 @@ export function AuthProvider({ children }) {
       clearTimeout(timeout);
 
       if (error || !session) {
-        // Bad/expired/missing session — wipe it so next reload is clean
         await supabase.auth.signOut();
         setUser(null);
         setProfile(null);
+        clearProfileCache();
         setLoading(false);
         return;
       }
 
       setUser(session.user);
-      fetchProfile(session.user.id);
+
+      const cached = getCachedProfile();
+      if (cached && cached.id === session.user.id) {
+        // Show cached profile immediately — refresh silently in background
+        setProfile(cached);
+        setLoading(false);
+        fetchProfile(session.user.id, { background: true });
+      } else {
+        // No valid cache — wait for fresh profile
+        fetchProfile(session.user.id);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -64,12 +82,12 @@ export function AuthProvider({ children }) {
         if (event === "SIGNED_OUT") {
           setUser(null);
           setProfile(null);
+          clearProfileCache();
           setLoading(false);
           return;
         }
         if (session?.user) {
           setUser(session.user);
-          // Only re-fetch profile on explicit sign-in, not every token refresh
           if (event === "SIGNED_IN") {
             await fetchProfile(session.user.id);
           }

@@ -89,7 +89,7 @@ export default function QuizStudy() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <Link to={-1} className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600 mb-3">
+        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600 mb-3">
           <ChevronLeft className="w-4 h-4" /> Back
         </Link>
         <div className="flex items-center justify-between">

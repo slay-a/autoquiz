@@ -56,7 +56,7 @@ export default function FlashcardStudy() {
   if (done) {
     return (
       <div className="space-y-6 animate-fade-in max-w-md mx-auto">
-        <Link to={-1} className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600">
+        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600">
           <ChevronLeft className="w-4 h-4" /> Back
         </Link>
         <div className="card p-8 text-center space-y-6">
@@ -101,7 +101,7 @@ export default function FlashcardStudy() {
   return (
     <div className="space-y-6 animate-fade-in max-w-xl mx-auto">
       <div className="flex items-center justify-between">
-        <Link to={-1} className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600">
+        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600">
           <ChevronLeft className="w-4 h-4" /> Back
         </Link>
         <div className="flex items-center gap-3">

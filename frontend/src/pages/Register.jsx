@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Sparkles, GraduationCap, BookOpen, Loader2 } from "lucide-react";
 
 export default function Register() {
   const { register } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState({ fullName: "", email: "", password: "", role: "" });
   const [error, setError]   = useState(null);
   const [loading, setLoading] = useState(false);
-  const [done, setDone]     = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -17,27 +17,13 @@ export default function Register() {
     setError(null);
     try {
       await register({ email: form.email, password: form.password, fullName: form.fullName, role: form.role });
-      setDone(true);
+      const targetPath = form.role === "instructor" ? "/instructor" : "/student";
+      navigate(targetPath);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }
-
-  if (done) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 flex items-center justify-center p-4">
-        <div className="card p-8 max-w-sm w-full text-center space-y-3">
-          <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-            <BookOpen className="w-6 h-6 text-emerald-600" />
-          </div>
-          <h2 className="text-lg font-bold text-gray-900">Check your email</h2>
-          <p className="text-sm text-gray-500">We sent a confirmation link to <strong>{form.email}</strong>. Click it to activate your account, then sign in.</p>
-          <Link to="/login" className="btn-primary inline-flex mt-2">Go to Sign In</Link>
-        </div>
-      </div>
-    );
   }
 
   return (

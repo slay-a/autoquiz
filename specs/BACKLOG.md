@@ -22,6 +22,7 @@
 
 | ID | Feature | Priority | Status | Spec file | Depends on |
 |----|---------|----------|--------|-----------|------------|
+| FEAT-001 | Authentication & Session Management | P0 | ready | `specs/feat-001-auth-session.md` | — |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -30,7 +31,12 @@
 
 ## Feature Details
 
-> Feature detail entries will appear here as features are added to the index above.
+### FEAT-001 — Authentication & Session Management
+
+**Stories:** 1.1 Registration, 1.2 Login, 1.3 Session persistence, 1.4 Logout, 1.5 Role-based access control
+**ACs summary:** Registration inserts into `profiles` and redirects by role; login checks credentials and redirects; session restored from `aq_profile` in localStorage; logout clears session and blocks protected routes; `ProtectedRoute` enforces role and auth state.
+**Dependencies:** none
+**Implementation status:** already in codebase — pipeline run is for validation and test coverage catch-up.
 
 ---
 

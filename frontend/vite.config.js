@@ -18,4 +18,9 @@ export default defineConfig({
       "/notes": "http://localhost:8000",
     },
   },
+  test: {
+    globals: true,
+    environment: "happy-dom",
+    setupFiles: "./src/__tests__/setup.js",
+  },
 });

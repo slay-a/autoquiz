@@ -10,6 +10,146 @@
 
 ---
 
+## 0. Architectural Pattern
+
+> This section is the highest-priority reference for `autoquiz-design-validator`.
+> Any implementation that violates the layer boundaries or component rules below
+> must be flagged as **CRITICAL** regardless of whether the feature otherwise works.
+
+### Backend — Strict Layered Architecture
+
+The backend is organized into four layers. **Data flows downward only.** Upper layers
+call lower layers; lower layers never import from upper layers.
+
+```
+┌─────────────────────────────────────────────────┐
+│  Layer 1 — API / Presentation                   │
+│  backend/app/api/routes/                        │
+│  Responsibility: HTTP routing, input validation, │
+│  response shaping. Delegates all logic to Layer 2│
+│  Rules:                                         │
+│  - No direct DB or OpenAI calls                 │
+│  - No business logic                            │
+│  - Reads/writes only via service functions      │
+└───────────────────┬─────────────────────────────┘
+                    │ calls
+┌───────────────────▼─────────────────────────────┐
+│  Layer 2 — Service / Business Logic             │
+│  backend/app/services/                          │
+│  Responsibility: RAG pipeline, LLM orchestration,│
+│  document processing, retrieval logic.          │
+│  Rules:                                         │
+│  - All OpenAI calls live here, nowhere else     │
+│  - No HTTP request/response objects             │
+│  - No FastAPI imports                           │
+└───────────────────┬─────────────────────────────┘
+                    │ calls
+┌───────────────────▼─────────────────────────────┐
+│  Layer 3 — Infrastructure                       │
+│  backend/app/core/   backend/app/utils/         │
+│  Responsibility: External client initialization  │
+│  (Supabase, OpenAI), config loading, file        │
+│  parsers, pure helpers.                         │
+│  Rules:                                         │
+│  - No business logic                            │
+│  - No route-level concerns                      │
+└───────────────────┬─────────────────────────────┘
+                    │ reads/writes
+┌───────────────────▼─────────────────────────────┐
+│  Layer 4 — Data                                 │
+│  Supabase Postgres + pgvector                   │
+│  Supabase Storage (bucket: "uploads")           │
+│  Schemas defined in: backend/app/models/schemas.py │
+│  (Pydantic) and backend/supabase_schema.sql (SQL)│
+└─────────────────────────────────────────────────┘
+
+Async boundary: long-running Layer 2 work (ingestion) is
+offloaded to Celery + Redis — never called inline from Layer 1.
+```
+
+**Layer violation examples the design-validator must flag as CRITICAL:**
+- A route handler imports `openai` or calls `supabase` directly
+- A service function imports from `app.api`
+- Business logic (prompt building, chunk filtering) placed in a route handler
+- A Celery task bypassing Layer 2 and writing to the DB directly from a parser
+
+---
+
+### Frontend — Component-Based Architecture with Context State
+
+The frontend is not MVC. It uses a **component-based architecture** where pages own their
+local state and data fetching, a single Context provides global auth state, and reusable
+components are purely presentational.
+
+```
+┌─────────────────────────────────────────────────┐
+│  Global State Layer                             │
+│  frontend/src/contexts/AuthContext.jsx          │
+│  Responsibility: user identity, profile, role,  │
+│  login/logout. The only global state in the app.│
+│  Rules:                                         │
+│  - Only one context exists (AuthContext)        │
+│  - New global state requires explicit           │
+│    justification — default to local state       │
+└───────────────────┬─────────────────────────────┘
+                    │ consumed via useAuth()
+┌───────────────────▼─────────────────────────────┐
+│  Page Layer (Smart Containers)                  │
+│  frontend/src/pages/                            │
+│  Organized by role: instructor/ and student/    │
+│  Shared pages at root of pages/                 │
+│  Responsibility: data fetching, local state,    │
+│  composition of reusable components.            │
+│  Rules:                                         │
+│  - One page per route                           │
+│  - Pages call the FastAPI backend directly      │
+│    (fetch/axios) — not Supabase tables          │
+│  - Role-gated pages wrapped in ProtectedRoute   │
+└───────────────────┬─────────────────────────────┘
+                    │ renders
+┌───────────────────▼─────────────────────────────┐
+│  Component Layer (Reusable / Presentational)    │
+│  frontend/src/components/                       │
+│  Current components: ProtectedRoute, QuizView,  │
+│  Upload, TopicSearch                            │
+│  Rules:                                         │
+│  - No direct API calls (receive data via props) │
+│  - No business logic                            │
+│  - May use useAuth() for identity display only  │
+└───────────────────┬─────────────────────────────┘
+                    │ uses
+┌───────────────────▼─────────────────────────────┐
+│  Library / Utility Layer                        │
+│  frontend/src/lib/                              │
+│  supabase.js — Supabase JS client (auth only)   │
+│  sharing.js   — pure helper functions           │
+│  Rules:                                         │
+│  - No React imports                             │
+│  - No component rendering                       │
+│  - supabase.js used for auth operations only;   │
+│    never for direct table queries from pages    │
+└─────────────────────────────────────────────────┘
+```
+
+**Layer violation examples the design-validator must flag as CRITICAL:**
+- A component making a `fetch()` call to the backend
+- A page querying Supabase tables directly (instead of calling the FastAPI backend)
+- A second Context created without justification
+- Business logic (score calculation, prompt building) placed in a page or component
+
+---
+
+### What this architecture is NOT
+
+| Pattern | Why it does not apply |
+|---|---|
+| MVC | No dedicated controller layer; no server-rendered views |
+| Repository pattern | Services call Supabase client directly — no repository abstraction |
+| Flux / Redux | Global state is confined to AuthContext; no action/reducer pattern |
+| Microservices | Single FastAPI process; Celery is a worker, not a separate service |
+
+---
+
 ## 1. System Overview
 
 AutoQuiz is a two-role (instructor / student) web application for AI-powered quiz and

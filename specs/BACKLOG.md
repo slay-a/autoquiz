@@ -23,6 +23,7 @@
 | ID | Feature | Priority | Status | Spec file | Depends on |
 |----|---------|----------|--------|-----------|------------|
 | FEAT-001 | Authentication & Session Management | P0 | ready | `specs/feat-001-auth-session.md` | — |
+| FEAT-002 | Class Management (Instructor) | P0 | ready | `specs/feat-002-class-management.md` | FEAT-001 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -30,6 +31,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-002 — Class Management (Instructor)
+
+**Stories:** 2.1 Create a class, 2.2 View class list, 2.3 View class detail
+**ACs summary:** Create form disabled when name empty; inserts into `classes` with 6-char unique `class_code`; new class prepends to list without reload; form resets; dashboard fetches only instructor's own classes with member counts ordered newest-first; detail page shows name/code/description/members with clipboard copy.
+**Dependencies:** FEAT-001
+**Implementation status:** already in codebase — pipeline run is for validation and test coverage catch-up.
+
+---
 
 ### FEAT-001 — Authentication & Session Management
 

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import upload, retrieve, quiz, notes
+from app.api.routes import upload, retrieve, quiz, notes, classes
 
 app = FastAPI(
     title="AutoQuiz API",
@@ -24,6 +24,7 @@ app.include_router(upload.router)
 app.include_router(retrieve.router)
 app.include_router(quiz.router)
 app.include_router(notes.router)
+app.include_router(classes.router)
 
 
 @app.get("/health")

@@ -10,6 +10,8 @@ import {
   Globe, Lock, Edit3, X, Save, AlertTriangle,
 } from "lucide-react";
 
+const API_BASE = "http://localhost:8000";
+
 // ── NoteEditor (inline component) ────────────────────────────
 function NoteEditor({ note, onSave, onCancel, saving }) {
   const [title, setTitle]     = useState(note.title);
@@ -196,25 +198,62 @@ export default function ClassView() {
 
   async function fetchAll() {
     setLoading(true);
-    const [
-      { data: classData },
-      { data: memberData },
-      { data: quizData },
-      { data: fileData },
-      { data: noteData },
-    ] = await Promise.all([
-      supabase.from("classes").select("*").eq("id", id).single(),
-      supabase.from("class_members").select("student_id, profiles(full_name, email)").eq("class_id", id),
-      supabase.from("saved_quizzes").select("*").eq("class_id", id).order("created_at", { ascending: false }),
-      supabase.from("uploaded_files").select("*").eq("class_id", id).order("created_at", { ascending: false }),
-      supabase.from("class_notes").select("*").eq("class_id", id).order("created_at", { ascending: false }),
-    ]);
-    setCls(classData);
-    setMembers(memberData ?? []);
-    setQuizzes(quizData ?? []);
-    setFiles(fileData ?? []);
-    setNotes(noteData ?? []);
-    setLoading(false);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      // Fetch class detail from FastAPI (includes class info and members)
+      const classRes = await fetch(`${API_BASE}/classes/${id}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (classRes.ok) {
+        const classDetail = await classRes.json();
+        setCls({
+          id: classDetail.id,
+          name: classDetail.name,
+          description: classDetail.description,
+          class_code: classDetail.class_code,
+          instructor_id: classDetail.instructor_id,
+          created_at: classDetail.created_at,
+        });
+
+        // Transform members to match the old structure (profiles nested)
+        const transformedMembers = classDetail.members.map(m => ({
+          student_id: m.student_id,
+          joined_at: m.joined_at,
+          profiles: {
+            full_name: m.full_name,
+            email: m.email,
+          },
+        }));
+        setMembers(transformedMembers);
+      } else {
+        console.error("Failed to fetch class:", await classRes.text());
+      }
+
+      // Keep fetching quizzes, files, and notes from Supabase directly
+      // (these don't have FastAPI routes yet per the spec)
+      const [
+        { data: quizData },
+        { data: fileData },
+        { data: noteData },
+      ] = await Promise.all([
+        supabase.from("saved_quizzes").select("*").eq("class_id", id).order("created_at", { ascending: false }),
+        supabase.from("uploaded_files").select("*").eq("class_id", id).order("created_at", { ascending: false }),
+        supabase.from("class_notes").select("*").eq("class_id", id).order("created_at", { ascending: false }),
+      ]);
+
+      setQuizzes(quizData ?? []);
+      setFiles(fileData ?? []);
+      setNotes(noteData ?? []);
+    } catch (error) {
+      console.error("Error fetching class data:", error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function copyCode() {

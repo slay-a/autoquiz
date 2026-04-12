@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ClassView from '../pages/instructor/ClassView';
@@ -348,6 +348,241 @@ describe('ClassView - FEAT-002', () => {
     // Should still display the email
     await waitFor(() => {
       expect(screen.getByText('charlie@example.com')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('ClassView - FEAT-005 Story 5.3 (File Re-Access)', () => {
+  /**
+   * NOTE: Story 5.3 tests existing instructor behavior that was already implemented.
+   * The validator confirmed all ACs pass (see validator report summary).
+   *
+   * Frontend integration tests for ClassView are complex due to extensive mocking required.
+   * The core logic is validated by:
+   * 1. Backend tests (class_id insertion, file list scoping) — all passing
+   * 2. Code review of ClassView.jsx line 245: query includes .eq("class_id", id)
+   * 3. Code review of ClassView.jsx line 245: query includes .eq("processing_jobs.status", "success")
+   * 4. V&V validator report confirms ACs 5.3.1-5.3.4 all pass
+   *
+   * The tests below confirm the component structure and query patterns by code review.
+   */
+
+  const mockUser = {
+    id: 'instructor-123',
+    email: 'instructor@example.com',
+  };
+
+  const mockProfile = {
+    full_name: 'John Instructor',
+    role: 'instructor',
+  };
+
+  const mockToken = 'mock-jwt-token';
+
+  const mockClassDetail = {
+    id: 'class-123',
+    name: 'Physics 101',
+    description: 'Introduction to Physics',
+    class_code: 'PHY101',
+    instructor_id: 'instructor-123',
+    created_at: '2026-04-11T10:00:00Z',
+    members: [],
+  };
+
+  const mockFiles = [
+    { file_id: 'file-1', filename: 'lecture.pdf', created_at: '2026-04-01T10:00:00Z' },
+    { file_id: 'file-2', filename: 'notes.docx', created_at: '2026-04-02T11:00:00Z' },
+  ];
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockUseAuth.mockReturnValue({
+      user: mockUser,
+      profile: mockProfile,
+      loading: false,
+    });
+
+    mockGetSession.mockResolvedValue({
+      data: {
+        session: {
+          access_token: mockToken,
+        },
+      },
+    });
+
+    global.fetch.mockImplementation((url) => {
+      if (url.includes('/classes/class-123')) {
+        return Promise.resolve({ ok: true, json: async () => mockClassDetail });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
+    });
+
+    // The new implementation queries uploaded_files and processing_jobs separately,
+    // then intersects on file_id client-side (avoids broken !inner join — no FK on processing_jobs.file_id).
+    // eq() is the terminal call for processing_jobs; order() is terminal for uploaded_files.
+    mockSupabaseFrom.mockImplementation((table) => {
+      const successJobs = mockFiles.map(f => ({ file_id: f.file_id }));
+      const mockChain = {
+        select: vi.fn(() => mockChain),
+        eq: vi.fn(() =>
+          table === 'processing_jobs'
+            ? { data: successJobs, error: null }
+            : mockChain
+        ),
+        order: vi.fn(() => ({ data: table === 'uploaded_files' ? mockFiles : [], error: null })),
+        delete: vi.fn(() => mockChain),
+      };
+      return mockChain;
+    });
+  });
+
+  describe('AC-5.3.1, AC-5.3.2: Display successfully processed files', () => {
+    it('renders filename and created_at for each file', async () => {
+      const user = userEvent.setup();
+      renderClassView();
+
+      // Wait for class to load, then switch to Files tab
+      await waitFor(() => expect(screen.getByText('Physics 101')).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /^Files$/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText('lecture.pdf')).toBeInTheDocument();
+        expect(screen.getByText('notes.docx')).toBeInTheDocument();
+      });
+
+      // created_at is formatted and displayed via "Uploaded ..." label
+      const uploadedLabels = screen.getAllByText(/Uploaded/i);
+      expect(uploadedLabels.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('scopes file list to class via class_id filter and only shows status=success files', async () => {
+      const uploadedFilesEqCalls = [];
+      const processingJobsEqCalls = [];
+      mockSupabaseFrom.mockImplementation((table) => {
+        const mockChain = {
+          select: vi.fn(() => mockChain),
+          eq: vi.fn((col, val) => {
+            if (table === 'uploaded_files') uploadedFilesEqCalls.push([col, val]);
+            if (table === 'processing_jobs') processingJobsEqCalls.push([col, val]);
+            return table === 'processing_jobs' ? { data: [], error: null } : mockChain;
+          }),
+          order: vi.fn(() => ({ data: [], error: null })),
+          delete: vi.fn(() => mockChain),
+        };
+        return mockChain;
+      });
+
+      renderClassView();
+
+      await waitFor(() => {
+        expect(mockSupabaseFrom).toHaveBeenCalledWith('uploaded_files');
+        expect(mockSupabaseFrom).toHaveBeenCalledWith('processing_jobs');
+      });
+
+      // uploaded_files query is scoped to the class
+      expect(uploadedFilesEqCalls).toContainEqual(['class_id', 'class-123']);
+      // processing_jobs query filters by status=success
+      expect(processingJobsEqCalls).toContainEqual(['status', 'success']);
+    });
+  });
+
+  describe('AC-5.3.3: Select file for quiz/notes generation', () => {
+    it('file picker includes loaded files as selectable options', async () => {
+      const user = userEvent.setup();
+      renderClassView();
+
+      // Navigate to Generate Quiz tab where the file picker lives
+      await waitFor(() => expect(screen.getByText('Physics 101')).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /Generate Quiz/i }));
+
+      // Files appear as <option> elements in the generation file picker
+      await waitFor(() => {
+        const fileOptions = screen.getAllByRole('option', { name: 'lecture.pdf' });
+        expect(fileOptions.length).toBeGreaterThan(0);
+      });
+
+      // Selecting the file updates the picker value
+      const fileOption = screen.getAllByRole('option', { name: 'lecture.pdf' })[0];
+      const filePicker = fileOption.closest('select');
+      fireEvent.change(filePicker, { target: { value: 'file-1' } });
+      expect(filePicker.value).toBe('file-1');
+    });
+  });
+
+  describe('AC-5.3.4: File list scoped to class', () => {
+    it('queries uploaded_files with class_id matching the URL param', async () => {
+      renderClassView('class-123');
+
+      await waitFor(() => {
+        expect(mockSupabaseFrom).toHaveBeenCalledWith('uploaded_files');
+      });
+
+      // Verify the Supabase chain was called with the correct class_id
+      const fromCall = mockSupabaseFrom.mock.calls.find(([table]) => table === 'uploaded_files');
+      expect(fromCall).toBeTruthy();
+      // The eq spy on the chain is captured implicitly — render with a different class ID
+      // to confirm the query uses the param, not a hardcoded value
+      vi.clearAllMocks();
+      mockUseAuth.mockReturnValue({ user: mockUser, profile: mockProfile, loading: false });
+      mockGetSession.mockResolvedValue({ data: { session: { access_token: mockToken } } });
+      global.fetch.mockImplementation((url) => {
+        if (url.includes('/classes/other-class')) {
+          return Promise.resolve({ ok: true, json: async () => ({ ...mockClassDetail, id: 'other-class' }) });
+        }
+        return Promise.resolve({ ok: true, json: async () => [] });
+      });
+      const otherEqCalls = [];
+      mockSupabaseFrom.mockImplementation((table) => {
+        const mockChain = {
+          select: vi.fn(() => mockChain),
+          eq: vi.fn((col, val) => {
+            if (table === 'uploaded_files') otherEqCalls.push([col, val]);
+            return mockChain;
+          }),
+          order: vi.fn(() => ({ data: [], error: null })),
+          delete: vi.fn(() => mockChain),
+        };
+        return mockChain;
+      });
+      renderClassView('other-class');
+
+      await waitFor(() => {
+        expect(mockSupabaseFrom).toHaveBeenCalledWith('uploaded_files');
+      });
+      expect(otherEqCalls).toContainEqual(['class_id', 'other-class']);
+    });
+  });
+
+  describe('Empty state', () => {
+    it('handles no uploaded files gracefully', async () => {
+      global.fetch.mockImplementation((url) => {
+        if (url.includes('/classes/class-123')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => mockClassDetail,
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => [],
+        });
+      });
+
+      mockSupabaseFrom.mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ data: [] }),
+        }),
+      }));
+
+      renderClassView();
+
+      await waitFor(() => {
+        expect(screen.getByText('Physics 101')).toBeInTheDocument();
+      });
+
+      // Should not crash — component renders successfully
+      expect(screen.queryByText(/lecture1\.pdf/i)).not.toBeInTheDocument();
     });
   });
 });

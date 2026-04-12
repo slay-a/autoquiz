@@ -238,6 +238,39 @@
 
 ---
 
+### Story 5.3 — Re-access previously uploaded files for generation (Instructor)
+
+**As an** instructor,
+**I want** to select a file I have already uploaded to a class without re-uploading it,
+**so that** I can generate quizzes and notes from the same document multiple times without redundant uploads.
+
+> **Note:** This behaviour is already implemented. It is documented here retroactively because it was absent from the original user stories.
+
+**Acceptance Criteria:**
+- AC-5.3.1: The class detail page displays a list of files previously uploaded to that class where the corresponding `processing_jobs` row has `status = 'success'`.
+- AC-5.3.2: Each file entry displays the `filename` and `created_at` timestamp from `uploaded_files`.
+- AC-5.3.3: The instructor can select a file from this list to use as the `file_id` source for quiz or notes generation — no re-upload is required.
+- AC-5.3.4: The file list is scoped to the class context — only files associated with that class are shown, not files from other classes.
+
+---
+
+### Story 5.4 — Re-access previously uploaded files for generation (Student)
+
+**As a** student,
+**I want** to select a file I have already uploaded without re-uploading it,
+**so that** I can generate quizzes and notes from the same document multiple times without redundant uploads.
+
+> **Note:** This behaviour does not yet exist for students. Instructors have an equivalent feature (Story 5.3). This story defines the intended behaviour to be implemented.
+
+**Acceptance Criteria:**
+- AC-5.4.1: The student generate page displays a list of files the student has previously uploaded where the corresponding `processing_jobs` row has `status = 'success'`.
+- AC-5.4.2: Each file entry displays the `filename` and `created_at` timestamp from `uploaded_files`.
+- AC-5.4.3: The student can select a file from this list to use as the `file_id` source for quiz or notes generation — no re-upload is required.
+- AC-5.4.4: The file list is scoped to the current student — only files where `uploaded_by` matches the authenticated user's ID are shown.
+- AC-5.4.5: The file picker and the upload component coexist on the same page. Selecting an existing file dismisses/disables the upload input, and vice versa.
+
+---
+
 ## Feature Group 6 — Quiz Generation
 
 ### Story 6.1 — Generate a quiz from uploaded material

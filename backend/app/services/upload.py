@@ -29,6 +29,7 @@ def store_file_and_create_job(
     filename: str,
     content_type: str,
     uploaded_by: str,
+    class_id: str = None,
 ) -> dict:
     """
     Store file in Supabase Storage, insert into uploaded_files and processing_jobs.
@@ -38,6 +39,7 @@ def store_file_and_create_job(
         filename: Original filename
         content_type: MIME type
         uploaded_by: User ID from JWT
+        class_id: Optional class ID to associate the file with
 
     Returns:
         dict with file_id, job_id, status, message
@@ -54,11 +56,15 @@ def store_file_and_create_job(
     )
 
     # Insert into uploaded_files (GAP 1)
-    supabase.table("uploaded_files").insert({
+    file_record = {
         "file_id": file_id,
         "filename": filename,
         "uploaded_by": uploaded_by,
-    }).execute()
+    }
+    if class_id:
+        file_record["class_id"] = class_id
+
+    supabase.table("uploaded_files").insert(file_record).execute()
 
     # Insert into processing_jobs
     supabase.table("processing_jobs").insert({
@@ -155,3 +161,29 @@ def create_retry_job(job_id: str, user_id: str) -> dict:
         "message": "Retry queued.",
         "filename": job["filename"],
     }
+
+
+def get_user_files(user_id: str) -> list[dict]:
+    """
+    Retrieve all successfully processed files for a user.
+
+    Args:
+        user_id: User ID from JWT
+
+    Returns:
+        list of dicts with file_id, filename, created_at
+    """
+    supabase = get_supabase()
+    # Query processing_jobs directly — it stores file_id, filename, uploaded_by, and status,
+    # so no join to uploaded_files is needed. processing_jobs.file_id has no FK constraint,
+    # making PostgREST !inner joins from uploaded_files unreliable.
+    result = (
+        supabase.table("processing_jobs")
+        .select("file_id, filename, created_at")
+        .eq("uploaded_by", user_id)
+        .eq("status", "success")
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    return result.data or []

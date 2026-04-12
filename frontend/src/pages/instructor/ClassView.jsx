@@ -240,14 +240,17 @@ export default function ClassView() {
         { data: quizData },
         { data: fileData },
         { data: noteData },
+        { data: successJobData },
       ] = await Promise.all([
         supabase.from("saved_quizzes").select("*").eq("class_id", id).order("created_at", { ascending: false }),
         supabase.from("uploaded_files").select("*").eq("class_id", id).order("created_at", { ascending: false }),
         supabase.from("class_notes").select("*").eq("class_id", id).order("created_at", { ascending: false }),
+        supabase.from("processing_jobs").select("file_id").eq("status", "success"),
       ]);
 
+      const successFileIds = new Set((successJobData ?? []).map(j => j.file_id));
       setQuizzes(quizData ?? []);
-      setFiles(fileData ?? []);
+      setFiles((fileData ?? []).filter(f => successFileIds.has(f.file_id)));
       setNotes(noteData ?? []);
     } catch (error) {
       console.error("Error fetching class data:", error);
@@ -266,6 +269,7 @@ export default function ClassView() {
     const { data: { session } } = await supabase.auth.getSession();
     const form = new FormData();
     form.append("file", file);
+    form.append("class_id", id);
     const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${session?.access_token}` },
@@ -276,7 +280,7 @@ export default function ClassView() {
       throw new Error(d.detail || "Upload failed");
     }
     const data = await res.json();
-    const fileEntry = { file_id: data.file_id, filename: file.name, uploaded_by: user.id, created_at: new Date().toISOString() };
+    const fileEntry = { file_id: data.file_id, filename: file.name, uploaded_by: user.id, class_id: id, created_at: new Date().toISOString() };
     setFiles(prev => [fileEntry, ...prev]);
     setSelectedFileId(data.file_id);
     setShowInlineUpload(false);

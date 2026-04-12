@@ -892,6 +892,363 @@ class TestRetryJobEndpoint:
         app.dependency_overrides.clear()
 
 
+# ── Story 5.3 & 5.4: File Re-Access Tests ──────────────────────────────
+
+
+class TestStory53ClassScopedFileUpload:
+    """Tests for Story 5.3 — Instructor class-scoped file uploads."""
+
+    @patch("app.services.upload.get_supabase")
+    @patch("celery_worker.process_document")
+    def test_upload_with_class_id_inserts_class_id(self, mock_process_document, mock_get_supabase, client, instructor_user):
+        """AC-5.3.4: File upload accepts class_id and inserts it into uploaded_files."""
+        app.dependency_overrides[get_current_user] = lambda: instructor_user
+
+        mock_supabase = Mock()
+        mock_get_supabase.return_value = mock_supabase
+
+        # Mock storage upload
+        mock_bucket = Mock()
+        mock_bucket.upload = Mock(return_value=None)
+        mock_storage = Mock()
+        mock_storage.from_ = Mock(return_value=mock_bucket)
+        mock_supabase.storage = mock_storage
+
+        # Track inserted records
+        inserted_file_record = None
+        inserted_job_record = None
+
+        def capture_insert(table_name):
+            def insert_handler(record):
+                nonlocal inserted_file_record, inserted_job_record
+                if table_name == "uploaded_files":
+                    inserted_file_record = record
+                elif table_name == "processing_jobs":
+                    inserted_job_record = record
+
+                mock_execute = Mock()
+                mock_execute.execute = Mock(return_value=None)
+                return mock_execute
+
+            mock_insert = Mock()
+            mock_insert.insert = Mock(side_effect=insert_handler)
+            return mock_insert
+
+        mock_supabase.table = Mock(side_effect=lambda name: capture_insert(name))
+        mock_process_document.delay = Mock(return_value=None)
+
+        # Upload with class_id
+        class_id = "class-789-uuid"
+        pdf_content = b"%PDF-1.4\ntest"
+        response = client.post(
+            "/upload/",
+            files={"file": ("test.pdf", io.BytesIO(pdf_content), "application/pdf")},
+            data={"class_id": class_id},
+        )
+
+        assert response.status_code == 200
+        assert inserted_file_record is not None
+        assert inserted_file_record["class_id"] == class_id
+        assert inserted_file_record["uploaded_by"] == instructor_user["id"]
+        assert inserted_job_record is not None
+        assert inserted_job_record["uploaded_by"] == instructor_user["id"]
+
+        app.dependency_overrides.clear()
+
+    @patch("app.services.upload.get_supabase")
+    @patch("celery_worker.process_document")
+    def test_upload_without_class_id_works(self, mock_process_document, mock_get_supabase, client, student_user):
+        """Verify that class_id is optional — uploads without it succeed."""
+        app.dependency_overrides[get_current_user] = lambda: student_user
+
+        mock_supabase = Mock()
+        mock_get_supabase.return_value = mock_supabase
+
+        # Mock storage upload
+        mock_bucket = Mock()
+        mock_bucket.upload = Mock(return_value=None)
+        mock_storage = Mock()
+        mock_storage.from_ = Mock(return_value=mock_bucket)
+        mock_supabase.storage = mock_storage
+
+        # Track inserted file record
+        inserted_file_record = None
+
+        def capture_insert(table_name):
+            def insert_handler(record):
+                nonlocal inserted_file_record
+                if table_name == "uploaded_files":
+                    inserted_file_record = record
+
+                mock_execute = Mock()
+                mock_execute.execute = Mock(return_value=None)
+                return mock_execute
+
+            mock_insert = Mock()
+            mock_insert.insert = Mock(side_effect=insert_handler)
+            return mock_insert
+
+        mock_supabase.table = Mock(side_effect=lambda name: capture_insert(name))
+        mock_process_document.delay = Mock(return_value=None)
+
+        # Upload without class_id
+        pdf_content = b"%PDF-1.4\ntest"
+        response = client.post(
+            "/upload/",
+            files={"file": ("test.pdf", io.BytesIO(pdf_content), "application/pdf")},
+        )
+
+        assert response.status_code == 200
+        assert inserted_file_record is not None
+        assert "class_id" not in inserted_file_record or inserted_file_record.get("class_id") is None
+
+        app.dependency_overrides.clear()
+
+
+class TestStory54GetUserFiles:
+    """Tests for Story 5.4 — GET /upload/files endpoint."""
+
+    @patch("app.services.upload.get_supabase")
+    def test_returns_only_success_files(self, mock_get_supabase, client, student_user):
+        """AC-5.4.1, AC-5.4.2: Returns only files where processing_jobs.status = 'success'."""
+        app.dependency_overrides[get_current_user] = lambda: student_user
+
+        mock_supabase = Mock()
+        mock_get_supabase.return_value = mock_supabase
+
+        # Mock Supabase query result — only success files
+        mock_result = Mock()
+        mock_result.data = [
+            {
+                "file_id": "file-1",
+                "filename": "lecture1.pdf",
+                "created_at": "2024-01-01T10:00:00",
+                "processing_jobs": [{"status": "success"}],
+            },
+            {
+                "file_id": "file-2",
+                "filename": "notes.docx",
+                "created_at": "2024-01-02T11:00:00",
+                "processing_jobs": [{"status": "success"}],
+            },
+        ]
+
+        # Build mock chain: table().select().eq().eq().order().execute()
+        mock_execute = Mock()
+        mock_execute.execute = Mock(return_value=mock_result)
+        mock_order = Mock()
+        mock_order.order = Mock(return_value=mock_execute)
+        mock_eq2 = Mock()
+        mock_eq2.eq = Mock(return_value=mock_order)
+        mock_eq1 = Mock()
+        mock_eq1.eq = Mock(return_value=mock_eq2)
+        mock_select = Mock()
+        mock_select.select = Mock(return_value=mock_eq1)
+        mock_supabase.table = Mock(return_value=mock_select)
+
+        response = client.get("/upload/files")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 2
+        assert data[0]["file_id"] == "file-1"
+        assert data[0]["filename"] == "lecture1.pdf"
+        assert data[0]["created_at"] == "2024-01-01T10:00:00"
+        assert data[1]["file_id"] == "file-2"
+
+        # Verify query filters by uploaded_by and status='success'
+        mock_select.select.assert_called_once()
+        assert "processing_jobs!inner" in mock_select.select.call_args[0][0]
+
+        app.dependency_overrides.clear()
+
+    @patch("app.services.upload.get_supabase")
+    def test_does_not_return_failed_files(self, mock_get_supabase, client, student_user):
+        """Verify that files with status='failed' are NOT returned."""
+        app.dependency_overrides[get_current_user] = lambda: student_user
+
+        mock_supabase = Mock()
+        mock_get_supabase.return_value = mock_supabase
+
+        # Mock result — no failed files in response
+        mock_result = Mock()
+        mock_result.data = []
+
+        mock_execute = Mock()
+        mock_execute.execute = Mock(return_value=mock_result)
+        mock_order = Mock()
+        mock_order.order = Mock(return_value=mock_execute)
+        mock_eq2 = Mock()
+        mock_eq2.eq = Mock(return_value=mock_order)
+        mock_eq1 = Mock()
+        mock_eq1.eq = Mock(return_value=mock_eq2)
+        mock_select = Mock()
+        mock_select.select = Mock(return_value=mock_eq1)
+        mock_supabase.table = Mock(return_value=mock_select)
+
+        response = client.get("/upload/files")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 0
+
+        # Verify filter was applied
+        mock_eq2.eq.assert_called_with("processing_jobs.status", "success")
+
+        app.dependency_overrides.clear()
+
+    @patch("app.services.upload.get_supabase")
+    def test_does_not_return_in_progress_files(self, mock_get_supabase, client, student_user):
+        """Verify that files with status='in_progress' or 'queued' are NOT returned."""
+        app.dependency_overrides[get_current_user] = lambda: student_user
+
+        mock_supabase = Mock()
+        mock_get_supabase.return_value = mock_supabase
+
+        # Mock result — no in-progress files
+        mock_result = Mock()
+        mock_result.data = []
+
+        mock_execute = Mock()
+        mock_execute.execute = Mock(return_value=mock_result)
+        mock_order = Mock()
+        mock_order.order = Mock(return_value=mock_execute)
+        mock_eq2 = Mock()
+        mock_eq2.eq = Mock(return_value=mock_order)
+        mock_eq1 = Mock()
+        mock_eq1.eq = Mock(return_value=mock_eq2)
+        mock_select = Mock()
+        mock_select.select = Mock(return_value=mock_eq1)
+        mock_supabase.table = Mock(return_value=mock_select)
+
+        response = client.get("/upload/files")
+
+        assert response.status_code == 200
+        assert len(response.json()) == 0
+
+        app.dependency_overrides.clear()
+
+    @patch("app.services.upload.get_supabase")
+    def test_scoped_to_current_user(self, mock_get_supabase, client, student_user):
+        """AC-5.4.4: File list is scoped to uploaded_by = current user."""
+        app.dependency_overrides[get_current_user] = lambda: student_user
+
+        mock_supabase = Mock()
+        mock_get_supabase.return_value = mock_supabase
+
+        mock_result = Mock()
+        mock_result.data = []
+
+        mock_execute = Mock()
+        mock_execute.execute = Mock(return_value=mock_result)
+        mock_order = Mock()
+        mock_order.order = Mock(return_value=mock_execute)
+        mock_eq2 = Mock()
+        mock_eq2.eq = Mock(return_value=mock_order)
+        mock_eq1 = Mock()
+        mock_eq1.eq = Mock(return_value=mock_eq2)
+        mock_select = Mock()
+        mock_select.select = Mock(return_value=mock_eq1)
+        mock_supabase.table = Mock(return_value=mock_select)
+
+        response = client.get("/upload/files")
+
+        assert response.status_code == 200
+
+        # Verify uploaded_by filter
+        mock_eq1.eq.assert_called_with("uploaded_by", student_user["id"])
+
+        app.dependency_overrides.clear()
+
+    @patch("app.services.upload.get_supabase")
+    def test_returns_empty_list_for_other_users_files(self, mock_get_supabase, client, student_user):
+        """Verify that files belonging to other users are NOT returned."""
+        app.dependency_overrides[get_current_user] = lambda: student_user
+
+        mock_supabase = Mock()
+        mock_get_supabase.return_value = mock_supabase
+
+        # Simulate DB returning no rows (because uploaded_by filter excludes other users)
+        mock_result = Mock()
+        mock_result.data = []
+
+        mock_execute = Mock()
+        mock_execute.execute = Mock(return_value=mock_result)
+        mock_order = Mock()
+        mock_order.order = Mock(return_value=mock_execute)
+        mock_eq2 = Mock()
+        mock_eq2.eq = Mock(return_value=mock_order)
+        mock_eq1 = Mock()
+        mock_eq1.eq = Mock(return_value=mock_eq2)
+        mock_select = Mock()
+        mock_select.select = Mock(return_value=mock_eq1)
+        mock_supabase.table = Mock(return_value=mock_select)
+
+        response = client.get("/upload/files")
+
+        assert response.status_code == 200
+        assert len(response.json()) == 0
+
+        app.dependency_overrides.clear()
+
+    @patch("app.services.upload.get_supabase")
+    def test_response_matches_user_file_entry_schema(self, mock_get_supabase, client, student_user):
+        """AC-5.4.2: Response matches UserFileEntry schema (file_id, filename, created_at)."""
+        app.dependency_overrides[get_current_user] = lambda: student_user
+
+        mock_supabase = Mock()
+        mock_get_supabase.return_value = mock_supabase
+
+        mock_result = Mock()
+        mock_result.data = [
+            {
+                "file_id": "file-123",
+                "filename": "test.pdf",
+                "created_at": "2024-01-01T12:00:00",
+                "processing_jobs": [{"status": "success"}],
+            },
+        ]
+
+        mock_execute = Mock()
+        mock_execute.execute = Mock(return_value=mock_result)
+        mock_order = Mock()
+        mock_order.order = Mock(return_value=mock_execute)
+        mock_eq2 = Mock()
+        mock_eq2.eq = Mock(return_value=mock_order)
+        mock_eq1 = Mock()
+        mock_eq1.eq = Mock(return_value=mock_eq2)
+        mock_select = Mock()
+        mock_select.select = Mock(return_value=mock_eq1)
+        mock_supabase.table = Mock(return_value=mock_select)
+
+        response = client.get("/upload/files")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        entry = data[0]
+
+        # Verify schema fields
+        assert "file_id" in entry
+        assert "filename" in entry
+        assert "created_at" in entry
+        assert entry["file_id"] == "file-123"
+        assert entry["filename"] == "test.pdf"
+        assert entry["created_at"] == "2024-01-01T12:00:00"
+
+        # Should not include processing_jobs array
+        assert "processing_jobs" not in entry
+
+        app.dependency_overrides.clear()
+
+    def test_requires_authentication(self, client):
+        """Route requires authentication (unauthenticated request returns 401/403)."""
+        # No auth override — request should fail
+        response = client.get("/upload/files")
+
+        assert response.status_code in [401, 403]
+
+
 # ── Notes on out-of-scope tests ────────────────────────────────────────
 
 

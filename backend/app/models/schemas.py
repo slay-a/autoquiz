@@ -32,6 +32,12 @@ class JobStatusResponse(BaseModel):
     updated_at: str
 
 
+class UserFileEntry(BaseModel):
+    file_id: str
+    filename: str
+    created_at: str
+
+
 # ── Retrieve ─────────────────────────────────────────────────────────────────
 
 class RetrieveRequest(BaseModel):

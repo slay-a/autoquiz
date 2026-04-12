@@ -4,11 +4,11 @@
 
 ## 1. Summary
 
-**Feature:** File upload and processing pipeline — users upload PDF, DOCX, or PPTX documents; the system stores them in Supabase Storage, kicks off a background processing job, and exposes a status-polling endpoint so the client knows when the file is ready for quiz and notes generation.
+**Feature:** File upload and processing pipeline — users upload PDF, DOCX, or PPTX documents; the system stores them in Supabase Storage, kicks off a background processing job, and exposes a status-polling endpoint so the client knows when the file is ready for quiz and notes generation. Previously processed files can be re-selected for generation without re-uploading.
 **Requested by:** Instructor / Student
 **Priority:** High
 
-This feature is already implemented. This spec exists to onboard the feature into the pipeline so it can be validated against the design, verified against user stories, and covered by tests.
+Stories 5.1 and 5.2 are already implemented and have passed the pipeline. Stories 5.3 and 5.4 are additive: 5.3 documents existing instructor behaviour that was previously unspecified; 5.4 is new student-facing functionality to be built.
 
 ---
 
@@ -44,12 +44,45 @@ This feature is already implemented. This spec exists to onboard the feature int
 
 ---
 
+### Story 5.3 — Re-access previously uploaded files for generation (Instructor)
+
+**As an** instructor,
+**I want** to select a file I have already uploaded to a class without re-uploading it,
+**so that** I can generate quizzes and notes from the same document multiple times without redundant uploads.
+
+> **Pipeline note:** This behaviour is already implemented. It was absent from the original user stories and is documented here retroactively. Req-validator should verify ACs against existing code; prototyper should not touch this story unless a gap is found.
+
+**Acceptance Criteria:**
+- [x] AC-5.3.1: The class detail page displays a list of files previously uploaded to that class where the corresponding `processing_jobs` row has `status = 'success'`.
+- [x] AC-5.3.2: Each file entry displays the `filename` and `created_at` timestamp from `uploaded_files`.
+- [x] AC-5.3.3: The instructor can select a file from this list to use as the `file_id` source for quiz or notes generation — no re-upload is required.
+- [x] AC-5.3.4: The file list is scoped to the class context — only files associated with that class are shown, not files from other classes.
+
+---
+
+### Story 5.4 — Re-access previously uploaded files for generation (Student)
+
+**As a** student,
+**I want** to select a file I have already uploaded without re-uploading it,
+**so that** I can generate quizzes and notes from the same document multiple times without redundant uploads.
+
+> **Pipeline note:** This behaviour does not yet exist for students. Instructors have an equivalent feature (Story 5.3). The prototyper should implement this story; validators should treat all ACs as new functionality.
+
+**Acceptance Criteria:**
+- [x] AC-5.4.1: The student generate page displays a list of files the student has previously uploaded where the corresponding `processing_jobs` row has `status = 'success'`.
+- [x] AC-5.4.2: Each file entry displays the `filename` and `created_at` timestamp from `uploaded_files`.
+- [x] AC-5.4.3: The student can select a file from this list to use as the `file_id` source for quiz or notes generation — no re-upload is required.
+- [x] AC-5.4.4: The file list is scoped to the current student — only files where `uploaded_by` matches the authenticated user's ID are shown.
+- [x] AC-5.4.5: The file picker and the upload component coexist on the same page. Selecting an existing file dismisses/disables the upload input, and vice versa.
+
+---
+
 ## 3. Role & Access Rules
 
 | Actor | Allowed action | Denied action | Enforced at |
 |-------|----------------|---------------|-------------|
-| Instructor | Upload files; poll status for own jobs | Access other users' jobs or files | FastAPI `get_current_user` + Supabase RLS on `uploaded_files` and `processing_jobs` (uploaded_by = auth.uid()) |
-| Student | Upload files; poll status for own jobs | Access other users' jobs or files | FastAPI `get_current_user` + Supabase RLS |
+| Instructor | Upload files; poll status for own jobs; re-select class-scoped processed files for generation | Access other users' jobs or files; see files outside the current class context | FastAPI `get_current_user` + Supabase RLS on `uploaded_files` and `processing_jobs` (uploaded_by = auth.uid()); class-scoping enforced at query level |
+| Student | Upload files; poll status for own jobs; re-select own processed files for generation (Story 5.4) | Access other users' jobs or files | FastAPI `get_current_user` + Supabase RLS (uploaded_by = auth.uid()) |
 | Unauthenticated | None | All actions | FastAPI auth dependency |
 
 ---
@@ -69,9 +102,11 @@ This feature is already implemented. This spec exists to onboard the feature int
 ### 4b. Backend architecture
 
 - **Routes:** `backend/app/api/routes/upload.py` — `POST /upload`, `GET /upload/status/{job_id}`
+- **New route (Story 5.4):** `GET /upload/files` — returns the authenticated user's successfully processed files (`status = 'success'`), joining `uploaded_files` to `processing_jobs`; `uploaded_by` filter applied from JWT
+- **Class-scoped file list (Story 5.3):** file list for instructors is filtered by class context at the query level — exact mechanism (join table, `class_id` column on `uploaded_files`, or existing class-scoping) to be verified by design-validator
 - **Background processing:** Celery worker task triggered after successful upload; progresses `processing_jobs` through stage transitions
 - **File size enforcement:** FastAPI middleware or route-level check rejects files > 50MB with HTTP 413
-- **Async / sync?** Upload route is synchronous; processing is a Celery background task
+- **Async / sync?** Upload and file-list routes are synchronous; processing is a Celery background task
 - **LLM involvement?** No
 
 ### 4c. Frontend architecture
@@ -79,7 +114,10 @@ This feature is already implemented. This spec exists to onboard the feature int
 - **Pages affected:**
   - Upload component (shared, used from instructor class detail and student generate pages)
   - Status polling UI — client polls `GET /upload/status/{job_id}` on an interval until `status` is `success` or `failed`
-- **State scope:** local component state (upload progress, job status)
+  - `frontend/src/pages/instructor/ClassView.jsx` — existing processed-file list (Story 5.3, already implemented)
+  - `frontend/src/pages/student/Generate.jsx` — new processed-file picker coexisting with upload input (Story 5.4, to be built)
+- **State scope:** local component state (upload progress, job status, selected file); no new context
+- **Mutual exclusion (Story 5.4):** selecting an existing file from the picker sets `file_id` and disables/hides the upload input; clearing the selection re-enables upload
 - **No secrets in client-side code:** confirmed
 
 ### 4d. RAG pipeline impact
@@ -105,7 +143,9 @@ This feature is already implemented. This spec exists to onboard the feature int
 - Support for file types beyond `.pdf`, `.docx`, `.pptx`
 - Real-time status updates via WebSocket or Server-Sent Events (polling only)
 - File preview or download by the user
-- Per-class file scoping (files are user-scoped, not class-scoped, in this iteration)
+- Showing failed or in-progress files in the re-access file picker (only `status = 'success'` files are listed)
+- Pagination of the processed-file list (all successful files for the user/class are returned in one response in this iteration)
+- Cross-student file sharing — a student's processed files are never visible to other students or instructors
 
 ---
 
@@ -115,19 +155,23 @@ This feature is already implemented. This spec exists to onboard the feature int
 |---|----------|-------|------------|
 | 1 | Is the 50MB limit enforced in the FastAPI route, Supabase Storage policy, or both? | pipeline | Req-validator should check the upload route and Supabase bucket config for AC-5.1.2 |
 | 2 | Does the status polling UI use a fixed interval or exponential backoff? | pipeline | Design-validator should check the frontend polling implementation |
+| 3 | How is the instructor file list currently scoped to a class (Story 5.3)? Is there a `class_id` on `uploaded_files`, a join table, or another mechanism? | pipeline | Design-validator must identify the existing scoping mechanism before prototyper mirrors it for Story 5.4 |
+| 4 | Should the student file picker (Story 5.4) be a new backend route (`GET /upload/files`) or a Supabase client-side query? | pipeline | Design-validator should match the pattern used by the instructor's existing file list |
 
 ---
 
 ## 7. Test Boundaries
 
 - **External deps to mock:** `supabase.storage.from_('uploads').upload()`, `supabase.from('uploaded_files')`, `supabase.from('processing_jobs')`, Celery task dispatch
-- **Fixtures needed:** small valid `.pdf`, `.docx`, `.pptx` files; an oversized file stub; a file with an unsupported extension
+- **Fixtures needed:** small valid `.pdf`, `.docx`, `.pptx` files; an oversized file stub; a file with an unsupported extension; `uploaded_files` + `processing_jobs` rows at `status = 'success'` and `status = 'failed'` for picker tests
 - **Integration vs. unit boundary:**
   - Upload route handler = integration test with mocked Supabase storage and DB
   - Status polling route = integration test with mocked `processing_jobs` row at each stage
   - File type and size validation = unit tests against the route's validation logic
   - `jobs_updated_at` trigger = DB-level test (can be skipped if live DB not available)
-- **Frontend test targets:** upload component rejects unsupported extensions before submission; displays error on 413 response; renders correct status label for each `status`/`stage` combination
+  - File list route / query (Stories 5.3 & 5.4) = integration test verifying only `status = 'success'` rows are returned and scoping is correct (class for instructor, `uploaded_by` for student)
+- **Frontend test targets (Stories 5.1–5.2, already tested):** upload component rejects unsupported extensions; displays error on 413; renders correct status label per `status`/`stage`
+- **Frontend test targets (Stories 5.3–5.4, new):** instructor class view shows only successfully processed files scoped to that class; student generate page renders file picker; selecting a file sets `file_id` and disables upload input; clearing selection re-enables upload input; failed/in-progress files are absent from the picker
 - **Explicitly out of test scope:** live Supabase Storage writes, live Celery worker execution, live DB trigger
 
 ---

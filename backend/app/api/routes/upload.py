@@ -1,13 +1,15 @@
 """E1 — File upload and processing status endpoints."""
 
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
+from typing import Optional
 from app.core.config import settings
-from app.models.schemas import UploadResponse, JobStatusResponse
+from app.models.schemas import UploadResponse, JobStatusResponse, UserFileEntry
 from app.api.dependencies import get_current_user
 from app.services.upload import (
     store_file_and_create_job,
     get_job_status,
     create_retry_job,
+    get_user_files,
     JobNotFoundError,
     AccessDeniedError,
     InvalidJobStateError,
@@ -23,6 +25,7 @@ CHUNK_SIZE = 1024 * 1024  # 1MB chunks for size validation
 @router.post("/", response_model=UploadResponse)
 async def upload_file(
     file: UploadFile = File(...),
+    class_id: Optional[str] = Form(None),
     current_user: dict = Depends(get_current_user),
 ):
     # Validate extension
@@ -46,6 +49,7 @@ async def upload_file(
         filename=file.filename,
         content_type=file.content_type or "application/octet-stream",
         uploaded_by=current_user["id"],
+        class_id=class_id,
     )
 
     # Dispatch async Celery task
@@ -98,3 +102,15 @@ async def retry_job_endpoint(
         raise HTTPException(403, str(e))
     except InvalidJobStateError as e:
         raise HTTPException(400, str(e))
+
+
+@router.get("/files", response_model=list[UserFileEntry])
+async def get_user_files_endpoint(
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Retrieve all successfully processed files for the current user.
+    Files must have processing_jobs.status = 'success'.
+    """
+    files = get_user_files(current_user["id"])
+    return files

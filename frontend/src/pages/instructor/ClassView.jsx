@@ -262,22 +262,27 @@ export default function ClassView() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  async function handleFileUploaded(f) {
-    const { data, error } = await supabase.from("uploaded_files").insert({
-      file_id:     f.file_id,
-      filename:    f.filename,
-      uploaded_by: user.id,
-      class_id:    id,
-    }).select().single();
-
-    if (!error && data) {
-      setFiles(prev => [data, ...prev]);
-      setSelectedFileId(data.file_id);
-      setShowInlineUpload(false);
-      setShowAddFile(false);
-      setNoteGenFileId(data.file_id);
-      setNoteGenShowUpload(false);
+  async function handleUpload(file) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${session?.access_token}` },
+      body: form,
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.detail || "Upload failed");
     }
+    const data = await res.json();
+    const fileEntry = { file_id: data.file_id, filename: file.name, uploaded_by: user.id, created_at: new Date().toISOString() };
+    setFiles(prev => [fileEntry, ...prev]);
+    setSelectedFileId(data.file_id);
+    setShowInlineUpload(false);
+    setShowAddFile(false);
+    setNoteGenFileId(data.file_id);
+    setNoteGenShowUpload(false);
   }
 
   async function deleteFile(file) {
@@ -684,14 +689,14 @@ export default function ClassView() {
                   </div>
                   {noteGenShowUpload && (
                     <div className="animate-slide-up">
-                      <Upload onSuccess={handleFileUploaded} />
+                      <Upload onUpload={handleUpload} />
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="space-y-2">
                   <p className="text-xs text-gray-400">No files yet. Upload one to generate grounded notes.</p>
-                  <Upload onSuccess={handleFileUploaded} />
+                  <Upload onUpload={handleUpload} />
                 </div>
               )}
             </div>
@@ -762,14 +767,14 @@ export default function ClassView() {
                 </div>
                 {showInlineUpload && (
                   <div className="animate-slide-up">
-                    <Upload onSuccess={handleFileUploaded} />
+                    <Upload onUpload={handleUpload} />
                   </div>
                 )}
               </div>
             ) : (
               <div className="space-y-2">
                 <p className="text-xs text-gray-400">No files yet. Upload one to generate grounded quizzes.</p>
-                <Upload onSuccess={handleFileUploaded} />
+                <Upload onUpload={handleUpload} />
               </div>
             )}
           </div>
@@ -806,7 +811,7 @@ export default function ClassView() {
 
           {showAddFile && (
             <div className="card p-5 animate-slide-up">
-              <Upload onSuccess={handleFileUploaded} />
+              <Upload onUpload={handleUpload} />
             </div>
           )}
 

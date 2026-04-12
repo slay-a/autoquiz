@@ -21,6 +21,23 @@ export default function Generate() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(null);
 
+  async function handleUpload(file) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${session?.access_token}` },
+      body: form,
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.detail || "Upload failed");
+    }
+    const data = await res.json();
+    setUploadedFile({ ...data, filename: file.name });
+  }
+
   async function generate(params) {
     setLoading(true);
     setError(null);
@@ -137,7 +154,7 @@ export default function Generate() {
           )}
         </div>
         {!uploadedFile
-          ? <Upload onSuccess={(f) => setUploadedFile(f)} />
+          ? <Upload onUpload={handleUpload} />
           : <button onClick={() => setUploadedFile(null)} className="text-xs text-gray-400 hover:text-red-400 transition-colors">Remove file</button>
         }
       </div>

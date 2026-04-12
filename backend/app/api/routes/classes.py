@@ -46,6 +46,42 @@ class ClassDetail(BaseModel):
     members: list[ClassMember]
 
 
+class JoinClassRequest(BaseModel):
+    class_code: str
+
+
+class StudentClassItem(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    class_code: str
+    created_at: str
+
+
+class QuizItem(BaseModel):
+    id: str
+    title: str
+    topic: str
+    difficulty: str
+    questions: list
+    created_at: str
+    className: str
+
+
+class NoteItem(BaseModel):
+    id: str
+    title: str
+    topic: str
+    content: dict
+    created_at: str
+    className: str
+
+
+class StudentContentResponse(BaseModel):
+    quizzes: list[QuizItem]
+    notes: list[NoteItem]
+
+
 # ── Routes ────────────────────────────────────────────────────────
 
 
@@ -193,4 +229,194 @@ def get_class_detail(class_id: str, current_user: dict = Depends(get_current_use
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to fetch class detail: {str(e)}"
+        )
+
+
+@router.post("/join", status_code=200)
+def join_class(
+    req: JoinClassRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Join a class using a class code.
+
+    student_id is extracted from the JWT — never from the request body.
+    Returns 404 if class not found, 409 if already a member.
+    """
+    if not req.class_code or not req.class_code.strip():
+        raise HTTPException(status_code=400, detail="Class code is required")
+
+    supabase = get_supabase()
+
+    try:
+        # Case-insensitive lookup of class by class_code
+        class_result = (
+            supabase.table("classes")
+            .select("id, name")
+            .ilike("class_code", req.class_code.strip())
+            .execute()
+        )
+
+        if not class_result.data or len(class_result.data) == 0:
+            raise HTTPException(status_code=404, detail="Class not found")
+
+        cls = class_result.data[0]
+
+        # Insert into class_members
+        insert_result = (
+            supabase.table("class_members")
+            .insert({
+                "class_id": cls["id"],
+                "student_id": current_user["id"]
+            })
+            .execute()
+        )
+
+        return {
+            "message": "Successfully joined class",
+            "class_id": cls["id"],
+            "class_name": cls["name"]
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Check if it's a duplicate constraint error (Supabase error code 23505)
+        error_str = str(e)
+        if "23505" in error_str or "duplicate" in error_str.lower():
+            raise HTTPException(status_code=409, detail="Already a member of this class")
+        raise HTTPException(status_code=500, detail=f"Failed to join class: {str(e)}")
+
+
+@router.get("/student/classes", response_model=list[StudentClassItem])
+def get_student_classes(current_user: dict = Depends(get_current_user)):
+    """
+    Get list of classes the current student has joined.
+
+    Joins class_members + classes, filtered by student_id = auth.uid().
+    """
+    supabase = get_supabase()
+
+    try:
+        # Fetch class memberships for this student
+        result = (
+            supabase.table("class_members")
+            .select("classes(id, name, description, class_code, created_at)")
+            .eq("student_id", current_user["id"])
+            .execute()
+        )
+
+        memberships = result.data or []
+
+        # Extract classes from nested structure
+        classes = []
+        for m in memberships:
+            cls = m.get("classes")
+            if cls:
+                classes.append(
+                    StudentClassItem(
+                        id=cls["id"],
+                        name=cls["name"],
+                        description=cls.get("description"),
+                        class_code=cls["class_code"],
+                        created_at=cls["created_at"],
+                    )
+                )
+
+        return classes
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch student classes: {str(e)}"
+        )
+
+
+@router.get("/student/content", response_model=StudentContentResponse)
+def get_student_content(current_user: dict = Depends(get_current_user)):
+    """
+    Get quizzes and notes from joined classes.
+
+    Applies is_shared=true filter on saved_quizzes and is_published=true
+    filter on class_notes AT THE QUERY LEVEL. Each item includes the class name.
+    """
+    supabase = get_supabase()
+
+    try:
+        # Fetch class memberships for this student
+        memberships_result = (
+            supabase.table("class_members")
+            .select("class_id, classes(id, name)")
+            .eq("student_id", current_user["id"])
+            .execute()
+        )
+
+        memberships = memberships_result.data or []
+        class_ids = [m["class_id"] for m in memberships if m.get("class_id")]
+
+        if not class_ids:
+            return StudentContentResponse(quizzes=[], notes=[])
+
+        # Build a map of class_id -> class_name
+        class_name_map = {}
+        for m in memberships:
+            cls = m.get("classes")
+            if cls:
+                class_name_map[m["class_id"]] = cls["name"]
+
+        # Fetch shared quizzes from joined classes
+        quizzes_result = (
+            supabase.table("saved_quizzes")
+            .select("id, title, topic, difficulty, questions, created_at, class_id")
+            .in_("class_id", class_ids)
+            .eq("is_shared", True)
+            .order("created_at", desc=True)
+            .execute()
+        )
+
+        quizzes_data = quizzes_result.data or []
+
+        quizzes = []
+        for q in quizzes_data:
+            quizzes.append(
+                QuizItem(
+                    id=q["id"],
+                    title=q["title"],
+                    topic=q["topic"],
+                    difficulty=q["difficulty"],
+                    questions=q["questions"],
+                    created_at=q["created_at"],
+                    className=class_name_map.get(q["class_id"], "Unknown Class"),
+                )
+            )
+
+        # Fetch published notes from joined classes
+        notes_result = (
+            supabase.table("class_notes")
+            .select("id, title, topic, content, created_at, class_id")
+            .in_("class_id", class_ids)
+            .eq("is_published", True)
+            .order("created_at", desc=True)
+            .execute()
+        )
+
+        notes_data = notes_result.data or []
+
+        notes = []
+        for n in notes_data:
+            notes.append(
+                NoteItem(
+                    id=n["id"],
+                    title=n["title"],
+                    topic=n["topic"],
+                    content=n["content"],
+                    created_at=n["created_at"],
+                    className=class_name_map.get(n["class_id"], "Unknown Class"),
+                )
+            )
+
+        return StudentContentResponse(quizzes=quizzes, notes=notes)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch student content: {str(e)}"
         )

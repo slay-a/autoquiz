@@ -24,6 +24,7 @@
 |----|---------|----------|--------|-----------|------------|
 | FEAT-001 | Authentication & Session Management | P0 | ready | `specs/feat-001-auth-session.md` | — |
 | FEAT-002 | Class Management (Instructor) | P0 | ready | `specs/feat-002-class-management.md` | FEAT-001 |
+| FEAT-003 | Class Membership (Student) | P0 | ready | `specs/feat-003-class-membership.md` | FEAT-001 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -31,6 +32,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-003 — Class Membership (Student)
+
+**Stories:** 3.1 Join a class, 3.2 View class content as a student
+**ACs summary:** Join button disabled when input empty; case-insensitive code lookup inserts into `class_members`; error on bad code; no duplicate insert with appropriate message; new class prepends without reload; student dashboard shows only `is_shared = true` quizzes and `is_published = true` notes from joined classes, each labelled with class name, with correct nav targets.
+**Dependencies:** FEAT-001
+**Implementation status:** already in codebase — pipeline run is for validation and test coverage catch-up.
+
+---
 
 ### FEAT-002 — Class Management (Instructor)
 

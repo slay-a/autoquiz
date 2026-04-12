@@ -3,13 +3,16 @@ import { UploadCloud, FileText, X } from "lucide-react";
 
 const ALLOWED = [".pdf", ".docx", ".pptx"];
 
-export default function Upload({ onSuccess }) {
+export default function Upload({ onUpload, onSuccess }) {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const [preview, setPreview] = useState(null);
   const inputRef = useRef();
+
+  // Support both prop names for backward compatibility
+  const uploadHandler = onUpload || onSuccess;
 
   function validate(file) {
     const ext = "." + file.name.split(".").pop().toLowerCase();
@@ -27,38 +30,17 @@ export default function Upload({ onSuccess }) {
     setUploading(true);
     setProgress(10);
 
-    const form = new FormData();
-    form.append("file", file);
-
     try {
       // Simulate progress ticks
       const tick = setInterval(() => setProgress((p) => Math.min(p + 15, 85)), 400);
 
-      const res = await fetch("/upload/", { method: "POST", body: form });
+      // Call parent's upload handler
+      await uploadHandler?.(file);
+
       clearInterval(tick);
       setProgress(100);
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || "Upload failed");
-      }
-
-      const data = await res.json();
-      onSuccess?.({ ...data, filename: file.name });
     } catch (e) {
-      // Demo mode — simulate success locally
-      if (e.message === "Failed to fetch" || e.message.includes("fetch")) {
-        await new Promise((r) => setTimeout(r, 800));
-        setProgress(100);
-        onSuccess?.({
-          file_id: crypto.randomUUID(),
-          job_id: crypto.randomUUID(),
-          status: "success",
-          filename: file.name,
-        });
-      } else {
-        setError(e.message);
-      }
+      setError(e.message || "Upload failed");
     } finally {
       setTimeout(() => {
         setUploading(false);

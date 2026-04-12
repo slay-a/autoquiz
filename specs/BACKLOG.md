@@ -25,7 +25,8 @@
 | FEAT-001 | Authentication & Session Management | P0 | ready | `specs/feat-001-auth-session.md` | — |
 | FEAT-002 | Class Management (Instructor) | P0 | ready | `specs/feat-002-class-management.md` | FEAT-001 |
 | FEAT-003 | Class Membership (Student) | P0 | ready | `specs/feat-003-class-membership.md` | FEAT-001 |
-| FEAT-004 | LlamaIndex Ingestion Refactor | P1 | ready | `specs/feat-004-llamaindex-ingestion.md` | FEAT-001 |
+| FEAT-004 | LlamaIndex Ingestion Pipeline | P1 | ready | `specs/feat-004-llamaindex-ingestion.md` | FEAT-001 |
+| FEAT-005 | File Upload & Processing Pipeline | P0 | ready | `specs/feat-005-file-upload.md` | FEAT-004 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -34,17 +35,21 @@
 
 ## Feature Details
 
-### FEAT-004 — LlamaIndex Ingestion Refactor
+### FEAT-005 — File Upload & Processing Pipeline
 
-**Stories:**
-- 4.1 As the system, document parsing uses LlamaIndex readers (PDFReader, DocxReader, PptxReader) so that text extraction quality matches maintained library extractors rather than a custom implementation.
-- 4.2 As the system, chunking uses LlamaIndex `SentenceSplitter` with configured token size and overlap so that chunk boundaries are semantically coherent.
-- 4.3 As the system, LlamaIndex `TextNode` metadata (page label, section title) is mapped to the existing `chunks` table schema so that no database schema changes are required.
+**Stories:** 5.1 Upload a document, 5.2 Track processing status
+**ACs summary:** Upload accepts only `.pdf`/`.docx`/`.pptx`; files > 50MB rejected with HTTP 413; file stored in Supabase Storage at `{file_id}/{filename}`; row inserted into `uploaded_files` and `processing_jobs` with `status='queued'`; client polls `GET /upload/status/{job_id}`; status progresses `queued → in_progress → success|failed`; stage reflects pipeline step; `updated_at` auto-refreshed by DB trigger.
+**Dependencies:** FEAT-004
+**Implementation status:** already in codebase — pipeline run is for validation and test coverage catch-up.
 
-**ACs summary:** `parsers.py` uses LlamaIndex readers and returns `TextNode` list (not raw `(page, text)` tuples); `ingestion.py` calls `SentenceSplitter` with `CHUNK_SIZE_TOKENS` and `CHUNK_OVERLAP_TOKENS` from settings; each `TextNode` is mapped to a `chunks` row with `page_numbers` and `section_title` populated from node metadata; no LlamaIndex vector store or index classes are used; all existing `processing_jobs` stage labels (`extract`, `chunk`) remain valid; all existing tests pass.
+---
 
+### FEAT-004 — LlamaIndex Ingestion Pipeline
+
+**Stories:** 4.1 LlamaIndex-based document parsing, 4.2 SentenceSplitter chunking, 4.3 TextNode → chunks table mapping
+**ACs summary:** `parsers.py` uses LlamaIndex readers; old custom parse functions removed; `ingestion.py` uses `SentenceSplitter` with settings-configured token size/overlap; old `clean_text`/`detect_sections`/`chunk_sections` removed; `ingest_document` returns same dict shape as before; `page_numbers` and `section_title` mapped from node metadata; no LlamaIndex vector store classes used.
 **Dependencies:** FEAT-001
-**Implementation status:** not started — replaces custom parser and chunking logic in `backend/app/utils/parsers.py` and `backend/app/services/ingestion.py`.
+**Implementation status:** already in codebase — pipeline run is for validation and test coverage catch-up.
 
 ---
 

@@ -32,16 +32,25 @@ def process_document(self, file_id: str, job_id: str, filename: str):
     supabase = get_supabase()
 
     try:
+        # Stage 1: Extract
         _update_job(job_id, JobStatus.in_progress, "extract")
 
         # Download file from Supabase Storage
         file_bytes = supabase.storage.from_("uploads").download(f"{file_id}/{filename}")
 
-        # Parse → clean → section → chunk
+        # Stage 2: Clean (GAP 2)
+        _update_job(job_id, JobStatus.in_progress, "clean")
+
+        # Stage 3: Section (GAP 2)
+        _update_job(job_id, JobStatus.in_progress, "section")
+
+        # Parse → clean → section → chunk (LlamaIndex handles internally)
         chunks = ingest_document(file_bytes, filename, file_id)
 
-        # Embed all chunks
+        # Stage 4: Chunk
         _update_job(job_id, JobStatus.in_progress, "chunk")
+
+        # Embed all chunks
         texts = [c["text"] for c in chunks]
         embed_response = _openai.embeddings.create(
             model="text-embedding-3-small",

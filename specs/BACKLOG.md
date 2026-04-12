@@ -25,6 +25,7 @@
 | FEAT-001 | Authentication & Session Management | P0 | ready | `specs/feat-001-auth-session.md` | — |
 | FEAT-002 | Class Management (Instructor) | P0 | ready | `specs/feat-002-class-management.md` | FEAT-001 |
 | FEAT-003 | Class Membership (Student) | P0 | ready | `specs/feat-003-class-membership.md` | FEAT-001 |
+| FEAT-004 | LlamaIndex Ingestion Refactor | P1 | ready | `specs/feat-004-llamaindex-ingestion.md` | FEAT-001 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -32,6 +33,20 @@
 ---
 
 ## Feature Details
+
+### FEAT-004 — LlamaIndex Ingestion Refactor
+
+**Stories:**
+- 4.1 As the system, document parsing uses LlamaIndex readers (PDFReader, DocxReader, PptxReader) so that text extraction quality matches maintained library extractors rather than a custom implementation.
+- 4.2 As the system, chunking uses LlamaIndex `SentenceSplitter` with configured token size and overlap so that chunk boundaries are semantically coherent.
+- 4.3 As the system, LlamaIndex `TextNode` metadata (page label, section title) is mapped to the existing `chunks` table schema so that no database schema changes are required.
+
+**ACs summary:** `parsers.py` uses LlamaIndex readers and returns `TextNode` list (not raw `(page, text)` tuples); `ingestion.py` calls `SentenceSplitter` with `CHUNK_SIZE_TOKENS` and `CHUNK_OVERLAP_TOKENS` from settings; each `TextNode` is mapped to a `chunks` row with `page_numbers` and `section_title` populated from node metadata; no LlamaIndex vector store or index classes are used; all existing `processing_jobs` stage labels (`extract`, `chunk`) remain valid; all existing tests pass.
+
+**Dependencies:** FEAT-001
+**Implementation status:** not started — replaces custom parser and chunking logic in `backend/app/utils/parsers.py` and `backend/app/services/ingestion.py`.
+
+---
 
 ### FEAT-003 — Class Membership (Student)
 

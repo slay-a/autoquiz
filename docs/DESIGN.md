@@ -48,8 +48,8 @@ call lower layers; lower layers never import from upper layers.
 │  Layer 3 — Infrastructure                       │
 │  backend/app/core/   backend/app/utils/         │
 │  Responsibility: External client initialization  │
-│  (Supabase, OpenAI), config loading, file        │
-│  parsers, pure helpers.                         │
+│  (Supabase, OpenAI), config loading, LlamaIndex  │
+│  document readers + splitters, pure helpers.    │
 │  Rules:                                         │
 │  - No business logic                            │
 │  - No route-level concerns                      │
@@ -435,12 +435,14 @@ The pipeline runs in three phases. Each phase maps to a service file.
 ```
 Phase 1 — Ingestion (async, Celery)          backend/app/services/ingestion.py
   File upload → Supabase Storage
-  → parse (PDF/DOCX/PPTX)                    backend/app/utils/parsers.py
-  → clean (remove headers/footers)
-  → detect sections
-  → chunk (target: chunk_size_tokens=400, overlap=60)
+  → parse (PDF/DOCX/PPTX) via LlamaIndex readers   backend/app/utils/parsers.py
+    (PDFReader, DocxReader, PptxReader — preserves page numbers in node metadata)
+  → chunk into TextNodes via LlamaIndex SentenceSplitter
+    (chunk_size=CHUNK_SIZE_TOKENS=400, chunk_overlap=CHUNK_OVERLAP_TOKENS=60)
   → embed (text-embedding-3-small)
-  → store chunks + embeddings in pgvector
+  → map TextNode → chunks row; store in pgvector
+    (TextNode.text → chunks.text; metadata.page_label → chunks.page_numbers;
+     metadata.section_title → chunks.section_title)
 
 Phase 2 — Retrieval (sync, per-request)      backend/app/services/retrieval.py
   embed query → vector search (match_chunks RPC, top_k=10)
@@ -465,6 +467,10 @@ Phase 3 — Generation (sync, per-request)     backend/app/services/quiz_gen.py
    route handler synchronously — it blocks the event loop.
 5. **Retrieval is sync** and fast enough for a request/response cycle. Do not move it
    to Celery unless profiling shows a problem.
+6. **LlamaIndex owns parsing and chunking only.** Use LlamaIndex readers and
+   `SentenceSplitter` to produce `TextNode` objects. Do not use LlamaIndex's
+   `VectorStoreIndex` or `SupabaseVectorStore` — write nodes to the existing `chunks`
+   table directly. This keeps the storage layer fully under our schema control.
 
 ---
 

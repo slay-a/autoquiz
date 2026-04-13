@@ -389,3 +389,541 @@ describe('Generate Page — Story 5.4 (Student File Re-Access)', () => {
     });
   });
 });
+
+/**
+ * Tests for Generate.jsx — FEAT-006 Quiz Generation
+ *
+ * Tests cover:
+ * - Story 6.1: Generate a quiz from uploaded material
+ * - Story 6.2: Select difficulty level
+ * - Story 6.3: Generate a quiz using general knowledge
+ */
+describe('Generate Page — FEAT-006 Quiz Generation', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+
+    mockUseAuth.mockReturnValue({
+      user: mockUser,
+      loading: false,
+    });
+
+    mockGetSession.mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'test-token',
+        },
+      },
+    });
+
+    mockFrom.mockReturnValue({
+      insert: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: { id: 'quiz-123' }, error: null }),
+        }),
+      }),
+      delete: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+          }),
+        }),
+      }),
+    });
+  });
+
+  describe('AC-6.1.1: Topic field validation', () => {
+    it('blocks submission when topic field is empty', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalled();
+      });
+
+      const generateButton = screen.getByRole('button', { name: /Generat/i });
+
+      // Topic is empty by default, button should be disabled or generate should not fire
+      expect(generateButton).toBeDisabled();
+    });
+
+    it('enables submission when topic field has text', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalled();
+      });
+
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Machine Learning' } });
+
+      const generateButton = screen.getByRole('button', { name: /Generat/i });
+      expect(generateButton).not.toBeDisabled();
+    });
+  });
+
+  describe('AC-6.2.1 & AC-6.2.2: Difficulty selector', () => {
+    it('sends correct difficulty value in request', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Machine Learning',
+          difficulty: 'hard',
+          num_questions: 5,
+          questions: [
+            {
+              question_id: 'q1',
+              type: 'mcq',
+              question: 'What is supervised learning?',
+              options: [
+                { label: 'A', text: 'Learning with labeled data' },
+                { label: 'B', text: 'Learning without supervision' },
+              ],
+              answer: 'A',
+              explanation: 'Supervised learning uses labeled data.',
+              source_chunk_ids: [],
+              page_numbers: [],
+            },
+          ],
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Machine Learning' } });
+
+      // Select difficulty (click the "hard" button)
+      const hardButton = screen.getByRole('button', { name: /^hard$/i });
+      fireEvent.click(hardButton);
+
+      // Generate quiz
+      const generateButton = screen.getByRole('button', { name: /Generate/i });
+      fireEvent.click(generateButton);
+
+      await waitFor(() => {
+        const quizGenerationCall = global.fetch.mock.calls.find(
+          (call) => call[0] === 'http://localhost:8000/quiz/generate'
+        );
+        expect(quizGenerationCall).toBeTruthy();
+        const requestBody = JSON.parse(quizGenerationCall[1].body);
+        expect(requestBody.difficulty).toBe('hard');
+      });
+    });
+
+    it('defaults to medium difficulty when not explicitly selected', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Machine Learning',
+          difficulty: 'medium',
+          num_questions: 5,
+          questions: [],
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Machine Learning' } });
+
+      // Generate without changing difficulty
+      const generateButton = screen.getByRole('button', { name: /Generate/i });
+      fireEvent.click(generateButton);
+
+      await waitFor(() => {
+        const quizGenerationCall = global.fetch.mock.calls.find(
+          (call) => call[0] === 'http://localhost:8000/quiz/generate'
+        );
+        expect(quizGenerationCall).toBeTruthy();
+        const requestBody = JSON.parse(quizGenerationCall[1].body);
+        expect(requestBody.difficulty).toBe('medium');
+      });
+    });
+  });
+
+  describe('AC-6.3.1: Outside sources toggle', () => {
+    it('sends outside_sources=true when toggle is enabled', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Quantum Physics',
+          difficulty: 'medium',
+          num_questions: 5,
+          questions: [],
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Quantum Physics' } });
+
+      // Enable outside sources (click the container div)
+      const outsideSourcesText = screen.getByText(/Include outside sources/i);
+      fireEvent.click(outsideSourcesText);
+
+      // Generate quiz
+      const generateButton = screen.getByRole('button', { name: /Generate/i });
+      fireEvent.click(generateButton);
+
+      await waitFor(() => {
+        const quizGenerationCall = global.fetch.mock.calls.find(
+          (call) => call[0] === 'http://localhost:8000/quiz/generate'
+        );
+        expect(quizGenerationCall).toBeTruthy();
+        const requestBody = JSON.parse(quizGenerationCall[1].body);
+        expect(requestBody.outside_sources).toBe(true);
+      });
+    });
+
+    it('sends outside_sources=false by default', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Quantum Physics',
+          difficulty: 'medium',
+          num_questions: 5,
+          questions: [],
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Quantum Physics' } });
+
+      // Generate without enabling outside sources
+      const generateButton = screen.getByRole('button', { name: /Generate/i });
+      fireEvent.click(generateButton);
+
+      await waitFor(() => {
+        const quizGenerationCall = global.fetch.mock.calls.find(
+          (call) => call[0] === 'http://localhost:8000/quiz/generate'
+        );
+        expect(quizGenerationCall).toBeTruthy();
+        const requestBody = JSON.parse(quizGenerationCall[1].body);
+        expect(requestBody.outside_sources).toBe(false);
+      });
+    });
+  });
+
+  describe('AC-6.1.4: Quiz response rendering', () => {
+    it('renders MCQ questions with options correctly', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Machine Learning',
+          difficulty: 'medium',
+          num_questions: 1,
+          questions: [
+            {
+              question_id: 'q1',
+              type: 'mcq',
+              question: 'What is supervised learning?',
+              options: [
+                { label: 'A', text: 'Learning with labeled data' },
+                { label: 'B', text: 'Learning without labels' },
+                { label: 'C', text: 'Reinforcement learning' },
+                { label: 'D', text: 'Transfer learning' },
+              ],
+              answer: 'A',
+              explanation: 'Supervised learning uses labeled data.',
+              source_chunk_ids: ['chunk-1'],
+              page_numbers: [1, 2],
+            },
+          ],
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic and generate
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Machine Learning' } });
+
+      const generateButton = screen.getByRole('button', { name: /Generat/i });
+      fireEvent.click(generateButton);
+
+      // Wait for quiz to render
+      await waitFor(() => {
+        expect(screen.getByText('What is supervised learning?')).toBeInTheDocument();
+      });
+
+      // Verify all options are rendered
+      expect(screen.getByText(/Learning with labeled data/i)).toBeInTheDocument();
+      expect(screen.getByText(/Learning without labels/i)).toBeInTheDocument();
+      expect(screen.getByText(/Reinforcement learning/i)).toBeInTheDocument();
+      expect(screen.getByText(/Transfer learning/i)).toBeInTheDocument();
+    });
+
+    it('renders true/false questions correctly', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Machine Learning',
+          difficulty: 'medium',
+          num_questions: 1,
+          questions: [
+            {
+              question_id: 'q1',
+              type: 'true_false',
+              question: 'Neural networks require labeled data.',
+              answer: 'False',
+              explanation: 'Unsupervised learning does not require labeled data.',
+              source_chunk_ids: [],
+              page_numbers: [],
+            },
+          ],
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic and generate
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Machine Learning' } });
+
+      const generateButton = screen.getByRole('button', { name: /Generat/i });
+      fireEvent.click(generateButton);
+
+      // Wait for quiz to render
+      await waitFor(() => {
+        expect(screen.getByText('Neural networks require labeled data.')).toBeInTheDocument();
+      });
+    });
+
+    it('renders short answer questions correctly', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Machine Learning',
+          difficulty: 'medium',
+          num_questions: 1,
+          questions: [
+            {
+              question_id: 'q1',
+              type: 'short_answer',
+              question: 'What is the purpose of backpropagation?',
+              answer: 'To update weights in a neural network by computing gradients.',
+              explanation: 'Backpropagation is used for training neural networks.',
+              source_chunk_ids: [],
+              page_numbers: [],
+            },
+          ],
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic and generate
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Machine Learning' } });
+
+      const generateButton = screen.getByRole('button', { name: /Generat/i });
+      fireEvent.click(generateButton);
+
+      // Wait for quiz to render
+      await waitFor(() => {
+        expect(screen.getByText('What is the purpose of backpropagation?')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('AC-6.1.5: Number of questions parameter', () => {
+    it('sends num_questions parameter in request', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Machine Learning',
+          difficulty: 'medium',
+          num_questions: 10,
+          questions: [],
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Machine Learning' } });
+
+      // Increase number of questions by clicking the + button 5 times (from default 5 to 10)
+      const plusButton = screen.getAllByRole('button').find(btn =>
+        btn.querySelector('.lucide-plus')
+      );
+      for (let i = 0; i < 5; i++) {
+        fireEvent.click(plusButton);
+      }
+
+      // Generate quiz
+      const generateButton = screen.getByRole('button', { name: /Generate/i });
+      fireEvent.click(generateButton);
+
+      await waitFor(() => {
+        const quizGenerationCall = global.fetch.mock.calls.find(
+          (call) => call[0] === 'http://localhost:8000/quiz/generate'
+        );
+        expect(quizGenerationCall).toBeTruthy();
+        const requestBody = JSON.parse(quizGenerationCall[1].body);
+        expect(requestBody.num_questions).toBe(10);
+      });
+    });
+  });
+
+  describe('Error handling for quiz generation', () => {
+    it('displays error when generation fails with 404', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ detail: 'Could not find content for this topic in the uploaded file.' }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic and generate
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Nonexistent Topic' } });
+
+      const generateButton = screen.getByRole('button', { name: /Generat/i });
+      fireEvent.click(generateButton);
+
+      // Wait for error to display
+      await waitFor(() => {
+        expect(screen.getByText(/Could not find content/i)).toBeInTheDocument();
+      });
+    });
+
+    it('displays error when generation fails with 400', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({ detail: 'Invalid request parameters' }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Fill in topic with valid text
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Test Topic' } });
+
+      // Generate quiz - server will return 400 for some reason
+      const generateButton = screen.getByRole('button', { name: /Generate/i });
+      fireEvent.click(generateButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Invalid request parameters/i)).toBeInTheDocument();
+      });
+    });
+  });
+});

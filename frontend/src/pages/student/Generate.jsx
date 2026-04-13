@@ -78,9 +78,13 @@ export default function Generate() {
     setLastParams(params);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${import.meta.env.VITE_API_URL}/quiz/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`
+        },
         body: JSON.stringify({
           topic: params.topic,
           num_questions: params.numQuestions,

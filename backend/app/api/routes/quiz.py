@@ -1,33 +1,41 @@
 """E3 — Quiz generation endpoint."""
 
 import uuid
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Optional
-from app.models.schemas import QuizResponse
+from fastapi import APIRouter, HTTPException, Depends
+from app.models.schemas import QuizResponse, QuizRequest
 from app.services.retrieval import hybrid_search
 from app.services.quiz_gen import generate_quiz
+from app.api.dependencies import get_current_user
+from app.core.supabase import get_supabase
 
 router = APIRouter(prefix="/quiz", tags=["quiz"])
 
 
-class QuizRequest(BaseModel):
-    topic: str
-    file_id: Optional[str] = None
-    num_questions: int = 5
-    difficulty: str = "medium"
-    question_types: list[str] = ["mcq", "true_false", "short_answer"]
-    outside_sources: bool = False
-
-
 @router.post("/generate", response_model=QuizResponse)
-async def generate_quiz_endpoint(request: QuizRequest):
+async def generate_quiz_endpoint(
+    request: QuizRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    # Role check: only students can generate quizzes
+    if current_user.get("role") == "instructor":
+        raise HTTPException(403, "Instructors cannot generate quizzes")
+
     if not request.topic.strip():
         raise HTTPException(400, "Topic cannot be empty")
 
     # Retrieve relevant chunks if a file is provided
     chunks = []
     if request.file_id:
+        # Validate file_id ownership
+        supabase = get_supabase()
+        file_row = supabase.table("uploaded_files").select("uploaded_by").eq("file_id", request.file_id).execute()
+
+        if not file_row.data:
+            raise HTTPException(404, "File not found")
+
+        if file_row.data[0]["uploaded_by"] != current_user["id"]:
+            raise HTTPException(403, "You do not have access to this file")
+
         chunks = hybrid_search(
             topic=request.topic,
             file_id=request.file_id,
@@ -49,5 +57,6 @@ async def generate_quiz_endpoint(request: QuizRequest):
         quiz_id=str(uuid.uuid4()),
         topic=request.topic,
         difficulty=request.difficulty,
+        num_questions=request.num_questions,
         questions=questions,
     )

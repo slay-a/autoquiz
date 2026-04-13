@@ -27,6 +27,7 @@
 | FEAT-003 | Class Membership (Student) | P0 | ready | `specs/feat-003-class-membership.md` | FEAT-001 |
 | FEAT-004 | LlamaIndex Ingestion Pipeline | P1 | ready | `specs/feat-004-llamaindex-ingestion.md` | FEAT-001 |
 | FEAT-005 | File Upload & Processing Pipeline | P0 | ready | `specs/feat-005-file-upload.md` | FEAT-004 |
+| FEAT-006 | Quiz Generation | P0 | ready | `specs/feat-006-quiz-generation.md` | FEAT-005 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -34,6 +35,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-006 — Quiz Generation
+
+**Stories:** 6.1 Generate a quiz from uploaded material, 6.2 Select difficulty level, 6.3 Generate using general knowledge
+**ACs summary:** Empty topic returns HTTP 400; `file_id` triggers hybrid search top-12 chunks; no chunks + `outside_sources=false` returns HTTP 404; response contains `questions` array with required fields per type; `num_questions` honoured (default 5); difficulty accepts only easy/medium/hard (422 otherwise), defaults to medium, reflected in LLM prompt and response body; `outside_sources=true` skips retrieval or blends chunks with general knowledge; `[Outside Source]` prepended to explanations from outside the document.
+**Dependencies:** FEAT-005
+**Implementation status:** already in codebase — pipeline run is for validation and test coverage catch-up.
+
+---
 
 ### FEAT-005 — File Upload & Processing Pipeline
 

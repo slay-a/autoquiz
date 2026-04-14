@@ -28,6 +28,7 @@
 | FEAT-004 | LlamaIndex Ingestion Pipeline | P1 | ready | `specs/feat-004-llamaindex-ingestion.md` | FEAT-001 |
 | FEAT-005 | File Upload & Processing Pipeline | P0 | ready | `specs/feat-005-file-upload.md` | FEAT-004 |
 | FEAT-006 | Quiz Generation | P0 | ready | `specs/feat-006-quiz-generation.md` | FEAT-005 |
+| FEAT-007 | Quiz Study & Saving | P0 | ready | `specs/feat-007-quiz-study-saving.md` | FEAT-006 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -35,6 +36,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-007 — Quiz Study & Saving
+
+**Stories:** 7.1 Study a quiz, 7.2 Save a generated quiz, 7.3 Regenerate a quiz
+**ACs summary:** `/quiz/:id` loads from `saved_quizzes` or shows error; MCQ renders A/B/C/D options; answer locks after submit with correct answer and explanation revealed; true/false shows exactly two options; short answer reveals model answer; Save button inserts row with `is_shared=false` and title `{topic} — {difficulty}`, replaced by confirmation indicator after save; saved quiz appears on dashboard; Regenerate replays generation with original params, saves as new row with `(v2)` suffix, navigates to new URL.
+**Dependencies:** FEAT-006
+**Implementation status:** already in codebase — pipeline run is for validation and test coverage catch-up.
+
+---
 
 ### FEAT-006 — Quiz Generation
 

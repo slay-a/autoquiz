@@ -927,3 +927,287 @@ describe('Generate Page — FEAT-006 Quiz Generation', () => {
     });
   });
 });
+
+/**
+ * Tests for Generate.jsx — FEAT-007 Story 7.2 (Save a generated quiz)
+ *
+ * Tests cover:
+ * - AC-7.2.2: Title format is {topic} — {difficulty} with em dash
+ * - AC-7.2.3: Save button replaced by confirmation indicator after save
+ */
+describe('Generate Page — FEAT-007 Story 7.2 (Save a Quiz)', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+
+    mockUseAuth.mockReturnValue({
+      user: mockUser,
+      loading: false,
+    });
+
+    mockGetSession.mockResolvedValue({
+      data: {
+        session: {
+          access_token: 'test-token',
+        },
+      },
+    });
+  });
+
+  describe('AC-7.2.2: Title format uses em dash', () => {
+    it('constructs quiz title with em dash when saving', async () => {
+      // Mock initial file fetch
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      // Mock quiz generation
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Biology',
+          difficulty: 'medium',
+          num_questions: 3,
+          questions: [
+            {
+              question_id: 'q1',
+              type: 'mcq',
+              question: 'What is photosynthesis?',
+              options: [
+                { label: 'A', text: 'Energy production' },
+                { label: 'B', text: 'Cell division' },
+              ],
+              answer: 'A',
+              explanation: 'Photosynthesis converts light to energy.',
+            },
+          ],
+        }),
+      });
+
+      // Mock supabase insert
+      const mockInsert = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { id: 'saved-quiz-123' },
+            error: null,
+          }),
+        }),
+      });
+
+      mockFrom.mockReturnValue({
+        insert: mockInsert,
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Generate quiz
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Biology' } });
+
+      const generateButton = screen.getByRole('button', { name: /Generate/i });
+      fireEvent.click(generateButton);
+
+      // Wait for quiz to render
+      await waitFor(() => {
+        expect(screen.getByText(/What is photosynthesis?/i)).toBeInTheDocument();
+      });
+
+      // Click Save Quiz button
+      const saveButton = screen.getByRole('button', { name: /Save Quiz/i });
+      fireEvent.click(saveButton);
+
+      // Assert insert was called with em dash in title
+      await waitFor(() => {
+        expect(mockInsert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Biology — medium',
+          })
+        );
+      });
+    });
+  });
+
+  describe('AC-7.2.3: Save button replaced by confirmation indicator', () => {
+    it('shows "Saved" confirmation badge after successful save', async () => {
+      // Mock initial file fetch
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      // Mock quiz generation
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Biology',
+          difficulty: 'medium',
+          num_questions: 3,
+          questions: [
+            {
+              question_id: 'q1',
+              type: 'mcq',
+              question: 'What is photosynthesis?',
+              options: [
+                { label: 'A', text: 'Energy production' },
+                { label: 'B', text: 'Cell division' },
+              ],
+              answer: 'A',
+              explanation: 'Photosynthesis converts light to energy.',
+            },
+          ],
+        }),
+      });
+
+      // Mock supabase insert
+      const mockInsert = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { id: 'saved-quiz-123' },
+            error: null,
+          }),
+        }),
+      });
+
+      mockFrom.mockReturnValue({
+        insert: mockInsert,
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Generate quiz
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Biology' } });
+
+      const generateButton = screen.getByRole('button', { name: /Generate/i });
+      fireEvent.click(generateButton);
+
+      // Wait for quiz to render
+      await waitFor(() => {
+        expect(screen.getByText(/What is photosynthesis?/i)).toBeInTheDocument();
+      });
+
+      // Assert Save Quiz button is present
+      expect(screen.getByRole('button', { name: /Save Quiz/i })).toBeInTheDocument();
+
+      // Click Save Quiz button
+      const saveButton = screen.getByRole('button', { name: /Save Quiz/i });
+      fireEvent.click(saveButton);
+
+      // Assert Save button is replaced by Saved badge
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: /Save Quiz/i })).not.toBeInTheDocument();
+        expect(screen.getByText(/Saved/i)).toBeInTheDocument();
+      });
+    });
+
+    it('does not allow saving the same quiz twice', async () => {
+      // Mock initial file fetch
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [],
+      });
+
+      // Mock quiz generation
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          quiz_id: 'quiz-123',
+          topic: 'Biology',
+          difficulty: 'medium',
+          num_questions: 3,
+          questions: [
+            {
+              question_id: 'q1',
+              type: 'mcq',
+              question: 'What is photosynthesis?',
+              options: [
+                { label: 'A', text: 'Energy production' },
+                { label: 'B', text: 'Cell division' },
+              ],
+              answer: 'A',
+              explanation: 'Photosynthesis converts light to energy.',
+            },
+          ],
+        }),
+      });
+
+      // Mock supabase insert
+      const mockInsert = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { id: 'saved-quiz-123' },
+            error: null,
+          }),
+        }),
+      });
+
+      mockFrom.mockReturnValue({
+        insert: mockInsert,
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
+        }),
+      });
+
+      renderGenerate();
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      });
+
+      // Generate quiz
+      const topicInput = screen.getByPlaceholderText(/Software Requirements/i);
+      fireEvent.change(topicInput, { target: { value: 'Biology' } });
+
+      const generateButton = screen.getByRole('button', { name: /Generate/i });
+      fireEvent.click(generateButton);
+
+      // Wait for quiz to render
+      await waitFor(() => {
+        expect(screen.getByText(/What is photosynthesis?/i)).toBeInTheDocument();
+      });
+
+      // Click Save Quiz button
+      const saveButton = screen.getByRole('button', { name: /Save Quiz/i });
+      fireEvent.click(saveButton);
+
+      // Wait for saved confirmation
+      await waitFor(() => {
+        expect(screen.getByText(/Saved/i)).toBeInTheDocument();
+      });
+
+      // Assert insert was called exactly once
+      expect(mockInsert).toHaveBeenCalledTimes(1);
+
+      // Assert Save button is no longer clickable (it's been replaced by a badge)
+      expect(screen.queryByRole('button', { name: /Save Quiz/i })).not.toBeInTheDocument();
+    });
+  });
+});

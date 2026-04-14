@@ -215,3 +215,26 @@ end $$;
 
 -- ─── 11. Storage bucket (run once) ───────────────────────────
 -- Dashboard → Storage → New Bucket → name: "uploads" → private
+
+-- ─── 12. Migration: FEAT-007 — Harden saved_quizzes RLS ──────
+-- Replace permissive policy with ownership/sharing access control
+drop policy if exists auth_all on saved_quizzes;
+
+-- SELECT: users can read quizzes they created OR that are shared
+create policy saved_quizzes_select on saved_quizzes
+  for select to authenticated
+  using (created_by = auth.uid() OR is_shared = true);
+
+-- INSERT/UPDATE/DELETE: only quiz owner
+create policy saved_quizzes_insert on saved_quizzes
+  for insert to authenticated
+  with check (created_by = auth.uid());
+
+create policy saved_quizzes_update on saved_quizzes
+  for update to authenticated
+  using (created_by = auth.uid())
+  with check (created_by = auth.uid());
+
+create policy saved_quizzes_delete on saved_quizzes
+  for delete to authenticated
+  using (created_by = auth.uid());

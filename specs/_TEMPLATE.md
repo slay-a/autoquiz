@@ -144,6 +144,7 @@
 - **Integration vs. unit boundary:** <!-- e.g., route handler = integration test; prompt builder = unit test -->
 - **Frontend test targets:** <!-- e.g., Generate.jsx renders selector; payload includes difficulty field -->
 - **Explicitly out of test scope:** <!-- e.g., live OpenAI call, live Supabase writes -->
+- **Test quality standard:** Every test must assert a real, observable behaviour derived from an AC. Trivial assertions (`assert True`, `assert 1 == 1`, empty test bodies, pass-only stubs) are never acceptable — if a behaviour cannot be tested in the current environment, skip it explicitly with a comment explaining why rather than writing a vacuous assertion.
 
 ---
 

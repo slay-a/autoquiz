@@ -29,6 +29,7 @@
 | FEAT-005 | File Upload & Processing Pipeline | P0 | ready | `specs/feat-005-file-upload.md` | FEAT-004 |
 | FEAT-006 | Quiz Generation | P0 | ready | `specs/feat-006-quiz-generation.md` | FEAT-005 |
 | FEAT-007 | Quiz Study & Saving | P0 | ready | `specs/feat-007-quiz-study-saving.md` | FEAT-006 |
+| FEAT-008 | Quiz Sharing (Instructor) | P0 | ready | `specs/feat-008-quiz-sharing.md` | FEAT-007 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -36,6 +37,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-008 — Quiz Sharing (Instructor)
+
+**Stories:** 8.1 Share a quiz with a class, 8.2 Generate and share a quiz from the class view, 8.3 Delete a shared quiz
+**ACs summary:** Class detail page lists all class quizzes each with a share toggle; toggling sets `is_shared` true/false; only `is_shared = true` quizzes appear on student dashboards for enrolled classes; toggle reflects DB state on load; generation from class view saves with `class_id` and `is_shared = false`; `created_by` always from JWT; newly generated quiz appears without reload; delete removes quiz from list and student views.
+**Dependencies:** FEAT-007
+**Implementation status:** already in codebase — pipeline run is for validation and test coverage catch-up.
+
+---
 
 ### FEAT-007 — Quiz Study & Saving
 

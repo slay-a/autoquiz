@@ -313,10 +313,14 @@ export default function ClassView() {
     setGeneratedQuiz(null);
     setGenError(null);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const fileId = selectedFileId && selectedFileId !== "__new__" ? selectedFileId : null;
       const res = await fetch(`${import.meta.env.VITE_API_URL}/quiz/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`
+        },
         body: JSON.stringify({
           topic:           params.topic,
           num_questions:   params.numQuestions,
@@ -370,10 +374,14 @@ export default function ClassView() {
     setGeneratingNotes(true);
     setNotesGenError(null);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const fileId = noteGenFileId && noteGenFileId !== "__new__" ? noteGenFileId : null;
       const res = await fetch(`${import.meta.env.VITE_API_URL}/notes/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`
+        },
         body: JSON.stringify({
           topic:           noteGenTopic,
           file_id:         fileId,

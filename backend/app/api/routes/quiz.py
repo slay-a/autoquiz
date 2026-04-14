@@ -16,10 +16,6 @@ async def generate_quiz_endpoint(
     request: QuizRequest,
     current_user: dict = Depends(get_current_user),
 ):
-    # Role check: only students can generate quizzes
-    if current_user.get("role") == "instructor":
-        raise HTTPException(403, "Instructors cannot generate quizzes")
-
     if not request.topic.strip():
         raise HTTPException(400, "Topic cannot be empty")
 

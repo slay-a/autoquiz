@@ -15,6 +15,7 @@ export default function StudentDashboard() {
   const [flashcardSets, setFlashcardSets] = useState([]);
   const [classes, setClasses]       = useState([]);
   const [classNotes, setClassNotes] = useState([]);
+  const [myNotes, setMyNotes]       = useState([]);
   const [loading, setLoading]       = useState(true);
   const [joinCode, setJoinCode]     = useState("");
   const [joining, setJoining]       = useState(false);
@@ -51,11 +52,13 @@ export default function StudentDashboard() {
         { data: fsets },
         classesRes,
         contentRes,
+        myNotesRes,
       ] = await Promise.all([
         supabase.from("saved_quizzes").select("*").eq("created_by", user.id).order("created_at", { ascending: false }),
         supabase.from("flashcard_sets").select("*").eq("created_by", user.id).order("created_at", { ascending: false }),
         fetch("http://localhost:8000/classes/student/classes", { headers }),
         fetch("http://localhost:8000/classes/student/content", { headers }),
+        fetch("http://localhost:8000/notes/my", { headers }),
       ]);
 
       setMyQuizzes(myQ ?? []);
@@ -79,6 +82,15 @@ export default function StudentDashboard() {
         console.error("Failed to fetch content:", await contentRes.text());
         setClassQuizzes([]);
         setClassNotes([]);
+      }
+
+      // Handle my notes response
+      if (myNotesRes.ok) {
+        const notesData = await myNotesRes.json();
+        setMyNotes(notesData ?? []);
+      } else {
+        console.error("Failed to fetch my notes:", await myNotesRes.text());
+        setMyNotes([]);
       }
     } finally {
       setLoading(false);
@@ -134,6 +146,7 @@ export default function StudentDashboard() {
     { key: "quizzes",    label: "My Quizzes",    count: myQuizzes.length },
     { key: "class",      label: "Class Quizzes",  count: classQuizzes.length },
     { key: "notes",      label: "Class Notes",    count: classNotes.length },
+    { key: "mynotes",    label: "My Notes",       count: myNotes.length },
     { key: "flashcards", label: "Flashcards",     count: flashcardSets.length },
     { key: "classes",    label: "My Classes",     count: classes.length },
   ];
@@ -197,6 +210,7 @@ export default function StudentDashboard() {
           {tab === "quizzes"    && <QuizList quizzes={myQuizzes} emptyMsg="You haven't generated any quizzes yet." />}
           {tab === "class"      && <QuizList quizzes={classQuizzes} emptyMsg="No quizzes shared by instructors yet." showClass />}
           {tab === "notes"      && <NotesList notes={classNotes} />}
+          {tab === "mynotes"    && <MyNotesList notes={myNotes} />}
           {tab === "flashcards" && <FlashcardList sets={flashcardSets} />}
           {tab === "classes"    && <ClassList classes={classes} />}
         </>
@@ -303,6 +317,33 @@ function ClassList({ classes }) {
           <p className="text-xs text-gray-400">
             {c.description || "No description"}
           </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MyNotesList({ notes }) {
+  if (!notes.length) return (
+    <div className="card p-10 text-center text-gray-400 space-y-2">
+      <FileText className="w-8 h-8 mx-auto opacity-40" />
+      <p className="text-sm">No saved notes yet.</p>
+    </div>
+  );
+  return (
+    <div className="space-y-3">
+      {notes.map((note) => (
+        <div key={note.id} className="card p-4 flex items-center gap-4 hover:border-violet-200 transition-all">
+          <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
+            <FileText className="w-5 h-5 text-violet-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-gray-800 truncate">{note.title}</p>
+            <p className="text-xs text-gray-400">
+              {new Date(note.created_at).toLocaleDateString()}
+            </p>
+          </div>
+          <Link to={`/notes/${note.id}`} className="btn-primary text-xs py-1.5">View</Link>
         </div>
       ))}
     </div>

@@ -93,3 +93,18 @@ class QuizResponse(BaseModel):
     difficulty: str
     num_questions: int
     questions: list[QuizQuestion]
+
+
+# ── Notes ────────────────────────────────────────────────────────────────────
+
+class NotesSaveRequest(BaseModel):
+    topic: str
+    file_id: Optional[str] = None
+    content: dict
+
+
+class NotesSaveResponse(BaseModel):
+    id: str
+    title: str
+    topic: str
+    created_at: str

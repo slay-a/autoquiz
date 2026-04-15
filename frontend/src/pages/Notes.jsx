@@ -26,9 +26,14 @@ export default function Notes() {
     setNotes(null);
     setSaved(false);
     try {
+      const session = await supabase.auth.getSession();
+      const token = session?.data?.session?.access_token;
       const res = await fetch(`${import.meta.env.VITE_API_URL}/notes/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify({ topic: topic.trim(), file_id: fileId || null, outside_sources: !fileId }),
       });
       if (!res.ok) throw new Error("Failed to generate notes");
@@ -37,6 +42,30 @@ export default function Notes() {
       setError(e.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function saveNotes() {
+    if (!notes) return;
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session?.data?.session?.access_token;
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/notes/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          topic: topic.trim(),
+          file_id: fileId || null,
+          content: notes,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save notes");
+      setSaved(true);
+    } catch (e) {
+      console.error("Error saving notes:", e.message);
     }
   }
 
@@ -72,12 +101,12 @@ export default function Notes() {
         <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-2xl px-5 py-4">{error}</div>
       )}
 
-      {notes && <NotesView notes={notes} />}
+      {notes && <NotesView notes={notes} saved={saved} onSave={saveNotes} />}
     </div>
   );
 }
 
-function NotesView({ notes }) {
+function NotesView({ notes, saved, onSave }) {
   const scope = notes.scope ?? {};
 
   return (
@@ -201,6 +230,20 @@ function NotesView({ notes }) {
         <p className="text-xs text-gray-400 text-center">
           Generated from pages {notes.source_pages.join(", ")} of your uploaded material
         </p>
+      )}
+
+      {!saved ? (
+        <div className="card p-4 flex items-center justify-center">
+          <button onClick={onSave} className="btn-primary flex items-center gap-2">
+            <Save className="w-4 h-4" />
+            Save Notes
+          </button>
+        </div>
+      ) : (
+        <div className="card p-4 flex items-center justify-center gap-2 bg-emerald-50 border-emerald-200">
+          <Check className="w-4 h-4 text-emerald-600" />
+          <span className="text-sm font-medium text-emerald-700">Saved</span>
+        </div>
       )}
     </div>
   );

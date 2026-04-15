@@ -238,3 +238,20 @@ create policy saved_quizzes_update on saved_quizzes
 create policy saved_quizzes_delete on saved_quizzes
   for delete to authenticated
   using (created_by = auth.uid());
+
+-- ─── Migration: FEAT-009 — Student Notes ─────────────────────
+create table if not exists student_notes (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  topic text not null,
+  file_id text references uploaded_files(file_id) on delete set null,
+  created_by uuid not null references profiles(id) on delete cascade,
+  content jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+alter table student_notes enable row level security;
+
+create policy students_own_notes on student_notes
+  for all using (created_by = auth.uid())
+  with check (created_by = auth.uid());

@@ -30,6 +30,7 @@
 | FEAT-006 | Quiz Generation | P0 | ready | `specs/feat-006-quiz-generation.md` | FEAT-005 |
 | FEAT-007 | Quiz Study & Saving | P0 | ready | `specs/feat-007-quiz-study-saving.md` | FEAT-006 |
 | FEAT-008 | Quiz Sharing (Instructor) | P0 | ready | `specs/feat-008-quiz-sharing.md` | FEAT-007 |
+| FEAT-009 | Notes Generation (Student) | P1 | ready | `specs/feat-009-notes-generation-student.md` | FEAT-006 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -37,6 +38,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-009 — Notes Generation (Student)
+
+**Stories:** 9.1 Generate study notes, 9.2 Save generated notes
+**ACs summary:** Generate button disabled when topic empty; `POST /notes/generate` requires auth (currently missing — MAJOR gap); `file_id` triggers hybrid search top-15 chunks; response contains `summary`, `key_concepts`, `important_details`, `common_misconceptions`; no `file_id` uses general knowledge; Save button appears after generation and inserts into new `student_notes` table with `created_by` from JWT; Save button replaced by confirmation indicator after save; saved notes appear on student dashboard.
+**Dependencies:** FEAT-006
+**Implementation status:** Story 9.1 partially implemented (route exists, auth guard missing); Story 9.2 not implemented (no save route, no `student_notes` table, Save button not rendered).
+
+---
 
 ### FEAT-008 — Quiz Sharing (Instructor)
 

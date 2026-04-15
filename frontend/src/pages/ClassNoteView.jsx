@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { useAuth } from "../contexts/AuthContext";
 import { ChevronLeft, Loader2, BookOpen, Lightbulb, AlertCircle, Target } from "lucide-react";
 
 export default function ClassNoteView() {
   const { id } = useParams();
+  const { profile } = useAuth();
   const [note, setNote]     = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -19,6 +21,11 @@ export default function ClassNoteView() {
     </div>
   );
   if (!note) return <p className="text-gray-500">Note not found.</p>;
+
+  // Security: students cannot view unpublished notes
+  if (profile?.role === 'student' && !note.is_published) {
+    return <p className="text-gray-500">This note is not available.</p>;
+  }
 
   const c = note.content ?? {};
 

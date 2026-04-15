@@ -208,10 +208,32 @@ do $$ begin
   if not exists (select 1 from pg_policies where tablename='chunks' and policyname='auth_all') then
     create policy auth_all on chunks for all to authenticated using (true) with check (true);
   end if;
-  if not exists (select 1 from pg_policies where tablename='class_notes' and policyname='auth_all') then
-    create policy auth_all on class_notes for all to authenticated using (true) with check (true);
-  end if;
 end $$;
+
+-- ─── Migration: FEAT-010 — Harden class_notes RLS ────────────
+-- Replace permissive policy with ownership/publishing access control
+drop policy if exists auth_all on class_notes;
+
+-- SELECT: users can read notes they created OR that are published
+create policy class_notes_select on class_notes
+  for select to authenticated
+  using (created_by = auth.uid() or is_published = true);
+
+-- INSERT: only note owner
+create policy class_notes_insert on class_notes
+  for insert to authenticated
+  with check (created_by = auth.uid());
+
+-- UPDATE: only note owner
+create policy class_notes_update on class_notes
+  for update to authenticated
+  using (created_by = auth.uid())
+  with check (created_by = auth.uid());
+
+-- DELETE: only note owner
+create policy class_notes_delete on class_notes
+  for delete to authenticated
+  using (created_by = auth.uid());
 
 -- ─── 11. Storage bucket (run once) ───────────────────────────
 -- Dashboard → Storage → New Bucket → name: "uploads" → private

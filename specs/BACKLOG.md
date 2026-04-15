@@ -31,6 +31,7 @@
 | FEAT-007 | Quiz Study & Saving | P0 | ready | `specs/feat-007-quiz-study-saving.md` | FEAT-006 |
 | FEAT-008 | Quiz Sharing (Instructor) | P0 | ready | `specs/feat-008-quiz-sharing.md` | FEAT-007 |
 | FEAT-009 | Notes Generation (Student) | P1 | ready | `specs/feat-009-notes-generation-student.md` | FEAT-006 |
+| FEAT-010 | Instructor Notes System | P0 | ready | `specs/feat-010-instructor-notes.md` | FEAT-008 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -38,6 +39,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-010 — Instructor Notes System
+
+**Stories:** 10.1 Create class notes, 10.2 Edit class notes, 10.3 Publish and unpublish class notes
+**ACs summary:** Generate button disabled when topic empty; `POST /notes/generate` (authed) saves to `class_notes` with `is_published = false`, new note prepends without reload; NoteEditor allows inline edit of title, summary, key_concepts (add/edit/remove), important_details, common_misconceptions; Save updates row, Cancel discards; Publish toggle sets `is_published`; unpublished notes never visible to students; student accesses published notes at `/class-note/:id`; toggle reflects DB state on load.
+**Dependencies:** FEAT-008
+**Implementation status:** already in codebase — two MAJOR gaps: `class_notes` RLS is permissive `auth_all`; `ClassNoteView.jsx` has no `is_published` check.
+
+---
 
 ### FEAT-009 — Notes Generation (Student)
 

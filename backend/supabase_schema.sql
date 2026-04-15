@@ -196,9 +196,6 @@ do $$ begin
   if not exists (select 1 from pg_policies where tablename='saved_quizzes' and policyname='auth_all') then
     create policy auth_all on saved_quizzes for all to authenticated using (true) with check (true);
   end if;
-  if not exists (select 1 from pg_policies where tablename='flashcard_sets' and policyname='auth_all') then
-    create policy auth_all on flashcard_sets for all to authenticated using (true) with check (true);
-  end if;
   if not exists (select 1 from pg_policies where tablename='uploaded_files' and policyname='auth_all') then
     create policy auth_all on uploaded_files for all to authenticated using (true) with check (true);
   end if;
@@ -258,6 +255,27 @@ create policy saved_quizzes_update on saved_quizzes
   with check (created_by = auth.uid());
 
 create policy saved_quizzes_delete on saved_quizzes
+  for delete to authenticated
+  using (created_by = auth.uid());
+
+-- ─── Migration: FEAT-011 — Harden flashcard_sets RLS ────────
+-- Replace permissive policy with ownership/sharing access control
+drop policy if exists auth_all on flashcard_sets;
+
+create policy flashcard_sets_select on flashcard_sets
+  for select to authenticated
+  using (created_by = auth.uid() OR is_public = true OR is_shared = true);
+
+create policy flashcard_sets_insert on flashcard_sets
+  for insert to authenticated
+  with check (created_by = auth.uid());
+
+create policy flashcard_sets_update on flashcard_sets
+  for update to authenticated
+  using (created_by = auth.uid())
+  with check (created_by = auth.uid());
+
+create policy flashcard_sets_delete on flashcard_sets
   for delete to authenticated
   using (created_by = auth.uid());
 

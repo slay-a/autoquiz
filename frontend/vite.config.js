@@ -14,8 +14,10 @@ export default defineConfig({
     proxy: {
       "/upload": "http://localhost:8000",
       "/retrieve": "http://localhost:8000",
-      "/quiz": "http://localhost:8000",
-      "/notes": "http://localhost:8000",
+      "/quiz/generate": "http://localhost:8000",
+      "/notes/": "http://localhost:8000",
+      "/classes": "http://localhost:8000",
+      "/health": "http://localhost:8000",
     },
   },
   test: {

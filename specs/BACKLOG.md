@@ -32,6 +32,7 @@
 | FEAT-008 | Quiz Sharing (Instructor) | P0 | ready | `specs/feat-008-quiz-sharing.md` | FEAT-007 |
 | FEAT-009 | Notes Generation (Student) | P1 | ready | `specs/feat-009-notes-generation-student.md` | FEAT-006 |
 | FEAT-010 | Instructor Notes System | P0 | ready | `specs/feat-010-instructor-notes.md` | FEAT-008 |
+| FEAT-011 | Flashcard Study | P1 | ready | `specs/feat-011-flashcard-study.md` | FEAT-007 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -39,6 +40,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-011 — Flashcard Study
+
+**Stories:** 11.1 Study a flashcard set, 11.2 Restart a flashcard session, 11.3 Edit a flashcard set
+**ACs summary:** `/flashcards/:id` loads set, shows not-found on missing ID; front shown by default, click flips to back+explanation; rating buttons (Know/Almost/Nope) appear only after flip, advance to next card; results summary shows per-rating counts; Retry Missed and Restart All always present, Retry Missed falls back to full set when nope=0; restart clears ratings and returns to card 1 front; Edit link visible during study; editor shows front/back/explanation editable; add card requires non-empty front and back; delete card; save updates `cards` jsonb and returns to study page; only owner can save or delete.
+**Dependencies:** FEAT-007
+**Implementation status:** already in codebase — MAJOR gap: `flashcard_sets` RLS is permissive `auth_all`; editor has no ownership check; Retry Missed button hidden when nope=0 (violates AC-11.2.2).
+
+---
 
 ### FEAT-010 — Instructor Notes System
 

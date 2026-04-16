@@ -20,7 +20,7 @@ AI-powered study platform — upload course material, generate quizzes and study
 - Read published class notes
 - Generate personal quizzes from any topic
 - Build flashcard sets from quiz results, edit and study them
-- Upload personal notes/files
+- Upload personal files and generate personal study notes from them
 
 ## Architecture
 
@@ -73,20 +73,29 @@ AI-powered study platform — upload course material, generate quizzes and study
 autoquiz/
 ├── backend/
 │   ├── app/
-│   │   ├── api/routes/
-│   │   │   ├── upload.py        # file upload + Celery job dispatch
-│   │   │   ├── retrieve.py      # hybrid search (keyword + vector)
-│   │   │   ├── quiz.py          # quiz generation (GPT-4o)
-│   │   │   └── notes.py         # study notes generation (GPT-4o)
+│   │   ├── api/
+│   │   │   ├── dependencies.py  # auth + role guards
+│   │   │   └── routes/
+│   │   │       ├── upload.py    # file upload + Celery job dispatch
+│   │   │       ├── retrieve.py  # hybrid search (keyword + vector)
+│   │   │       ├── quiz.py      # quiz generation (GPT-4o)
+│   │   │       ├── notes.py     # study notes generation (GPT-4o)
+│   │   │       └── classes.py   # class + membership management
 │   │   ├── core/
 │   │   │   ├── config.py        # env / settings
 │   │   │   └── supabase.py      # Supabase client singleton
+│   │   ├── models/
+│   │   │   └── schemas.py       # Pydantic request/response models
 │   │   ├── services/
 │   │   │   ├── ingestion.py     # parse → clean → chunk → embed
 │   │   │   ├── retrieval.py     # hybrid_search()
-│   │   │   └── quiz_gen.py      # prompt building + JSON parsing
+│   │   │   ├── quiz_gen.py      # prompt building + JSON parsing
+│   │   │   ├── notes_gen.py     # notes prompt building + parsing
+│   │   │   ├── class_service.py # class business logic
+│   │   │   └── upload.py        # upload orchestration
 │   │   └── utils/
 │   │       └── parsers.py       # PDF / DOCX / PPTX extractors
+│   ├── tests/                   # pytest backend test suite
 │   ├── celery_worker.py         # async ingest job
 │   ├── main.py                  # FastAPI app + CORS
 │   ├── supabase_schema.sql      # full DB schema (run once in Supabase)
@@ -109,6 +118,7 @@ autoquiz/
 │   │   │   ├── Register.jsx
 │   │   │   ├── Notes.jsx         # student personal notes
 │   │   │   ├── QuizStudy.jsx     # quiz study session
+│   │   │   ├── StudentQuiz.jsx   # student-facing shared quiz view
 │   │   │   ├── FlashcardStudy.jsx
 │   │   │   ├── FlashcardEditor.jsx
 │   │   │   ├── ClassNoteView.jsx # read-only class note viewer
@@ -118,11 +128,12 @@ autoquiz/
 │   │   │   └── student/
 │   │   │       ├── Dashboard.jsx # quizzes, class quizzes, notes, flashcards
 │   │   │       └── Generate.jsx  # personal quiz generator
+│   │   ├── __tests__/           # Vitest frontend test suite
 │   │   ├── App.jsx               # routing + navbar
 │   │   └── index.css
 │   ├── vite.config.js
 │   └── tailwind.config.js
-└── docker-compose.yml            # Redis
+└── docker-compose.yml           # Redis
 ```
 
 ## Local Setup
@@ -213,5 +224,6 @@ The schema creates: `profiles`, `classes`, `class_members`, `uploaded_files`, `p
 | `processing_jobs` | Celery job status (queued → done / error) |
 | `chunks` | Text chunks + pgvector embeddings |
 | `saved_quizzes` | Generated quizzes; `is_shared` controls student visibility |
-| `flashcard_sets` | Flashcard sets created from quiz results |
+| `flashcard_sets` | Flashcard sets created from quiz results; `is_shared`/`is_public` control sharing |
 | `class_notes` | Instructor-generated study notes; `is_published` controls student visibility |
+| `student_notes` | Student-generated personal study notes tied to uploaded files |

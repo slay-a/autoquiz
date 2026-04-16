@@ -12,6 +12,12 @@ from app.models.schemas import QuizQuestion, QuizOption
 
 _openai = OpenAI(api_key=settings.openai_api_key)
 
+DIFFICULTY_DESCRIPTORS = {
+    "easy": "straightforward recall and basic comprehension questions",
+    "medium": "questions requiring understanding and application of concepts",
+    "hard": "challenging questions requiring analysis, synthesis, and evaluation",
+}
+
 SYSTEM_PROMPT = """You are an expert quiz creator. Generate quiz questions based on the provided material.
 Always respond with valid JSON only. Do not include any text outside the JSON object."""
 
@@ -54,8 +60,10 @@ def generate_quiz(
 
     system = SYSTEM_PROMPT_OUTSIDE if outside_sources else SYSTEM_PROMPT
 
+    difficulty_descriptor = DIFFICULTY_DESCRIPTORS[difficulty]
+
     user_prompt = f"""Topic: {topic}
-Difficulty: {difficulty}
+Difficulty: {difficulty_descriptor}
 Question types to include: {', '.join(question_types)}
 Number of questions: {num_questions}
 

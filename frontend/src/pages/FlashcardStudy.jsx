@@ -84,11 +84,9 @@ export default function FlashcardStudy() {
           </div>
 
           <div className="flex flex-col gap-2">
-            {nope > 0 && (
-              <button onClick={() => restart(true)} className="btn-primary w-full">
-                Study missed cards ({nope})
-              </button>
-            )}
+            <button onClick={() => restart(true)} className="btn-primary w-full">
+              {nope > 0 ? `Study missed cards (${nope})` : "Retry Missed"}
+            </button>
             <button onClick={() => restart(false)} className="btn-secondary w-full">
               <RotateCcw className="w-4 h-4" /> Restart all
             </button>

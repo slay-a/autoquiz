@@ -196,9 +196,6 @@ do $$ begin
   if not exists (select 1 from pg_policies where tablename='saved_quizzes' and policyname='auth_all') then
     create policy auth_all on saved_quizzes for all to authenticated using (true) with check (true);
   end if;
-  if not exists (select 1 from pg_policies where tablename='flashcard_sets' and policyname='auth_all') then
-    create policy auth_all on flashcard_sets for all to authenticated using (true) with check (true);
-  end if;
   if not exists (select 1 from pg_policies where tablename='uploaded_files' and policyname='auth_all') then
     create policy auth_all on uploaded_files for all to authenticated using (true) with check (true);
   end if;
@@ -208,10 +205,93 @@ do $$ begin
   if not exists (select 1 from pg_policies where tablename='chunks' and policyname='auth_all') then
     create policy auth_all on chunks for all to authenticated using (true) with check (true);
   end if;
-  if not exists (select 1 from pg_policies where tablename='class_notes' and policyname='auth_all') then
-    create policy auth_all on class_notes for all to authenticated using (true) with check (true);
-  end if;
 end $$;
+
+-- ─── Migration: FEAT-010 — Harden class_notes RLS ────────────
+-- Replace permissive policy with ownership/publishing access control
+drop policy if exists auth_all on class_notes;
+
+-- SELECT: users can read notes they created OR that are published
+create policy class_notes_select on class_notes
+  for select to authenticated
+  using (created_by = auth.uid() or is_published = true);
+
+-- INSERT: only note owner
+create policy class_notes_insert on class_notes
+  for insert to authenticated
+  with check (created_by = auth.uid());
+
+-- UPDATE: only note owner
+create policy class_notes_update on class_notes
+  for update to authenticated
+  using (created_by = auth.uid())
+  with check (created_by = auth.uid());
+
+-- DELETE: only note owner
+create policy class_notes_delete on class_notes
+  for delete to authenticated
+  using (created_by = auth.uid());
 
 -- ─── 11. Storage bucket (run once) ───────────────────────────
 -- Dashboard → Storage → New Bucket → name: "uploads" → private
+
+-- ─── 12. Migration: FEAT-007 — Harden saved_quizzes RLS ──────
+-- Replace permissive policy with ownership/sharing access control
+drop policy if exists auth_all on saved_quizzes;
+
+-- SELECT: users can read quizzes they created OR that are shared
+create policy saved_quizzes_select on saved_quizzes
+  for select to authenticated
+  using (created_by = auth.uid() OR is_shared = true);
+
+-- INSERT/UPDATE/DELETE: only quiz owner
+create policy saved_quizzes_insert on saved_quizzes
+  for insert to authenticated
+  with check (created_by = auth.uid());
+
+create policy saved_quizzes_update on saved_quizzes
+  for update to authenticated
+  using (created_by = auth.uid())
+  with check (created_by = auth.uid());
+
+create policy saved_quizzes_delete on saved_quizzes
+  for delete to authenticated
+  using (created_by = auth.uid());
+
+-- ─── Migration: FEAT-011 — Harden flashcard_sets RLS ────────
+-- Replace permissive policy with ownership/sharing access control
+drop policy if exists auth_all on flashcard_sets;
+
+create policy flashcard_sets_select on flashcard_sets
+  for select to authenticated
+  using (created_by = auth.uid() OR is_public = true OR is_shared = true);
+
+create policy flashcard_sets_insert on flashcard_sets
+  for insert to authenticated
+  with check (created_by = auth.uid());
+
+create policy flashcard_sets_update on flashcard_sets
+  for update to authenticated
+  using (created_by = auth.uid())
+  with check (created_by = auth.uid());
+
+create policy flashcard_sets_delete on flashcard_sets
+  for delete to authenticated
+  using (created_by = auth.uid());
+
+-- ─── Migration: FEAT-009 — Student Notes ─────────────────────
+create table if not exists student_notes (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  topic text not null,
+  file_id text references uploaded_files(file_id) on delete set null,
+  created_by uuid not null references profiles(id) on delete cascade,
+  content jsonb not null,
+  created_at timestamptz not null default now()
+);
+
+alter table student_notes enable row level security;
+
+create policy students_own_notes on student_notes
+  for all using (created_by = auth.uid())
+  with check (created_by = auth.uid());

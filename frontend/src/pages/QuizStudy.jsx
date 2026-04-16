@@ -18,8 +18,18 @@ export default function QuizStudy() {
 
   async function fetchQuiz() {
     setLoading(true);
-    const { data } = await supabase.from("saved_quizzes").select("*").eq("id", id).single();
-    setQuiz(data);
+    const { data, error } = await supabase
+      .from("saved_quizzes")
+      .select("*")
+      .eq("id", id)
+      .or(`created_by.eq.${user.id},is_shared.eq.true`)
+      .single();
+
+    if (error || !data) {
+      setQuiz(null);
+    } else {
+      setQuiz(data);
+    }
     setLoading(false);
   }
 
@@ -27,9 +37,13 @@ export default function QuizStudy() {
     if (!quiz) return;
     setRegenerating(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${import.meta.env.VITE_API_URL}/quiz/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`,
+        },
         body: JSON.stringify({
           topic: quiz.topic,
           num_questions: quiz.questions.length,

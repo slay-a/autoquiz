@@ -15,6 +15,7 @@ llama-index-vector-stores-postgres==0.2.0
 
 # Database / Auth
 supabase==2.7.4
+PyJWT==2.8.0
 
 # Async jobs
 celery==5.4.0

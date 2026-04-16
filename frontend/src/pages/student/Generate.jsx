@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
@@ -13,6 +13,8 @@ export default function Generate() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [previousFiles, setPreviousFiles] = useState([]);
+  const [selectedFileId, setSelectedFileId] = useState(null);
   const [quiz, setQuiz] = useState(null);
   const [lastParams, setLastParams] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,6 +22,53 @@ export default function Generate() {
   const [savedId, setSavedId] = useState(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(null);
+
+  // Fetch previously uploaded files on mount
+  useEffect(() => {
+    async function fetchPreviousFiles() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/files`, {
+          headers: { "Authorization": `Bearer ${session?.access_token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setPreviousFiles(data);
+        }
+      } catch (e) {
+        console.error("Failed to fetch previous files:", e);
+      }
+    }
+    fetchPreviousFiles();
+  }, []);
+
+  async function handleUpload(file) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${session?.access_token}` },
+      body: form,
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.detail || "Upload failed");
+    }
+    const data = await res.json();
+    setUploadedFile({ ...data, filename: file.name });
+    setSelectedFileId(null); // Clear selected file when new upload happens
+  }
+
+  function handleFileSelect(e) {
+    const fileId = e.target.value;
+    if (fileId) {
+      setSelectedFileId(fileId);
+      setUploadedFile(null); // Clear uploaded file when selecting from previous files
+    } else {
+      setSelectedFileId(null);
+    }
+  }
 
   async function generate(params) {
     setLoading(true);
@@ -29,16 +78,20 @@ export default function Generate() {
     setLastParams(params);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${import.meta.env.VITE_API_URL}/quiz/generate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`
+        },
         body: JSON.stringify({
           topic: params.topic,
           num_questions: params.numQuestions,
           difficulty: params.difficulty,
           question_types: ["mcq", "true_false", "short_answer"],
           outside_sources: params.outsideSources,
-          file_id: uploadedFile?.file_id || null,
+          file_id: selectedFileId || uploadedFile?.file_id || null,
         }),
       });
 
@@ -62,7 +115,7 @@ export default function Generate() {
       title: `${quiz.topic} — ${quiz.difficulty}`,
       topic: quiz.topic,
       difficulty: quiz.difficulty,
-      file_id: uploadedFile?.file_id || null,
+      file_id: selectedFileId || uploadedFile?.file_id || null,
       created_by: user.id,
       is_shared: false,
       outside_sources: lastParams?.outsideSources ?? false,
@@ -126,20 +179,55 @@ export default function Generate() {
         <p className="text-gray-500 mt-1 text-sm">Upload a file (optional), enter a topic, and get AI-generated questions.</p>
       </div>
 
-      {/* Upload */}
-      <div className="card p-6">
-        <div className="flex items-center justify-between mb-4">
+      {/* Upload and File Selection */}
+      <div className="card p-6 space-y-4">
+        <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-gray-700">Source Material <span className="text-gray-400 font-normal">(optional)</span></h2>
-          {uploadedFile && (
+          {(uploadedFile || selectedFileId) && (
             <span className="badge bg-emerald-50 text-emerald-600">
-              ✓ {uploadedFile.filename}
+              ✓ {uploadedFile?.filename || previousFiles.find(f => f.file_id === selectedFileId)?.filename}
             </span>
           )}
         </div>
-        {!uploadedFile
-          ? <Upload onSuccess={(f) => setUploadedFile(f)} />
-          : <button onClick={() => setUploadedFile(null)} className="text-xs text-gray-400 hover:text-red-400 transition-colors">Remove file</button>
-        }
+
+        {/* Previously uploaded files */}
+        {previousFiles.length > 0 && !uploadedFile && (
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-2">
+              Select from previous uploads
+            </label>
+            <select
+              value={selectedFileId || ""}
+              onChange={handleFileSelect}
+              className="input text-sm"
+            >
+              <option value="">Choose a file...</option>
+              {previousFiles.map((file) => (
+                <option key={file.file_id} value={file.file_id}>
+                  {file.filename} — {new Date(file.created_at).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Upload new file */}
+        {!uploadedFile && !selectedFileId ? (
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-2">
+              {previousFiles.length > 0 ? "Or upload a new file" : "Upload a file"}
+            </label>
+            <Upload onUpload={handleUpload} />
+          </div>
+        ) : uploadedFile ? (
+          <button onClick={() => setUploadedFile(null)} className="text-xs text-gray-400 hover:text-red-400 transition-colors">
+            Remove file
+          </button>
+        ) : (
+          <button onClick={() => setSelectedFileId(null)} className="text-xs text-gray-400 hover:text-red-400 transition-colors">
+            Clear selection
+          </button>
+        )}
       </div>
 
       {/* Generate form */}
@@ -188,7 +276,7 @@ export default function Generate() {
             {/* Notes */}
             <Link
               to="/notes"
-              state={{ topic: quiz.topic, file_id: uploadedFile?.file_id }}
+              state={{ topic: quiz.topic, file_id: selectedFileId || uploadedFile?.file_id }}
               className="btn-secondary text-xs"
             >
               <FileText className="w-3.5 h-3.5" /> Study Notes

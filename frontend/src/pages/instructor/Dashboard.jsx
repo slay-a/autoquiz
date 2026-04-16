@@ -4,9 +4,7 @@ import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
 import { Plus, Users, BookOpen, Copy, Check, ChevronRight, GraduationCap, Loader2 } from "lucide-react";
 
-function genCode() {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
+const API_BASE = "http://localhost:8000";
 
 export default function InstructorDashboard() {
   const { user, profile } = useAuth();
@@ -22,29 +20,63 @@ export default function InstructorDashboard() {
 
   async function fetchClasses() {
     setLoading(true);
-    const { data } = await supabase
-      .from("classes")
-      .select("*, class_members(count)")
-      .eq("instructor_id", user.id)
-      .order("created_at", { ascending: false });
-    setClasses(data ?? []);
-    setLoading(false);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const res = await fetch(`${API_BASE}/classes`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setClasses(data ?? []);
+      } else {
+        console.error("Failed to fetch classes:", await res.text());
+        setClasses([]);
+      }
+    } catch (error) {
+      console.error("Error fetching classes:", error);
+      setClasses([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function createClass() {
     if (!newClass.name.trim()) return;
     setCreating(true);
-    const { data, error } = await supabase.from("classes").insert({
-      name: newClass.name.trim(),
-      description: newClass.description.trim() || null,
-      class_code: genCode(),
-      instructor_id: user.id,
-    }).select().single();
-    setCreating(false);
-    if (!error) {
-      setClasses((p) => [data, ...p]);
-      setShowNew(false);
-      setNewClass({ name: "", description: "" });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const res = await fetch(`${API_BASE}/classes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: newClass.name.trim(),
+          description: newClass.description.trim() || null,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Fetch classes again to get member_count (which will be 0 for new class)
+        await fetchClasses();
+        setShowNew(false);
+        setNewClass({ name: "", description: "" });
+      } else {
+        console.error("Failed to create class:", await res.text());
+      }
+    } catch (error) {
+      console.error("Error creating class:", error);
+    } finally {
+      setCreating(false);
     }
   }
 
@@ -96,7 +128,7 @@ export default function InstructorDashboard() {
         <StatCard label="Classes" value={classes.length} color="violet" />
         <StatCard
           label="Total Students"
-          value={classes.reduce((s, c) => s + (c.class_members?.[0]?.count ?? 0), 0)}
+          value={classes.reduce((s, c) => s + (c.member_count ?? 0), 0)}
           color="indigo"
         />
         <StatCard label="Active" value={classes.length} color="emerald" />
@@ -142,7 +174,7 @@ function StatCard({ label, value, color }) {
 
 function ClassCard({ cls }) {
   const [copied, setCopied] = useState(false);
-  const memberCount = cls.class_members?.[0]?.count ?? 0;
+  const memberCount = cls.member_count ?? 0;
 
   function copyCode() {
     navigator.clipboard.writeText(cls.class_code);

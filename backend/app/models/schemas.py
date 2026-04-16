@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from enum import Enum
-from typing import Optional
+from typing import Optional, Literal
 
 
 # ── Job Status ──────────────────────────────────────────────────────────────
@@ -32,6 +32,12 @@ class JobStatusResponse(BaseModel):
     updated_at: str
 
 
+class UserFileEntry(BaseModel):
+    file_id: str
+    filename: str
+    created_at: str
+
+
 # ── Retrieve ─────────────────────────────────────────────────────────────────
 
 class RetrieveRequest(BaseModel):
@@ -60,8 +66,9 @@ class QuizRequest(BaseModel):
     topic: str
     file_id: Optional[str] = None
     num_questions: int = 5
-    difficulty: str = "medium"         # easy | medium | hard
+    difficulty: Literal["easy", "medium", "hard"] = "medium"
     question_types: list[str] = ["mcq", "true_false", "short_answer"]
+    outside_sources: bool = False
 
 
 class QuizOption(BaseModel):
@@ -84,4 +91,20 @@ class QuizResponse(BaseModel):
     quiz_id: str
     topic: str
     difficulty: str
+    num_questions: int
     questions: list[QuizQuestion]
+
+
+# ── Notes ────────────────────────────────────────────────────────────────────
+
+class NotesSaveRequest(BaseModel):
+    topic: str
+    file_id: Optional[str] = None
+    content: dict
+
+
+class NotesSaveResponse(BaseModel):
+    id: str
+    title: str
+    topic: str
+    created_at: str

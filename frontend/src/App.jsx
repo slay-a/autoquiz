@@ -64,7 +64,7 @@ function AppInner() {
           } />
 
           {/* Shared */}
-          <Route path="/quiz/:id"            element={<ProtectedRoute><QuizStudy /></ProtectedRoute>} />
+          <Route path="/quiz/:id"            element={<ProtectedRoute allowedRole={["student", "instructor"]}><QuizStudy /></ProtectedRoute>} />
           <Route path="/flashcards/:id"      element={<ProtectedRoute><FlashcardStudy /></ProtectedRoute>} />
           <Route path="/flashcards/:id/edit" element={<ProtectedRoute><FlashcardEditor /></ProtectedRoute>} />
           <Route path="/notes"               element={<ProtectedRoute allowedRole="student"><Notes /></ProtectedRoute>} />

@@ -1,9 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 import Upload from "../components/Upload";
 import { FileText, CheckCircle2, Clock, AlertCircle, RefreshCw } from "lucide-react";
 
+const API_BASE = "http://localhost:8000";
+
 export default function InstructorDashboard() {
   const [files, setFiles] = useState([]);
+
+  async function handleUpload(file) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+
+    const form = new FormData();
+    form.append("file", file);
+
+    const res = await fetch(`${API_BASE}/upload/`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+      body: form,
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.detail || "Upload failed");
+    }
+
+    const data = await res.json();
+    setFiles((prev) => [{ ...data, filename: file.name }, ...prev]);
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -33,7 +60,7 @@ export default function InstructorDashboard() {
       {/* Upload zone */}
       <div className="card p-6">
         <h2 className="text-sm font-semibold text-gray-700 mb-4">Upload New Material</h2>
-        <Upload onSuccess={(f) => setFiles((prev) => [f, ...prev])} />
+        <Upload onUpload={handleUpload} />
       </div>
 
       {/* File list */}
@@ -81,12 +108,19 @@ function FileRow({ file, onRetry }) {
   const [status, setStatus] = useState(file.status);
   const [retrying, setRetrying] = useState(false);
 
-  // Poll until terminal
-  useState(() => {
+  // Poll until terminal (GAP 5: moved to useEffect)
+  useEffect(() => {
     if (status === "success" || status === "failed") return;
     const id = setInterval(async () => {
       try {
-        const res = await fetch(`/upload/status/${file.job_id}`);
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+
+        const res = await fetch(`${API_BASE}/upload/status/${file.job_id}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
         if (res.ok) {
           const data = await res.json();
           setStatus(data.status);
@@ -95,12 +129,20 @@ function FileRow({ file, onRetry }) {
       } catch {}
     }, 3000);
     return () => clearInterval(id);
-  }, [file.job_id]);
+  }, [file.job_id, status]);
 
   async function retry() {
     setRetrying(true);
     try {
-      const res = await fetch(`/upload/retry/${file.job_id}`, { method: "POST" });
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const res = await fetch(`${API_BASE}/upload/retry/${file.job_id}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
       if (res.ok) {
         const data = await res.json();
         setStatus("queued");

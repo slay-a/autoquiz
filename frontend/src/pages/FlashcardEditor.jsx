@@ -24,6 +24,7 @@ export default function FlashcardEditor() {
   const [copied, setCopied]         = useState(false);
   const [loading, setLoading]       = useState(true);
   const [deleteError, setDeleteError] = useState(null);
+  const [isOwner, setIsOwner]       = useState(null);
 
   useEffect(() => { fetchSet(); }, [id]);
 
@@ -33,6 +34,7 @@ export default function FlashcardEditor() {
       setSet(data);
       setCards(data.cards ?? []);
       setTitle(data.title);
+      setIsOwner(data.created_by === user?.id);
     }
     setLoading(false);
   }
@@ -102,6 +104,9 @@ export default function FlashcardEditor() {
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 text-violet-400 animate-spin" /></div>;
   if (!set) return <p className="text-gray-500">Set not found.</p>;
+  if (!loading && set && isOwner === false) {
+    return <div className="p-8 text-center text-red-500">You don't have permission to edit this set.</div>;
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">

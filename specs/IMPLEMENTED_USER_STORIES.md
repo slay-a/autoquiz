@@ -487,3 +487,23 @@
 - AC-11.3.2: The flashcard editor (`FlashcardEditor`) displays each card's `front` and `back` fields as editable inputs.
 - AC-11.3.3: The editor allows adding new cards and deleting existing cards.
 - AC-11.3.4: Saving updates the `cards` jsonb array in `flashcard_sets` for the corresponding set ID.
+
+---
+
+## Feature Group 12 — Theme Preferences
+
+### Story 12.1 — Toggle dark mode
+
+**As a** user (instructor or student),
+**I want** to switch the app between light and dark colour themes,
+**so that** I can reduce eye strain in low-light environments and match my system preferences.
+
+**Acceptance Criteria:**
+- AC-12.1.1: A theme toggle control is rendered in the top navigation bar on every authenticated page. The control displays the icon of the theme that will be activated on click (moon icon in light mode, sun icon in dark mode).
+- AC-12.1.2: Clicking the toggle switches the active theme between `light` and `dark` by applying/removing the `dark` class on the root `<html>` element. The visual change occurs within 100ms without a page reload.
+- AC-12.1.3: The selected theme is persisted to `localStorage` under the key `aq_theme` with the value `"light"` or `"dark"`. The value is written synchronously on every toggle.
+- AC-12.1.4: On initial page load, the app reads `aq_theme` from `localStorage` and applies the stored theme before the first paint. If no value is stored, the app falls back to the OS preference via the `prefers-color-scheme: dark` media query.
+- AC-12.1.5: When `aq_theme` is absent and the OS `prefers-color-scheme` changes while the app is open, the app updates the theme live to match the OS preference. Once the user has explicitly toggled the theme, subsequent OS preference changes are ignored.
+- AC-12.1.6: In dark mode, every page (login, registration, instructor dashboard, student dashboard, class detail, quiz study, flashcard study, notes view, upload, and generation pages) renders with dark backgrounds and light-on-dark text. No element renders as black text on a black background or white text on a white background.
+- AC-12.1.7: Text in dark mode meets WCAG 2.1 AA contrast requirements: body text has a contrast ratio of at least 4.5:1 against its background, and large text (≥18pt or ≥14pt bold) has a contrast ratio of at least 3:1.
+- AC-12.1.8: The theme preference is applied consistently across browser tabs of the same origin — toggling dark mode in one tab updates other open tabs within 1 second via the `storage` event listener.

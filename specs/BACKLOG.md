@@ -33,6 +33,7 @@
 | FEAT-009 | Notes Generation (Student) | P1 | ready | `specs/feat-009-notes-generation-student.md` | FEAT-006 |
 | FEAT-010 | Instructor Notes System | P0 | ready | `specs/feat-010-instructor-notes.md` | FEAT-008 |
 | FEAT-011 | Flashcard Study | P1 | ready | `specs/feat-011-flashcard-study.md` | FEAT-007 |
+| FEAT-012 | Theme Preferences (Dark Mode) | P2 | ready | `specs/feat-012-theme-preferences.md` | FEAT-001 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -40,6 +41,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-012 — Theme Preferences (Dark Mode)
+
+**Stories:** 12.1 Toggle dark mode
+**ACs summary:** Theme toggle (moon/sun icon) in top nav on every page including login/register; click toggles `dark` class on `<html>` within 100ms, no reload; selection persisted to `localStorage` key `aq_theme` (`"light"|"dark"`); inline pre-paint script in `index.html` applies stored theme before first paint (no FOIT); falls back to `prefers-color-scheme` when `aq_theme` absent; live-follows OS preference only while `aq_theme` is unset; every page themed with slate-based dark palette, no black-on-black or white-on-white; body text ≥4.5:1 contrast (WCAG AA); cross-tab sync via `storage` event within 1s.
+**Dependencies:** FEAT-001
+**Implementation status:** not yet implemented — prototyper builds from scratch. Requires Tailwind `darkMode: 'class'`, new `ThemeContext`, `ThemeToggle`, shared `TopBar` component, and `dark:` variant styling across all pages.
+
+---
 
 ### FEAT-011 — Flashcard Study
 

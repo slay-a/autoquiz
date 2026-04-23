@@ -36,8 +36,8 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
       {/* Header */}
       <div className="card px-6 py-4 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="font-semibold text-gray-900">{quiz.topic}</h2>
-          <p className="text-xs text-gray-400 mt-0.5">{questions.length} questions</p>
+          <h2 className="font-semibold text-gray-900 dark:text-slate-100">{quiz.topic}</h2>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{questions.length} questions</p>
         </div>
         <div className="flex items-center gap-2">
           <span className={`badge capitalize ${DIFF_BADGE[quiz.difficulty] ?? DIFF_BADGE.medium}`}>
@@ -78,7 +78,7 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
           {wrongQuestions.length > 0 && onMakeFlashcards && (
             <button
               onClick={() => onMakeFlashcards(wrongQuestions, "wrong")}
-              className="mt-3 flex items-center gap-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+              className="mt-3 flex items-center gap-2 bg-white dark:bg-slate-800/20 hover:bg-white dark:bg-slate-800/30 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
             >
               <Layers className="w-4 h-4" /> Convert {wrongQuestions.length} wrong answers to flashcards
             </button>
@@ -115,8 +115,8 @@ function QuestionCard({ q, index, chosen, isRevealed, onSelect, onReveal }) {
           </span>
           <div className="flex-1 space-y-3">
             <div className="flex items-start justify-between gap-3">
-              <p className="text-sm font-medium text-gray-800 leading-relaxed">{q.question}</p>
-              <span className="flex-shrink-0 text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+              <p className="text-sm font-medium text-gray-800 dark:text-slate-100 leading-relaxed">{q.question}</p>
+              <span className="flex-shrink-0 text-xs font-medium text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap">
                 {TYPE_LABELS[q.type]}
               </span>
             </div>
@@ -133,14 +133,14 @@ function QuestionCard({ q, index, chosen, isRevealed, onSelect, onReveal }) {
                         ${isRevealed
                           ? isCorrectOpt ? "bg-emerald-50 border-emerald-300 text-emerald-800"
                           : isChosen ? "bg-red-50 border-red-200 text-red-700"
-                          : "bg-gray-50 border-gray-100 text-gray-400"
+                          : "bg-gray-50 dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-400 dark:text-slate-500"
                           : isChosen ? "bg-violet-50 border-violet-300 text-violet-800"
-                          : "bg-white border-gray-200 hover:border-violet-200 hover:bg-violet-50/30"
+                          : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-violet-200 hover:bg-violet-50/30"
                         }`}>
                       <span className={`w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold
                         ${isRevealed ? isCorrectOpt ? "bg-emerald-200 text-emerald-800"
-                          : isChosen ? "bg-red-200 text-red-700" : "bg-gray-200 text-gray-500"
-                          : isChosen ? "bg-violet-200 text-violet-700" : "bg-gray-100 text-gray-500"}`}>
+                          : isChosen ? "bg-red-200 text-red-700" : "bg-gray-200 text-gray-500 dark:text-slate-400"
+                          : isChosen ? "bg-violet-200 text-violet-700" : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400"}`}>
                         {opt.label}
                       </span>
                       {opt.text}
@@ -163,9 +163,9 @@ function QuestionCard({ q, index, chosen, isRevealed, onSelect, onReveal }) {
                       className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all
                         ${isRevealed ? isCorrectOpt ? "bg-emerald-50 border-emerald-300 text-emerald-700"
                           : isChosen ? "bg-red-50 border-red-200 text-red-600"
-                          : "bg-gray-50 border-gray-100 text-gray-400"
+                          : "bg-gray-50 dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-400 dark:text-slate-500"
                           : isChosen ? "bg-violet-50 border-violet-300 text-violet-700"
-                          : "bg-white border-gray-200 hover:border-violet-200"}`}>
+                          : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-violet-200"}`}>
                       {val}
                     </button>
                   );
@@ -205,7 +205,7 @@ function QuestionCard({ q, index, chosen, isRevealed, onSelect, onReveal }) {
             {q.explanation}
           </p>
           {q.page_numbers?.length > 0 && (
-            <p className="text-xs text-gray-400 pl-6">Source: p. {q.page_numbers.join(", ")}</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 pl-6">Source: p. {q.page_numbers.join(", ")}</p>
           )}
         </div>
       )}

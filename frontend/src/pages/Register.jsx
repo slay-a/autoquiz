@@ -27,14 +27,14 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mb-3 shadow-lg shadow-violet-200">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Create account</h1>
-          <p className="text-sm text-gray-500 mt-1">Join AutoQuiz</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Create account</h1>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Join AutoQuiz</p>
         </div>
 
         <div className="card p-7 space-y-5">
@@ -44,7 +44,7 @@ export default function Register() {
 
           {/* Role selector */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">I am a…</label>
+            <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">I am a…</label>
             <div className="grid grid-cols-2 gap-3">
               <RoleCard
                 role="instructor"
@@ -67,19 +67,19 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Full Name</label>
+              <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Full Name</label>
               <input type="text" required value={form.fullName}
                 onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                 placeholder="Your name" className="input" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
+              <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Email</label>
               <input type="email" required value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="you@example.com" className="input" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Password</label>
+              <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Password</label>
               <input type="password" required minLength={6} value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 placeholder="Min. 6 characters" className="input" />
@@ -90,7 +90,7 @@ export default function Register() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-gray-500 dark:text-slate-400">
             Have an account?{" "}
             <Link to="/login" className="text-violet-600 font-semibold hover:underline">Sign in</Link>
           </p>
@@ -108,10 +108,10 @@ function RoleCard({ icon, label, desc, selected, onClick }) {
       className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 text-center transition-all cursor-pointer
         ${selected
           ? "border-violet-500 bg-violet-50 text-violet-700"
-          : "border-gray-200 hover:border-violet-300 text-gray-600 hover:bg-violet-50/30"
+          : "border-gray-200 dark:border-slate-700 hover:border-violet-300 text-gray-600 dark:text-slate-300 hover:bg-violet-50/30"
         }`}
     >
-      <span className={selected ? "text-violet-600" : "text-gray-400"}>{icon}</span>
+      <span className={selected ? "text-violet-600" : "text-gray-400 dark:text-slate-500"}>{icon}</span>
       <span className="text-sm font-semibold">{label}</span>
       <span className="text-xs leading-tight opacity-70">{desc}</span>
     </button>

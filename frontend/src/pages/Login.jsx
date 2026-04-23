@@ -25,15 +25,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mb-3 shadow-lg shadow-violet-200">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-          <p className="text-sm text-gray-500 mt-1">Sign in to AutoQuiz</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Welcome back</h1>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Sign in to AutoQuiz</p>
         </div>
 
         {/* Card */}
@@ -46,7 +46,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
+              <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Email</label>
               <input
                 type="email"
                 required
@@ -58,7 +58,7 @@ export default function Login() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Password</label>
+              <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Password</label>
               <input
                 type="password"
                 required
@@ -74,7 +74,7 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-gray-500 dark:text-slate-400">
             No account?{" "}
             <Link to="/register" className="text-violet-600 font-semibold hover:underline">
               Create one

@@ -121,8 +121,8 @@ export default function StudentQuiz() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Generate a Quiz</h1>
-        <p className="text-gray-500 mt-1 text-sm">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Generate a Quiz</h1>
+        <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">
           Enter any topic and get AI-generated questions grounded in your uploaded materials.
         </p>
       </div>
@@ -137,7 +137,7 @@ export default function StudentQuiz() {
       )}
 
       {!quiz && !loading && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-400 dark:text-slate-500">
           <Brain className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p className="text-sm">Your quiz will appear here</p>
         </div>

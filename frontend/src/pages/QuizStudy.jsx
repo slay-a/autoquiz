@@ -98,16 +98,16 @@ export default function QuizStudy() {
   }
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 text-violet-400 animate-spin" /></div>;
-  if (!quiz) return <p className="text-gray-500">Quiz not found.</p>;
+  if (!quiz) return <p className="text-gray-500 dark:text-slate-400">Quiz not found.</p>;
 
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600 mb-3">
+        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-violet-600 mb-3">
           <ChevronLeft className="w-4 h-4" /> Back
         </Link>
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">{quiz.title}</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-slate-100">{quiz.title}</h1>
           <div className="flex items-center gap-2">
             <button onClick={regenerate} disabled={regenerating} className="btn-secondary text-xs">
               <RefreshCw className={`w-3.5 h-3.5 ${regenerating ? "animate-spin" : ""}`} />

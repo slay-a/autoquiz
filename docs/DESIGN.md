@@ -263,9 +263,11 @@ as **WARNING** unless they cross a security or architecture boundary, in which c
 | 403 | Role mismatch (student accessing instructor endpoint) |
 | 404 | Resource not found (job_id, file_id, quiz_id) |
 | 409 | Conflict (e.g., class code already exists) |
-| 413 | Upload exceeds `MAX_UPLOAD_SIZE_MB` |
+| 413 | Upload exceeds `MAX_UPLOAD_SIZE_MB`, or retrieval context exceeds `MAX_CONTEXT_CHARS` |
 | 422 | Pydantic validation failure (FastAPI default; do not suppress) |
 | 500 | Unhandled exception from service or infrastructure layer |
+| 502 | LLM returned an unparseable or schema-invalid response (`LLM_RESPONSE_INVALID`) |
+| 503 | Downstream dependency temporarily unavailable (`STORAGE_UNAVAILABLE`) |
 
 **Service layer error handling:**
 - Services raise typed exceptions defined in `backend/app/core/exceptions.py`. Do not raise `HTTPException` from services — that is a Layer 1 concern.
@@ -295,6 +297,66 @@ AutoQuizError (base)
 **Logging:**
 - Use Python's `logging` module configured in `backend/app/core/logging.py`. Do not use `print()` statements in any layer.
 - Log level guidelines: `DEBUG` for verbose pipeline internals, `INFO` for job state transitions and successful completions, `WARNING` for recoverable anomalies (empty retrieval results, fallback to keyword search), `ERROR` for all caught exceptions before re-raising.
+
+### 3.1.1 Standard Error Envelope
+
+Every non-2xx JSON response from the FastAPI backend uses the same envelope. FastAPI's default 422 validation response is the one permitted exception — its `detail` array shape is preserved unchanged so Pydantic tooling keeps working.
+
+```json
+{
+  "error": {
+    "code": "UPPER_SNAKE_CASE_STRING",
+    "message": "Human-readable, actionable sentence.",
+    "details": { "optional": "field-specific machine-readable context" },
+    "request_id": "uuid"
+  }
+}
+```
+
+**Envelope rules:**
+- `code` is always present and comes from the registry in §3.1.2. Never invent a code at the route level — add it to the registry first.
+- `message` is what the frontend may display verbatim. Do not include internal identifiers, stack frames, row IDs, or OpenAI/Supabase request IDs.
+- `details` is optional. Use it for field-level validation context (`{ "field": "topic", "reason": "empty" }`) or remediation hints. Never put PII here.
+- `request_id` is a server-generated UUID correlating the response to server logs. Route handlers read it from `request.state.request_id`; middleware populates it once per request.
+- The HTTP status code and the `code` field must be consistent (e.g., `UPLOAD_TOO_LARGE` always pairs with 413). The registry enforces the pairing.
+
+### 3.1.2 Error Code Registry
+
+Every `error_code` the backend emits — in the API envelope above, in `processing_jobs.error_code`, or in a log line — must appear in this table. Route handlers and Celery tasks import these codes from `backend/app/core/error_codes.py` rather than string-literal them.
+
+**Classification:**
+- **Predefined** — user-recoverable; the UI maps the `code` to a specific remediation affordance (re-upload, shorten text, pick fewer questions).
+- **Fail-loud** — developer-visible; indicates a bug or broken invariant. User sees a generic message but the code is preserved in logs for triage.
+- **Log-and-continue** — unexpected/unknown; always logged at `ERROR` with the full exception, surfaced to the user as `INTERNAL_ERROR` only.
+
+| `error_code`              | HTTP | Class             | User-visible message                                           | Raised by (layer)             |
+|---------------------------|------|-------------------|----------------------------------------------------------------|-------------------------------|
+| `VALIDATION_FAILED`       | 400  | Predefined        | "One or more fields are invalid. Please check and try again." | Route (non-Pydantic checks)   |
+| `EMPTY_TOPIC`             | 400  | Predefined        | "Please enter a topic before generating."                     | Route · `/quiz`, `/retrieve`, `/notes` |
+| `UNSUPPORTED_FILE_TYPE`   | 400  | Predefined        | "Only PDF, DOCX, and PPTX files are supported."               | Route · `/upload`             |
+| `UPLOAD_TOO_LARGE`        | 413  | Predefined        | "File exceeds the 50 MB limit."                               | Route · `/upload`             |
+| `AUTH_REQUIRED`           | 401  | Predefined        | "Please sign in to continue."                                 | Auth dependency (future)      |
+| `ROLE_FORBIDDEN`          | 403  | Predefined        | "You don't have permission to perform this action."           | Route (role gate)             |
+| `JOB_NOT_FOUND`           | 404  | Predefined        | "We couldn't find that upload job."                           | Route · `/upload/status`      |
+| `FILE_NOT_FOUND`          | 404  | Predefined        | "We couldn't find that file."                                 | Route, Service                |
+| `QUIZ_NOT_FOUND`          | 404  | Predefined        | "We couldn't find that quiz."                                 | Route · quiz, notes           |
+| `CLASS_CODE_CONFLICT`     | 409  | Predefined        | "That class code is already taken. Try another."              | Route · classes               |
+| `NO_CONTENT_FOUND`        | 404  | Predefined        | "No matching content was found for this topic."               | Service · retrieval           |
+| `CONTEXT_TOO_LARGE`       | 413  | Predefined        | "Too much content to process. Narrow the topic or source."   | Service · quiz_gen, notes     |
+| `PARSE_FAILED`            | —    | Fail-loud         | (generic ingestion failure via job record)                    | Celery · ingestion parse      |
+| `EMBED_FAILED`            | —    | Fail-loud         | (generic ingestion failure via job record)                    | Celery · ingestion embed      |
+| `CHUNK_FAILED`            | —    | Fail-loud         | (generic ingestion failure via job record)                    | Celery · ingestion chunk      |
+| `UPLOAD_FAILED`           | —    | Fail-loud         | (generic ingestion failure via job record)                    | Celery · ingestion storage    |
+| `LLM_RESPONSE_INVALID`    | 502  | Fail-loud         | "The generator returned an unexpected response. Please retry."| Service · quiz_gen, notes     |
+| `STORAGE_UNAVAILABLE`     | 503  | Fail-loud         | "Storage is temporarily unavailable. Please retry shortly."   | Service · storage             |
+| `INTERNAL_ERROR`          | 500  | Log-and-continue  | "Something went wrong on our end. Please try again."          | Any (catch-all)               |
+
+**Registry rules:**
+- Codes are `UPPER_SNAKE_CASE`, domain-first where helpful (`UPLOAD_*`, `QUIZ_*`).
+- Adding a new code is a DESIGN.md change first, code second — keep this table authoritative.
+- Each exception class in the §3.1 hierarchy maps to exactly one code; the route→HTTP mapping is table-driven, not `if/elif` sprawl.
+- Celery-only codes (no HTTP column) populate `processing_jobs.error_code`. The API surfaces them via `JobStatusResponse.error_code` using the same strings.
+- `INTERNAL_ERROR` is the only code that may be emitted without a dedicated exception class — it is the last-resort mapping for uncaught exceptions.
 
 ### 3.2 Frontend Error Handling
 

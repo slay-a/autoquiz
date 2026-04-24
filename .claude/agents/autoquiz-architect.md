@@ -8,7 +8,7 @@ description: >
   GUI/brand, interface, security, and compliance refinements. Produces a
   structured Architecture Advisory Report and edits `docs/DESIGN.md` when the
   product owner approves a recommendation.
-model: claude-opus-4-5
+model: claude-sonnet-4-6
 tools:
   - Read
   - Edit

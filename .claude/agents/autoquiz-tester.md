@@ -130,6 +130,8 @@ If any test passed: <list them and explain why they were removed/rewritten>
 
 ### Step 1 — Run the existing tests written in the Red phase
 
+Run **only the current feature's test files** — do not run the full suite.
+
 Backend:
 ```bash
 cd backend && python -m pytest tests/test_<feature_slug>.py -v
@@ -139,6 +141,12 @@ Frontend:
 ```bash
 cd frontend && npx vitest run src/__tests__/<ComponentName>.test.jsx
 ```
+
+If the prototyper modified a file that belongs to another feature, also run
+that feature's test file and report whether the change broke it. That is a
+regression introduced by this pipeline and must be reported. All other
+pre-existing test failures in unrelated feature files are **out of scope** —
+do not run them, do not report them, do not spend tokens on them.
 
 Do **not** rewrite tests to make them pass. If a test fails, it is a signal
 that the implementation is incomplete or incorrect.

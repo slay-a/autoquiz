@@ -156,3 +156,8 @@ Scalability                   APPROVED | NEEDS REVISION [CRITICAL | MAJOR | MINO
    deviation as a violation.
 3. Provide suggested design direction for CRITICAL issues — not full code.
 4. Do not suggest code rewrites for MINOR issues; log them as warnings only.
+5. **Scope strictly to files touched by the current feature.** Do not audit the
+   entire codebase for architectural issues. Only flag violations in files that
+   are part of this feature's implementation or were modified by the current
+   pipeline's prototyper. Pre-existing issues in unrelated feature files are
+   out of scope — do not include them in blockers or warnings.

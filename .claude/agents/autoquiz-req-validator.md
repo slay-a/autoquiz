@@ -97,3 +97,7 @@ Pass: <date>
 3. Do not flag issues covered by the Known Gaps in `docs/DESIGN.md` (Section 9)
    unless the feature spec explicitly targets them.
 4. Every FAIL verdict must name the specific file and describe the exact fix needed.
+5. **Scope strictly to the current feature.** Do not audit, flag, or mention
+   issues in other features' files unless the current feature's implementation
+   directly introduced or broke them. Pre-existing failures elsewhere are not
+   your concern — surfacing them wastes tokens and pollutes the blocker list.

@@ -89,6 +89,11 @@ Produce a single ranked blocker list by:
 3. Flagging contradictions (spec says X, DESIGN.md says Y) — these are
    **spec bugs**; stop and escalate to the user rather than proceeding
 4. Dropping MINOR warnings from the blocker list (log them for the final report)
+5. **Dropping any issue that is purely in another feature's files and was not
+   introduced or caused by the current feature's changes.** Pre-existing failures
+   in unrelated features are out of scope — do not include them in the blocker
+   list, retry budget, or final report. Only include cross-file issues when
+   the current pipeline's prototyper changes directly caused them.
 
 If the list is empty, skip to STEP 7 and report "no gaps found."
 
@@ -132,9 +137,14 @@ Collect all three reports before evaluating.
 ### STEP 6 — Evaluate
 
 **Fail conditions (any one triggers a retry):**
-- `req-validator`: any FAIL
-- `design-validator`: any CRITICAL or MAJOR
-- `tester` (Green): any failing test
+- `req-validator`: any FAIL scoped to the current feature
+- `design-validator`: any CRITICAL or MAJOR scoped to the current feature
+- `tester` (Green): any failing test in the current feature's test files
+
+**Ignore** pre-existing failures in unrelated feature test files unless the
+prototyper's changes directly caused them (i.e., the test file touched by the
+prototyper now fails). Do not burn retry budget on pre-existing, out-of-scope
+failures.
 
 **If any fail:**
 1. Compile a new blocker list from all three reports (dedupe + rank by severity)

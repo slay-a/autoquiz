@@ -42,7 +42,7 @@ function renderAuthProvider() {
 describe('AuthContext - Session Persistence', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
+    if (typeof localStorage.clear === 'function') { localStorage.clear(); } else { Object.keys(localStorage).forEach(k => localStorage.removeItem(k)); }
 
     // Default mock: no session
     mockSupabase.auth.getSession.mockResolvedValue({

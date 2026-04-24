@@ -28,16 +28,16 @@ export default function TopicSearch({ onGenerate, loading }) {
     <form onSubmit={submit} className="card p-6 space-y-5">
       {/* Topic */}
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Topic</label>
+        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Topic</label>
         <div className="relative">
-          <Search className="absolute left-3.5 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
+          <Search className="absolute left-3.5 top-3 w-4 h-4 text-gray-400 dark:text-slate-500 pointer-events-none" />
           <input type="text" value={topic} onChange={(e) => setTopic(e.target.value)}
             placeholder="e.g. Software Requirements" className="input pl-10" />
         </div>
         <div className="flex flex-wrap gap-1.5 pt-0.5">
           {SUGGESTIONS.map((s) => (
             <button key={s} type="button" onClick={() => setTopic(s)}
-              className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-violet-100 hover:text-violet-700 text-gray-600 transition-colors font-medium">
+              className="text-xs px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-violet-100 hover:text-violet-700 text-gray-600 dark:text-slate-300 transition-colors font-medium">
               {s}
             </button>
           ))}
@@ -48,15 +48,15 @@ export default function TopicSearch({ onGenerate, loading }) {
       <div className="flex gap-4 flex-wrap">
         {/* Num questions */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Questions</label>
-          <div className="flex items-center gap-2 bg-gray-100 rounded-xl p-1">
+          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Questions</label>
+          <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-700 rounded-xl p-1">
             <button type="button" onClick={() => setNumQ((n) => Math.max(1, n - 1))}
-              className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-gray-500 hover:text-violet-600 shadow-sm transition-colors">
+              className="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-slate-400 hover:text-violet-600 shadow-sm transition-colors">
               <Minus className="w-3.5 h-3.5" />
             </button>
-            <span className="w-8 text-center text-sm font-bold text-gray-800">{numQuestions}</span>
+            <span className="w-8 text-center text-sm font-bold text-gray-800 dark:text-slate-100">{numQuestions}</span>
             <button type="button" onClick={() => setNumQ((n) => n + 1)}
-              className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-gray-500 hover:text-violet-600 shadow-sm transition-colors">
+              className="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center text-gray-500 dark:text-slate-400 hover:text-violet-600 shadow-sm transition-colors">
               <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -64,12 +64,12 @@ export default function TopicSearch({ onGenerate, loading }) {
 
         {/* Difficulty */}
         <div className="flex-1 space-y-1.5">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Difficulty</label>
+          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Difficulty</label>
           <div className="flex gap-2">
             {["easy", "medium", "hard"].map((d) => (
               <button key={d} type="button" onClick={() => setDifficulty(d)}
                 className={`flex-1 py-2 rounded-xl text-sm font-semibold border capitalize transition-all
-                  ${difficulty === d ? diffColors[d] + " border-current" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"}`}>
+                  ${difficulty === d ? diffColors[d] + " border-current" : "bg-white dark:bg-slate-800 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:border-slate-600"}`}>
                 {d}
               </button>
             ))}
@@ -81,20 +81,20 @@ export default function TopicSearch({ onGenerate, loading }) {
       <div
         onClick={() => setOutside((v) => !v)}
         className={`flex items-center gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all
-          ${outsideSources ? "border-violet-300 bg-violet-50" : "border-gray-200 hover:border-violet-200"}`}
+          ${outsideSources ? "border-violet-300 bg-violet-50" : "border-gray-200 dark:border-slate-700 hover:border-violet-200"}`}
       >
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors
-          ${outsideSources ? "bg-violet-200 text-violet-700" : "bg-gray-100 text-gray-400"}`}>
+          ${outsideSources ? "bg-violet-200 text-violet-700" : "bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500"}`}>
           <Globe className="w-4 h-4" />
         </div>
         <div className="flex-1">
-          <p className={`text-sm font-semibold ${outsideSources ? "text-violet-800" : "text-gray-700"}`}>
+          <p className={`text-sm font-semibold ${outsideSources ? "text-violet-800" : "text-gray-700 dark:text-slate-200"}`}>
             Include outside sources
           </p>
-          <p className="text-xs text-gray-400">GPT draws on broader knowledge beyond your uploaded file</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">GPT draws on broader knowledge beyond your uploaded file</p>
         </div>
         <div className={`w-9 h-5 rounded-full transition-colors relative ${outsideSources ? "bg-violet-500" : "bg-gray-300"}`}>
-          <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all
+          <div className={`absolute top-0.5 w-4 h-4 bg-white dark:bg-slate-800 rounded-full shadow transition-all
             ${outsideSources ? "left-4" : "left-0.5"}`} />
         </div>
       </div>

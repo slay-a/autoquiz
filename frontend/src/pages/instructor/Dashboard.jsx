@@ -85,10 +85,10 @@ export default function InstructorDashboard() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
             Hey, {profile?.full_name?.split(" ")[0]} 👋
           </h1>
-          <p className="text-gray-500 mt-1 text-sm">Manage your classes and quizzes.</p>
+          <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">Manage your classes and quizzes.</p>
         </div>
         <button onClick={() => setShowNew(true)} className="btn-primary">
           <Plus className="w-4 h-4" /> New Class
@@ -98,7 +98,7 @@ export default function InstructorDashboard() {
       {/* New class form */}
       {showNew && (
         <div className="card p-6 space-y-4 animate-slide-up border-violet-200">
-          <h2 className="font-semibold text-gray-800">Create a new class</h2>
+          <h2 className="font-semibold text-gray-800 dark:text-slate-100">Create a new class</h2>
           <input
             autoFocus
             type="text"
@@ -144,8 +144,8 @@ export default function InstructorDashboard() {
           <div className="w-14 h-14 bg-violet-50 rounded-2xl flex items-center justify-center mx-auto">
             <GraduationCap className="w-7 h-7 text-violet-400" />
           </div>
-          <p className="font-medium text-gray-700">No classes yet</p>
-          <p className="text-sm text-gray-400">Create your first class to get started.</p>
+          <p className="font-medium text-gray-700 dark:text-slate-200">No classes yet</p>
+          <p className="text-sm text-gray-400 dark:text-slate-500">Create your first class to get started.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -191,19 +191,19 @@ function ClassCard({ cls }) {
         </div>
         <button
           onClick={(e) => { e.preventDefault(); copyCode(); }}
-          className="flex items-center gap-1.5 bg-gray-100 hover:bg-violet-100 px-2.5 py-1 rounded-lg text-xs font-mono font-bold text-gray-600 hover:text-violet-700 transition-colors"
+          className="flex items-center gap-1.5 bg-gray-100 dark:bg-slate-700 hover:bg-violet-100 px-2.5 py-1 rounded-lg text-xs font-mono font-bold text-gray-600 dark:text-slate-300 hover:text-violet-700 transition-colors"
         >
           {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
           {cls.class_code}
         </button>
       </div>
-      <h3 className="font-semibold text-gray-900 group-hover:text-violet-700 transition-colors">{cls.name}</h3>
-      {cls.description && <p className="text-xs text-gray-400 mt-1 line-clamp-1">{cls.description}</p>}
+      <h3 className="font-semibold text-gray-900 dark:text-slate-100 group-hover:text-violet-700 transition-colors">{cls.name}</h3>
+      {cls.description && <p className="text-xs text-gray-400 dark:text-slate-500 mt-1 line-clamp-1">{cls.description}</p>}
       <div className="flex items-center justify-between mt-4">
-        <span className="flex items-center gap-1 text-xs text-gray-400">
+        <span className="flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500">
           <Users className="w-3.5 h-3.5" /> {memberCount} student{memberCount !== 1 ? "s" : ""}
         </span>
-        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-violet-400 transition-colors" />
+        <ChevronRight className="w-4 h-4 text-gray-300 dark:text-slate-600 group-hover:text-violet-400 transition-colors" />
       </div>
     </Link>
   );

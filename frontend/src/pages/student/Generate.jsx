@@ -172,17 +172,17 @@ export default function Generate() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600 mb-3">
+        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-violet-600 mb-3">
           <ChevronLeft className="w-4 h-4" /> Dashboard
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Generate a Quiz</h1>
-        <p className="text-gray-500 mt-1 text-sm">Upload a file (optional), enter a topic, and get AI-generated questions.</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Generate a Quiz</h1>
+        <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">Upload a file (optional), enter a topic, and get AI-generated questions.</p>
       </div>
 
       {/* Upload and File Selection */}
       <div className="card p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-700">Source Material <span className="text-gray-400 font-normal">(optional)</span></h2>
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-200">Source Material <span className="text-gray-400 dark:text-slate-500 font-normal">(optional)</span></h2>
           {(uploadedFile || selectedFileId) && (
             <span className="badge bg-emerald-50 text-emerald-600">
               ✓ {uploadedFile?.filename || previousFiles.find(f => f.file_id === selectedFileId)?.filename}
@@ -193,7 +193,7 @@ export default function Generate() {
         {/* Previously uploaded files */}
         {previousFiles.length > 0 && !uploadedFile && (
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-2">
+            <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-2">
               Select from previous uploads
             </label>
             <select
@@ -214,17 +214,17 @@ export default function Generate() {
         {/* Upload new file */}
         {!uploadedFile && !selectedFileId ? (
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-2">
+            <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-2">
               {previousFiles.length > 0 ? "Or upload a new file" : "Upload a file"}
             </label>
             <Upload onUpload={handleUpload} />
           </div>
         ) : uploadedFile ? (
-          <button onClick={() => setUploadedFile(null)} className="text-xs text-gray-400 hover:text-red-400 transition-colors">
+          <button onClick={() => setUploadedFile(null)} className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-400 transition-colors">
             Remove file
           </button>
         ) : (
-          <button onClick={() => setSelectedFileId(null)} className="text-xs text-gray-400 hover:text-red-400 transition-colors">
+          <button onClick={() => setSelectedFileId(null)} className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-400 transition-colors">
             Clear selection
           </button>
         )}

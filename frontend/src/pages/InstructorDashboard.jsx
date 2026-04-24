@@ -36,8 +36,8 @@ export default function InstructorDashboard() {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Instructor Dashboard</h1>
-        <p className="text-gray-500 mt-1 text-sm">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Instructor Dashboard</h1>
+        <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">
           Upload learning materials — PDFs, slides, or docs — to enable AI quiz generation.
         </p>
       </div>
@@ -59,15 +59,15 @@ export default function InstructorDashboard() {
 
       {/* Upload zone */}
       <div className="card p-6">
-        <h2 className="text-sm font-semibold text-gray-700 mb-4">Upload New Material</h2>
+        <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-4">Upload New Material</h2>
         <Upload onUpload={handleUpload} />
       </div>
 
       {/* File list */}
       {files.length > 0 && (
         <div className="card overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-700">Uploaded Files</h2>
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-200">Uploaded Files</h2>
           </div>
           <ul className="divide-y divide-gray-50">
             {files.map((f) => (
@@ -81,7 +81,7 @@ export default function InstructorDashboard() {
 
       {/* Empty state */}
       {files.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-gray-400 dark:text-slate-500">
           <FileText className="w-10 h-10 mx-auto mb-3 opacity-40" />
           <p className="text-sm">No files uploaded yet</p>
         </div>
@@ -154,13 +154,13 @@ function FileRow({ file, onRetry }) {
   }
 
   return (
-    <li className="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50/50 transition-colors">
+    <li className="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 dark:bg-slate-800/50 transition-colors">
       <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0">
         <FileText className="w-4 h-4 text-violet-500" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800 truncate">{file.filename}</p>
-        <p className="text-xs text-gray-400">ID: {file.file_id?.slice(0, 8)}…</p>
+        <p className="text-sm font-medium text-gray-800 dark:text-slate-100 truncate">{file.filename}</p>
+        <p className="text-xs text-gray-400 dark:text-slate-500">ID: {file.file_id?.slice(0, 8)}…</p>
       </div>
       <div className="flex items-center gap-2">
         <StatusBadge status={status} />
@@ -168,7 +168,7 @@ function FileRow({ file, onRetry }) {
           <button
             onClick={retry}
             disabled={retrying}
-            className="flex items-center gap-1 text-xs text-gray-500 hover:text-violet-600 transition-colors"
+            className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400 hover:text-violet-600 transition-colors"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${retrying ? "animate-spin" : ""}`} />
             Retry
@@ -181,7 +181,7 @@ function FileRow({ file, onRetry }) {
 
 function StatusBadge({ status }) {
   const map = {
-    queued:      { label: "Queued",      cls: "bg-gray-100 text-gray-500",    icon: <Clock className="w-3 h-3" /> },
+    queued:      { label: "Queued",      cls: "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400",    icon: <Clock className="w-3 h-3" /> },
     in_progress: { label: "Processing",  cls: "bg-blue-50 text-blue-600",     icon: <Clock className="w-3 h-3 animate-spin" /> },
     success:     { label: "Ready",       cls: "bg-emerald-50 text-emerald-600", icon: <CheckCircle2 className="w-3 h-3" /> },
     failed:      { label: "Failed",      cls: "bg-red-50 text-red-500",       icon: <AlertCircle className="w-3 h-3" /> },

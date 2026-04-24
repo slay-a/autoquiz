@@ -121,17 +121,17 @@ export default function Notes() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600 mb-3">
+        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-violet-600 mb-3">
           <ChevronLeft className="w-4 h-4" /> Dashboard
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Study Notes</h1>
-        <p className="text-gray-500 mt-1 text-sm">AI-generated notes that map out everything you need to know about a topic.</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Study Notes</h1>
+        <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">AI-generated notes that map out everything you need to know about a topic.</p>
       </div>
 
       {/* Upload and File Selection */}
       <div className="card p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-700">Source Material <span className="text-gray-400 font-normal">(optional)</span></h2>
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-200">Source Material <span className="text-gray-400 dark:text-slate-500 font-normal">(optional)</span></h2>
           {(uploadedFile || selectedFileId) && (
             <span className="badge bg-emerald-50 text-emerald-600">
               ✓ {uploadedFile?.filename || previousFiles.find(f => f.file_id === selectedFileId)?.filename}
@@ -142,7 +142,7 @@ export default function Notes() {
         {/* Previously uploaded files */}
         {previousFiles.length > 0 && !uploadedFile && (
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-2">
+            <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-2">
               Select from previous uploads
             </label>
             <select
@@ -163,17 +163,17 @@ export default function Notes() {
         {/* Upload new file */}
         {!uploadedFile && !selectedFileId ? (
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-2">
+            <label className="block text-xs font-medium text-gray-600 dark:text-slate-300 mb-2">
               {previousFiles.length > 0 ? "Or upload a new file" : "Upload a file"}
             </label>
             <Upload onUpload={handleUpload} />
           </div>
         ) : uploadedFile ? (
-          <button onClick={() => setUploadedFile(null)} className="text-xs text-gray-400 hover:text-red-400 transition-colors">
+          <button onClick={() => setUploadedFile(null)} className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-400 transition-colors">
             Remove file
           </button>
         ) : (
-          <button onClick={() => setSelectedFileId(null)} className="text-xs text-gray-400 hover:text-red-400 transition-colors">
+          <button onClick={() => setSelectedFileId(null)} className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-400 transition-colors">
             Clear selection
           </button>
         )}
@@ -182,7 +182,7 @@ export default function Notes() {
       {/* Input */}
       <div className="card p-5 flex gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
+          <Search className="absolute left-3.5 top-3 w-4 h-4 text-gray-400 dark:text-slate-500 pointer-events-none" />
           <input
             type="text"
             value={topic}
@@ -223,17 +223,17 @@ function NotesView({ notes, saved, onSave }) {
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white/70 rounded-xl p-3 text-center">
+          <div className="bg-white dark:bg-slate-800/70 rounded-xl p-3 text-center">
             <p className="text-2xl font-bold text-violet-700">{scope.main_concepts_count ?? "?"}</p>
             <p className="text-xs text-violet-500 mt-0.5">Key Concepts</p>
           </div>
-          <div className="bg-white/70 rounded-xl p-3 text-center">
+          <div className="bg-white dark:bg-slate-800/70 rounded-xl p-3 text-center">
             <p className="text-2xl font-bold text-indigo-700">
               {scope.estimated_questions ? `${scope.estimated_questions.min}–${scope.estimated_questions.max}` : "?"}
             </p>
             <p className="text-xs text-indigo-500 mt-0.5">Possible Questions</p>
           </div>
-          <div className="bg-white/70 rounded-xl p-3 text-center">
+          <div className="bg-white dark:bg-slate-800/70 rounded-xl p-3 text-center">
             <p className="text-2xl font-bold text-violet-700">{scope.subtopics?.length ?? "?"}</p>
             <p className="text-xs text-violet-500 mt-0.5">Subtopics</p>
           </div>
@@ -241,7 +241,7 @@ function NotesView({ notes, saved, onSave }) {
         {scope.subtopics?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {scope.subtopics.map((s, i) => (
-              <span key={i} className="badge bg-white/80 text-violet-700 border border-violet-200">{s}</span>
+              <span key={i} className="badge bg-white dark:bg-slate-800/80 text-violet-700 border border-violet-200">{s}</span>
             ))}
           </div>
         )}
@@ -250,10 +250,10 @@ function NotesView({ notes, saved, onSave }) {
       {/* Summary */}
       <div className="card p-5">
         <div className="flex items-center gap-2 mb-3">
-          <BookOpen className="w-4 h-4 text-gray-400" />
-          <h2 className="font-semibold text-gray-800">Summary</h2>
+          <BookOpen className="w-4 h-4 text-gray-400 dark:text-slate-500" />
+          <h2 className="font-semibold text-gray-800 dark:text-slate-100">Summary</h2>
         </div>
-        <p className="text-sm text-gray-700 leading-relaxed">{notes.summary}</p>
+        <p className="text-sm text-gray-700 dark:text-slate-200 leading-relaxed">{notes.summary}</p>
       </div>
 
       {/* Key concepts */}
@@ -261,14 +261,14 @@ function NotesView({ notes, saved, onSave }) {
         <div className="card p-5">
           <div className="flex items-center gap-2 mb-4">
             <Lightbulb className="w-4 h-4 text-amber-400" />
-            <h2 className="font-semibold text-gray-800">Key Concepts</h2>
+            <h2 className="font-semibold text-gray-800 dark:text-slate-100">Key Concepts</h2>
             <span className="badge bg-amber-50 text-amber-600">{notes.key_concepts.length}</span>
           </div>
           <div className="space-y-3">
             {notes.key_concepts.map((c, i) => (
-              <div key={i} className="border border-gray-100 rounded-xl p-4 hover:border-violet-200 transition-colors">
-                <p className="font-semibold text-gray-800 text-sm">{c.term}</p>
-                <p className="text-sm text-gray-600 mt-1 leading-relaxed">{c.definition}</p>
+              <div key={i} className="border border-gray-100 dark:border-slate-700 rounded-xl p-4 hover:border-violet-200 transition-colors">
+                <p className="font-semibold text-gray-800 dark:text-slate-100 text-sm">{c.term}</p>
+                <p className="text-sm text-gray-600 dark:text-slate-300 mt-1 leading-relaxed">{c.definition}</p>
                 {c.example && (
                   <p className="text-xs text-violet-600 mt-1.5 italic bg-violet-50 rounded-lg px-3 py-1.5">
                     e.g. {c.example}
@@ -283,10 +283,10 @@ function NotesView({ notes, saved, onSave }) {
       {/* Important details */}
       {notes.important_details?.length > 0 && (
         <div className="card p-5">
-          <h2 className="font-semibold text-gray-800 mb-3">Important Details</h2>
+          <h2 className="font-semibold text-gray-800 dark:text-slate-100 mb-3">Important Details</h2>
           <ul className="space-y-2">
             {notes.important_details.map((d, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+              <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-slate-200">
                 <span className="w-5 h-5 rounded-full bg-violet-100 text-violet-600 text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
                 {d}
               </li>
@@ -300,7 +300,7 @@ function NotesView({ notes, saved, onSave }) {
         <div className="card p-5 border-amber-100 bg-amber-50/30">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-4 h-4 text-amber-500" />
-            <h2 className="font-semibold text-gray-800">Common Misconceptions</h2>
+            <h2 className="font-semibold text-gray-800 dark:text-slate-100">Common Misconceptions</h2>
           </div>
           <ul className="space-y-2">
             {notes.common_misconceptions.map((m, i) => (
@@ -315,7 +315,7 @@ function NotesView({ notes, saved, onSave }) {
       {/* Study tips */}
       {notes.study_tips?.length > 0 && (
         <div className="card p-5 border-emerald-100 bg-emerald-50/30">
-          <h2 className="font-semibold text-gray-800 mb-3">Study Tips</h2>
+          <h2 className="font-semibold text-gray-800 dark:text-slate-100 mb-3">Study Tips</h2>
           <ul className="space-y-2">
             {notes.study_tips.map((t, i) => (
               <li key={i} className="text-sm text-emerald-800 flex items-start gap-2">
@@ -327,7 +327,7 @@ function NotesView({ notes, saved, onSave }) {
       )}
 
       {notes.source_pages?.length > 0 && (
-        <p className="text-xs text-gray-400 text-center">
+        <p className="text-xs text-gray-400 dark:text-slate-500 text-center">
           Generated from pages {notes.source_pages.join(", ")} of your uploaded material
         </p>
       )}

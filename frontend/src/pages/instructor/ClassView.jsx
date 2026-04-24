@@ -68,7 +68,7 @@ function NoteEditor({ note, onSave, onCancel, saving }) {
 
       {/* Summary */}
       <div className="card p-5 space-y-2">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Summary</h3>
+        <h3 className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Summary</h3>
         <textarea
           value={content.summary ?? ""}
           onChange={e => updateSummary(e.target.value)}
@@ -81,17 +81,17 @@ function NoteEditor({ note, onSave, onCancel, saving }) {
       {/* Key Concepts */}
       <div className="card p-5 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Key Concepts</h3>
+          <h3 className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Key Concepts</h3>
           <button onClick={addConcept} className="btn-secondary text-xs">
             <Plus className="w-3 h-3" /> Add
           </button>
         </div>
         {(content.key_concepts ?? []).length === 0 && (
-          <p className="text-xs text-gray-400">No concepts yet.</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">No concepts yet.</p>
         )}
         {(content.key_concepts ?? []).map((kc, i) => (
-          <div key={i} className="bg-gray-50 rounded-xl p-4 space-y-2 relative">
-            <button onClick={() => removeConcept(i)} className="absolute top-2 right-2 text-gray-300 hover:text-red-400 transition-colors">
+          <div key={i} className="bg-gray-50 dark:bg-slate-800 rounded-xl p-4 space-y-2 relative">
+            <button onClick={() => removeConcept(i)} className="absolute top-2 right-2 text-gray-300 dark:text-slate-600 hover:text-red-400 transition-colors">
               <X className="w-3.5 h-3.5" />
             </button>
             <input
@@ -111,7 +111,7 @@ function NoteEditor({ note, onSave, onCancel, saving }) {
               value={kc.example ?? ""}
               onChange={e => updateConcept(i, "example", e.target.value)}
               placeholder="Example (optional)..."
-              className="input text-sm text-gray-500"
+              className="input text-sm text-gray-500 dark:text-slate-400"
             />
           </div>
         ))}
@@ -125,13 +125,13 @@ function NoteEditor({ note, onSave, onCancel, saving }) {
       ].map(({ field, label }) => (
         <div key={field} className="card p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{label}</h3>
+            <h3 className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">{label}</h3>
             <button onClick={() => addListItem(field)} className="btn-secondary text-xs">
               <Plus className="w-3 h-3" /> Add
             </button>
           </div>
           {(content[field] ?? []).length === 0 && (
-            <p className="text-xs text-gray-400">No items yet.</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500">No items yet.</p>
           )}
           {(content[field] ?? []).map((item, i) => (
             <div key={i} className="flex items-start gap-2">
@@ -141,7 +141,7 @@ function NoteEditor({ note, onSave, onCancel, saving }) {
                 rows={2}
                 className="input resize-none text-sm flex-1"
               />
-              <button onClick={() => removeListItem(field, i)} className="text-gray-300 hover:text-red-400 mt-2 transition-colors">
+              <button onClick={() => removeListItem(field, i)} className="text-gray-300 dark:text-slate-600 hover:text-red-400 mt-2 transition-colors">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -463,7 +463,7 @@ export default function ClassView() {
       <Loader2 className="w-6 h-6 text-violet-400 animate-spin" />
     </div>
   );
-  if (!cls) return <p className="text-gray-500">Class not found.</p>;
+  if (!cls) return <p className="text-gray-500 dark:text-slate-400">Class not found.</p>;
 
   const selectedFile    = files.find(f => f.file_id === selectedFileId);
   const noteGenFile     = files.find(f => f.file_id === noteGenFileId);
@@ -477,11 +477,11 @@ export default function ClassView() {
         <div>
           <button
             onClick={() => { setNoteView("list"); setEditingNote(null); }}
-            className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600 mb-3"
+            className="inline-flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-violet-600 mb-3"
           >
             <ChevronLeft className="w-4 h-4" /> Back to notes
           </button>
-          <h2 className="text-lg font-bold text-gray-800">Edit Note</h2>
+          <h2 className="text-lg font-bold text-gray-800 dark:text-slate-100">Edit Note</h2>
         </div>
         <NoteEditor
           note={editingNote}
@@ -497,13 +497,13 @@ export default function ClassView() {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div>
-        <Link to="/instructor" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600 mb-3">
+        <Link to="/instructor" className="inline-flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-violet-600 mb-3">
           <ChevronLeft className="w-4 h-4" /> Back
         </Link>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{cls.name}</h1>
-            {cls.description && <p className="text-gray-400 text-sm mt-0.5">{cls.description}</p>}
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">{cls.name}</h1>
+            {cls.description && <p className="text-gray-400 dark:text-slate-500 text-sm mt-0.5">{cls.description}</p>}
           </div>
           <button
             onClick={copyCode}
@@ -519,24 +519,24 @@ export default function ClassView() {
       <div className="grid grid-cols-4 gap-3">
         <div className="card p-4 text-center">
           <p className="text-xl font-bold text-violet-700">{members.length}</p>
-          <p className="text-xs text-gray-400 mt-0.5">Students</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Students</p>
         </div>
         <div className="card p-4 text-center">
           <p className="text-xl font-bold text-indigo-700">{sharedQuizzes}</p>
-          <p className="text-xs text-gray-400 mt-0.5">Shared Quizzes</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Shared Quizzes</p>
         </div>
         <div className="card p-4 text-center">
           <p className="text-xl font-bold text-emerald-700">{publishedNotes}</p>
-          <p className="text-xs text-gray-400 mt-0.5">Published Notes</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Published Notes</p>
         </div>
         <div className="card p-4 text-center">
           <p className="text-xl font-bold text-amber-600">{files.length}</p>
-          <p className="text-xs text-gray-400 mt-0.5">Files</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Files</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit flex-wrap">
+      <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 p-1 rounded-xl w-fit flex-wrap">
         {[
           { key: "quizzes",  label: "Quizzes" },
           { key: "notes",    label: "Notes" },
@@ -548,7 +548,7 @@ export default function ClassView() {
             key={t.key}
             onClick={() => { setTab(t.key); if (t.key === "notes") setNoteView("list"); }}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all
-              ${tab === t.key ? "bg-white text-violet-700 shadow-sm" : "text-gray-500 hover:text-gray-800"}`}
+              ${tab === t.key ? "bg-white dark:bg-slate-800 text-violet-700 shadow-sm" : "text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:text-slate-100"}`}
           >
             {t.label}
           </button>
@@ -559,7 +559,7 @@ export default function ClassView() {
       {tab === "quizzes" && (
         <div className="space-y-3">
           {quizzes.length === 0 ? (
-            <div className="card p-8 text-center text-gray-400">
+            <div className="card p-8 text-center text-gray-400 dark:text-slate-500">
               <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-40" />
               <p className="text-sm">No quizzes yet. Use the Generate Quiz tab to create one.</p>
             </div>
@@ -567,8 +567,8 @@ export default function ClassView() {
             quizzes.map((q) => (
               <div key={q.id} className="card p-4 flex items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-800 truncate">{q.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="font-medium text-gray-800 dark:text-slate-100 truncate">{q.title}</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
                     {q.questions?.length} questions · {q.difficulty} · {new Date(q.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -578,13 +578,13 @@ export default function ClassView() {
                     className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-all font-medium
                       ${q.is_shared
                         ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-                        : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100"}`}
+                        : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:bg-slate-700"}`}
                   >
                     {q.is_shared ? <Globe className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
                     {q.is_shared ? "Shared" : "Share"}
                   </button>
                   <Link to={`/quiz/${q.id}`} className="btn-secondary text-xs py-1.5">Study</Link>
-                  <button onClick={() => deleteQuiz(q.id)} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors">
+                  <button onClick={() => deleteQuiz(q.id)} className="p-1.5 text-gray-300 dark:text-slate-600 hover:text-red-400 transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -598,7 +598,7 @@ export default function ClassView() {
       {tab === "notes" && noteView === "list" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-slate-400">
               {notes.length} note{notes.length !== 1 ? "s" : ""} · {publishedNotes} published
             </p>
             <button onClick={() => setNoteView("generate")} className="btn-primary text-xs">
@@ -607,7 +607,7 @@ export default function ClassView() {
           </div>
 
           {notes.length === 0 ? (
-            <div className="card p-10 text-center text-gray-400 space-y-2">
+            <div className="card p-10 text-center text-gray-400 dark:text-slate-500 space-y-2">
               <FileText className="w-8 h-8 mx-auto opacity-40" />
               <p className="text-sm">No notes yet. Generate one for your students.</p>
             </div>
@@ -617,12 +617,12 @@ export default function ClassView() {
                 <div key={note.id} className="card p-4 flex items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <p className="font-medium text-gray-800 truncate">{note.title}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${note.is_published ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>
+                      <p className="font-medium text-gray-800 dark:text-slate-100 truncate">{note.title}</p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${note.is_published ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400"}`}>
                         {note.is_published ? "Published" : "Draft"}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400">{new Date(note.created_at).toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-400 dark:text-slate-500">{new Date(note.created_at).toLocaleDateString()}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
@@ -631,7 +631,7 @@ export default function ClassView() {
                       className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border transition-all font-medium
                         ${note.is_published
                           ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-                          : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100"}`}
+                          : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:bg-slate-700"}`}
                     >
                       {publishingNoteId === note.id
                         ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -641,14 +641,14 @@ export default function ClassView() {
                     </button>
                     <button
                       onClick={() => { setEditingNote(note); setNoteView("edit"); }}
-                      className="p-1.5 text-gray-300 hover:text-violet-500 transition-colors"
+                      className="p-1.5 text-gray-300 dark:text-slate-600 hover:text-violet-500 transition-colors"
                     >
                       <Edit3 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => deleteNote(note.id)}
                       disabled={deletingNoteId === note.id}
-                      className="p-1.5 text-gray-300 hover:text-red-400 transition-colors disabled:opacity-50"
+                      className="p-1.5 text-gray-300 dark:text-slate-600 hover:text-red-400 transition-colors disabled:opacity-50"
                     >
                       {deletingNoteId === note.id
                         ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -667,16 +667,16 @@ export default function ClassView() {
       {tab === "notes" && noteView === "generate" && (
         <div className="space-y-5 animate-slide-up">
           <div className="flex items-center gap-3">
-            <button onClick={() => setNoteView("list")} className="text-sm text-gray-400 hover:text-violet-600 flex items-center gap-1">
+            <button onClick={() => setNoteView("list")} className="text-sm text-gray-400 dark:text-slate-500 hover:text-violet-600 flex items-center gap-1">
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
-            <h2 className="text-base font-semibold text-gray-800">Generate Study Notes</h2>
+            <h2 className="text-base font-semibold text-gray-800 dark:text-slate-100">Generate Study Notes</h2>
           </div>
 
           <div className="card p-5 space-y-4">
             {/* File picker */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide block">Source Material (optional)</label>
+              <label className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide block">Source Material (optional)</label>
               {files.length > 0 ? (
                 <div className="space-y-2">
                   <div className="relative">
@@ -687,7 +687,7 @@ export default function ClassView() {
                         setNoteGenFileId(val);
                         setNoteGenShowUpload(val === "__new__");
                       }}
-                      className="w-full appearance-none input pr-10 cursor-pointer bg-white"
+                      className="w-full appearance-none input pr-10 cursor-pointer bg-white dark:bg-slate-800"
                     >
                       <option value="">No file — use general knowledge</option>
                       <optgroup label="Class files">
@@ -697,7 +697,7 @@ export default function ClassView() {
                       </optgroup>
                       <option value="__new__">+ Upload a new file…</option>
                     </select>
-                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-gray-400 dark:text-slate-500 pointer-events-none" />
                   </div>
                   {noteGenShowUpload && (
                     <div className="animate-slide-up">
@@ -707,7 +707,7 @@ export default function ClassView() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-xs text-gray-400">No files yet. Upload one to generate grounded notes.</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">No files yet. Upload one to generate grounded notes.</p>
                   <Upload onUpload={handleUpload} />
                 </div>
               )}
@@ -715,7 +715,7 @@ export default function ClassView() {
 
             {/* Topic */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide block">Topic / Chapter</label>
+              <label className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide block">Topic / Chapter</label>
               <input
                 value={noteGenTopic}
                 onChange={e => setNoteGenTopic(e.target.value)}
@@ -749,7 +749,7 @@ export default function ClassView() {
         <div className="space-y-5">
           <div className="card p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-gray-700">Source Material</h2>
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-200">Source Material</h2>
               {selectedFile && (
                 <span className="badge bg-emerald-50 text-emerald-600">✓ {selectedFile.filename}</span>
               )}
@@ -765,7 +765,7 @@ export default function ClassView() {
                       setSelectedFileId(val);
                       setShowInlineUpload(val === "__new__");
                     }}
-                    className="w-full appearance-none input pr-10 cursor-pointer bg-white"
+                    className="w-full appearance-none input pr-10 cursor-pointer bg-white dark:bg-slate-800"
                   >
                     <option value="">No file — use general knowledge</option>
                     <optgroup label="Class files">
@@ -775,7 +775,7 @@ export default function ClassView() {
                     </optgroup>
                     <option value="__new__">+ Upload a new file…</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-3 w-4 h-4 text-gray-400 dark:text-slate-500 pointer-events-none" />
                 </div>
                 {showInlineUpload && (
                   <div className="animate-slide-up">
@@ -785,7 +785,7 @@ export default function ClassView() {
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-xs text-gray-400">No files yet. Upload one to generate grounded quizzes.</p>
+                <p className="text-xs text-gray-400 dark:text-slate-500">No files yet. Upload one to generate grounded quizzes.</p>
                 <Upload onUpload={handleUpload} />
               </div>
             )}
@@ -815,7 +815,7 @@ export default function ClassView() {
       {tab === "files" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500">{files.length} file{files.length !== 1 ? "s" : ""}</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">{files.length} file{files.length !== 1 ? "s" : ""}</p>
             <button onClick={() => setShowAddFile(v => !v)} className="btn-primary text-xs">
               <Plus className="w-3.5 h-3.5" /> Add File
             </button>
@@ -828,7 +828,7 @@ export default function ClassView() {
           )}
 
           {files.length === 0 && !showAddFile ? (
-            <div className="card p-10 text-center text-gray-400">
+            <div className="card p-10 text-center text-gray-400 dark:text-slate-500">
               <FolderOpen className="w-8 h-8 mx-auto mb-2 opacity-40" />
               <p className="text-sm">No files yet. Click "Add File" to upload course material.</p>
             </div>
@@ -836,18 +836,18 @@ export default function ClassView() {
             <div className="card overflow-hidden">
               <ul className="divide-y divide-gray-50">
                 {files.map((f) => (
-                  <li key={f.file_id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/50 transition-colors">
+                  <li key={f.file_id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 dark:bg-slate-800/50 transition-colors">
                     <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
                       <FileText className="w-4 h-4 text-violet-500" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{f.filename}</p>
-                      <p className="text-xs text-gray-400">Uploaded {new Date(f.created_at).toLocaleDateString()}</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-slate-100 truncate">{f.filename}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500">Uploaded {new Date(f.created_at).toLocaleDateString()}</p>
                     </div>
                     <button
                       onClick={() => deleteFile(f)}
                       disabled={deletingFileId === f.file_id}
-                      className="p-1.5 text-gray-300 hover:text-red-400 transition-colors disabled:opacity-50"
+                      className="p-1.5 text-gray-300 dark:text-slate-600 hover:text-red-400 transition-colors disabled:opacity-50"
                     >
                       {deletingFileId === f.file_id
                         ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -866,13 +866,13 @@ export default function ClassView() {
       {tab === "members" && (
         <div className="space-y-6">
           <div className="card overflow-hidden">
-            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-700">Class Members</h3>
+            <div className="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-200">Class Members</h3>
               <span className="badge bg-violet-50 text-violet-600">{members.length}</span>
             </div>
             {members.length === 0 ? (
-              <div className="p-8 text-center text-gray-400 text-sm">
-                Share code <strong className="font-mono text-gray-600">{cls.class_code}</strong> with students to let them join.
+              <div className="p-8 text-center text-gray-400 dark:text-slate-500 text-sm">
+                Share code <strong className="font-mono text-gray-600 dark:text-slate-300">{cls.class_code}</strong> with students to let them join.
               </div>
             ) : (
               <ul className="divide-y divide-gray-50">
@@ -882,13 +882,13 @@ export default function ClassView() {
                       {m.profiles?.full_name?.[0] ?? "?"}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-800">{m.profiles?.full_name}</p>
-                      <p className="text-xs text-gray-400">{m.profiles?.email}</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-slate-100">{m.profiles?.full_name}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-500">{m.profiles?.email}</p>
                     </div>
                     <button
                       onClick={() => removeMember(m.student_id)}
                       disabled={removingMemberId === m.student_id}
-                      className="text-xs text-gray-300 hover:text-red-400 transition-colors disabled:opacity-50 flex items-center gap-1"
+                      className="text-xs text-gray-300 dark:text-slate-600 hover:text-red-400 transition-colors disabled:opacity-50 flex items-center gap-1"
                     >
                       {removingMemberId === m.student_id
                         ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -908,7 +908,7 @@ export default function ClassView() {
               <AlertTriangle className="w-4 h-4 text-red-400" />
               <h3 className="text-sm font-semibold text-red-600">Danger Zone</h3>
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-slate-400">
               Deleting this class will permanently remove all quizzes, notes, and files associated with it.
             </p>
             <button

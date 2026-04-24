@@ -46,7 +46,7 @@ export default function FlashcardStudy() {
   }
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 text-violet-400 animate-spin" /></div>;
-  if (!set || cards.length === 0) return <p className="text-gray-500">Flashcard set not found or empty.</p>;
+  if (!set || cards.length === 0) return <p className="text-gray-500 dark:text-slate-400">Flashcard set not found or empty.</p>;
 
   const card = cards[index];
   const know  = Object.values(results).filter((r) => r === "know").length;
@@ -56,7 +56,7 @@ export default function FlashcardStudy() {
   if (done) {
     return (
       <div className="space-y-6 animate-fade-in max-w-md mx-auto">
-        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600">
+        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-violet-600">
           <ChevronLeft className="w-4 h-4" /> Back
         </Link>
         <div className="card p-8 text-center space-y-6">
@@ -64,8 +64,8 @@ export default function FlashcardStudy() {
             <Trophy className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Round complete!</h2>
-            <p className="text-gray-500 text-sm mt-1">{set.title}</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Round complete!</h2>
+            <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">{set.title}</p>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -99,19 +99,19 @@ export default function FlashcardStudy() {
   return (
     <div className="space-y-6 animate-fade-in max-w-xl mx-auto">
       <div className="flex items-center justify-between">
-        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600">
+        <Link to="/student" className="inline-flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-violet-600">
           <ChevronLeft className="w-4 h-4" /> Back
         </Link>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">{index + 1} / {cards.length}</span>
-          <Link to={`/flashcards/${id}/edit`} className="flex items-center gap-1 text-xs text-gray-400 hover:text-violet-600 transition-colors">
+          <span className="text-sm text-gray-500 dark:text-slate-400">{index + 1} / {cards.length}</span>
+          <Link to={`/flashcards/${id}/edit`} className="flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500 hover:text-violet-600 transition-colors">
             <Edit3 className="w-3.5 h-3.5" /> Edit set
           </Link>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full transition-all duration-500"
           style={{ width: `${((index) / cards.length) * 100}%` }}
@@ -136,8 +136,8 @@ export default function FlashcardStudy() {
           <div className="absolute inset-0 card p-8 flex flex-col items-center justify-center text-center"
             style={{ backfaceVisibility: "hidden" }}>
             <p className="text-xs font-semibold text-violet-400 uppercase tracking-wide mb-4">Question</p>
-            <p className="text-lg font-medium text-gray-800 leading-relaxed">{card.front}</p>
-            <p className="text-xs text-gray-300 mt-6">Tap to reveal answer</p>
+            <p className="text-lg font-medium text-gray-800 dark:text-slate-100 leading-relaxed">{card.front}</p>
+            <p className="text-xs text-gray-300 dark:text-slate-600 mt-6">Tap to reveal answer</p>
           </div>
 
           {/* Back */}
@@ -187,7 +187,7 @@ export default function FlashcardStudy() {
         <div className="flex justify-center gap-4">
           {index > 0 && (
             <button onClick={() => { setIndex((i) => i - 1); setFlipped(false); }}
-              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1">
+              className="text-xs text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:text-slate-300 flex items-center gap-1">
               <ChevronLeft className="w-3.5 h-3.5" /> Previous
             </button>
           )}

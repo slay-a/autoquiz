@@ -103,7 +103,7 @@ export default function FlashcardEditor() {
   }
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 text-violet-400 animate-spin" /></div>;
-  if (!set) return <p className="text-gray-500">Set not found.</p>;
+  if (!set) return <p className="text-gray-500 dark:text-slate-400">Set not found.</p>;
   if (!loading && set && isOwner === false) {
     return <div className="p-8 text-center text-red-500">You don't have permission to edit this set.</div>;
   }
@@ -112,14 +112,14 @@ export default function FlashcardEditor() {
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div>
-        <Link to={`/flashcards/${id}`} className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-violet-600 mb-3">
+        <Link to={`/flashcards/${id}`} className="inline-flex items-center gap-1 text-sm text-gray-400 dark:text-slate-500 hover:text-violet-600 mb-3">
           <ChevronLeft className="w-4 h-4" /> Back to study
         </Link>
         <div className="flex items-center gap-3">
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="text-xl font-bold text-gray-900 bg-transparent border-b-2 border-transparent hover:border-violet-200 focus:border-violet-400 outline-none flex-1 pb-1"
+            className="text-xl font-bold text-gray-900 dark:text-slate-100 bg-transparent border-b-2 border-transparent hover:border-violet-200 focus:border-violet-400 outline-none flex-1 pb-1"
           />
           <button onClick={save} disabled={saving} className="btn-primary text-xs">
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
@@ -130,7 +130,7 @@ export default function FlashcardEditor() {
 
       {/* Share bar */}
       <div className="card p-4 flex items-center gap-3 flex-wrap">
-        <span className="text-sm text-gray-500">{cards.length} cards</span>
+        <span className="text-sm text-gray-500 dark:text-slate-400">{cards.length} cards</span>
         <div className="flex-1" />
         <button onClick={copyShare} className="btn-secondary text-xs">
           {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -144,7 +144,7 @@ export default function FlashcardEditor() {
           {set.is_public ? "Public" : "Make public"}
         </button>
         {set.share_code && (
-          <span className="badge bg-gray-100 text-gray-600 font-mono">{set.share_code}</span>
+          <span className="badge bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 font-mono">{set.share_code}</span>
         )}
       </div>
 
@@ -156,7 +156,7 @@ export default function FlashcardEditor() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Front</label>
+                    <label className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1 block">Front</label>
                     <textarea
                       value={editCard.front}
                       onChange={(e) => setEditCard({ ...editCard, front: e.target.value })}
@@ -165,7 +165,7 @@ export default function FlashcardEditor() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Back (Answer)</label>
+                    <label className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1 block">Back (Answer)</label>
                     <textarea
                       value={editCard.back}
                       onChange={(e) => setEditCard({ ...editCard, back: e.target.value })}
@@ -175,7 +175,7 @@ export default function FlashcardEditor() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Explanation (optional)</label>
+                  <label className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1 block">Explanation (optional)</label>
                   <textarea
                     value={editCard.explanation ?? ""}
                     onChange={(e) => setEditCard({ ...editCard, explanation: e.target.value })}
@@ -198,19 +198,19 @@ export default function FlashcardEditor() {
                 <GripVertical className="w-4 h-4 text-gray-200 mt-1 flex-shrink-0" />
                 <div className="flex-1 grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs font-semibold text-gray-400 mb-1">Front</p>
-                    <p className="text-sm text-gray-800">{card.front}</p>
+                    <p className="text-xs font-semibold text-gray-400 dark:text-slate-500 mb-1">Front</p>
+                    <p className="text-sm text-gray-800 dark:text-slate-100">{card.front}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-gray-400 mb-1">Back</p>
-                    <p className="text-sm text-gray-800">{card.back}</p>
+                    <p className="text-xs font-semibold text-gray-400 dark:text-slate-500 mb-1">Back</p>
+                    <p className="text-sm text-gray-800 dark:text-slate-100">{card.back}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <button onClick={() => startEdit(idx)} className="p-1.5 text-gray-300 hover:text-violet-500 transition-colors">
+                  <button onClick={() => startEdit(idx)} className="p-1.5 text-gray-300 dark:text-slate-600 hover:text-violet-500 transition-colors">
                     <Edit3 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => deleteCard(idx)} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors">
+                  <button onClick={() => deleteCard(idx)} className="p-1.5 text-gray-300 dark:text-slate-600 hover:text-red-400 transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -222,10 +222,10 @@ export default function FlashcardEditor() {
         {/* Add new card */}
         {showNew ? (
           <div className="card p-4 border-violet-200 space-y-3 animate-slide-up">
-            <h3 className="text-sm font-semibold text-gray-700">New Card</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-200">New Card</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Front</label>
+                <label className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1 block">Front</label>
                 <textarea
                   autoFocus
                   value={newCard.front}
@@ -236,7 +236,7 @@ export default function FlashcardEditor() {
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 block">Back</label>
+                <label className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-1 block">Back</label>
                 <textarea
                   value={newCard.back}
                   onChange={(e) => setNewCard({ ...newCard, back: e.target.value })}
@@ -262,7 +262,7 @@ export default function FlashcardEditor() {
           </div>
         ) : (
           <button onClick={() => setShowNew(true)}
-            className="w-full card p-4 border-dashed text-gray-400 hover:text-violet-600 hover:border-violet-300 transition-all flex items-center justify-center gap-2 text-sm font-medium">
+            className="w-full card p-4 border-dashed text-gray-400 dark:text-slate-500 hover:text-violet-600 hover:border-violet-300 transition-all flex items-center justify-center gap-2 text-sm font-medium">
             <Plus className="w-4 h-4" /> Add a card
           </button>
         )}

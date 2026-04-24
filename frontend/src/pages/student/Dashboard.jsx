@@ -156,10 +156,10 @@ export default function StudentDashboard() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
             Hey, {profile?.full_name?.split(" ")[0]} 👋
           </h1>
-          <p className="text-gray-500 mt-1 text-sm">Your study hub — quizzes, flashcards, notes.</p>
+          <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">Your study hub — quizzes, flashcards, notes.</p>
         </div>
         <Link to="/student/generate" className="btn-primary">
           <PlusCircle className="w-4 h-4" /> Generate Quiz
@@ -184,18 +184,18 @@ export default function StudentDashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit flex-wrap">
+      <div className="flex gap-1 bg-gray-100 dark:bg-slate-700 p-1 rounded-xl w-fit flex-wrap">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5
-              ${tab === t.key ? "bg-white text-violet-700 shadow-sm" : "text-gray-500 hover:text-gray-800"}`}
+              ${tab === t.key ? "bg-white dark:bg-slate-800 text-violet-700 shadow-sm" : "text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:text-slate-100"}`}
           >
             {t.label}
             {t.count > 0 && (
               <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold
-                ${tab === t.key ? "bg-violet-100 text-violet-600" : "bg-gray-200 text-gray-500"}`}>
+                ${tab === t.key ? "bg-violet-100 text-violet-600" : "bg-gray-200 text-gray-500 dark:text-slate-400"}`}>
                 {t.count}
               </span>
             )}
@@ -221,7 +221,7 @@ export default function StudentDashboard() {
 
 function QuizList({ quizzes, emptyMsg, showClass }) {
   if (!quizzes.length) return (
-    <div className="card p-10 text-center text-gray-400 space-y-2">
+    <div className="card p-10 text-center text-gray-400 dark:text-slate-500 space-y-2">
       <BookOpen className="w-8 h-8 mx-auto opacity-40" />
       <p className="text-sm">{emptyMsg}</p>
     </div>
@@ -234,8 +234,8 @@ function QuizList({ quizzes, emptyMsg, showClass }) {
             <BookOpen className="w-5 h-5 text-violet-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-gray-800 truncate">{q.title}</p>
-            <p className="text-xs text-gray-400">
+            <p className="font-medium text-gray-800 dark:text-slate-100 truncate">{q.title}</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500">
               {q.questions?.length} questions · {q.difficulty}
               {showClass && q.className && ` · ${q.className}`}
             </p>
@@ -249,7 +249,7 @@ function QuizList({ quizzes, emptyMsg, showClass }) {
 
 function NotesList({ notes }) {
   if (!notes.length) return (
-    <div className="card p-10 text-center text-gray-400 space-y-2">
+    <div className="card p-10 text-center text-gray-400 dark:text-slate-500 space-y-2">
       <FileText className="w-8 h-8 mx-auto opacity-40" />
       <p className="text-sm">No published notes from your classes yet.</p>
     </div>
@@ -262,8 +262,8 @@ function NotesList({ notes }) {
             <FileText className="w-5 h-5 text-indigo-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-gray-800 truncate">{note.title}</p>
-            <p className="text-xs text-gray-400">
+            <p className="font-medium text-gray-800 dark:text-slate-100 truncate">{note.title}</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500">
               {note.className} · {new Date(note.created_at).toLocaleDateString()}
             </p>
           </div>
@@ -276,7 +276,7 @@ function NotesList({ notes }) {
 
 function FlashcardList({ sets }) {
   if (!sets.length) return (
-    <div className="card p-10 text-center text-gray-400 space-y-2">
+    <div className="card p-10 text-center text-gray-400 dark:text-slate-500 space-y-2">
       <Layers className="w-8 h-8 mx-auto opacity-40" />
       <p className="text-sm">No flashcard sets yet. Create them from any quiz result.</p>
     </div>
@@ -289,8 +289,8 @@ function FlashcardList({ sets }) {
             <Layers className="w-5 h-5 text-indigo-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-gray-800 truncate">{s.title}</p>
-            <p className="text-xs text-gray-400">{s.cards?.length} cards</p>
+            <p className="font-medium text-gray-800 dark:text-slate-100 truncate">{s.title}</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500">{s.cards?.length} cards</p>
           </div>
           <Link to={`/flashcards/${s.id}`} className="btn-primary text-xs py-1.5">Study</Link>
         </div>
@@ -301,7 +301,7 @@ function FlashcardList({ sets }) {
 
 function ClassList({ classes }) {
   if (!classes.length) return (
-    <div className="card p-10 text-center text-gray-400 space-y-2">
+    <div className="card p-10 text-center text-gray-400 dark:text-slate-500 space-y-2">
       <Users className="w-8 h-8 mx-auto opacity-40" />
       <p className="text-sm">Enter a class code above to join.</p>
     </div>
@@ -311,10 +311,10 @@ function ClassList({ classes }) {
       {classes.map((c) => (
         <div key={c.id} className="card p-5">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-gray-800">{c.name}</h3>
-            <span className="badge bg-gray-100 text-gray-500 font-mono">{c.class_code}</span>
+            <h3 className="font-semibold text-gray-800 dark:text-slate-100">{c.name}</h3>
+            <span className="badge bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 font-mono">{c.class_code}</span>
           </div>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-400 dark:text-slate-500">
             {c.description || "No description"}
           </p>
         </div>
@@ -325,7 +325,7 @@ function ClassList({ classes }) {
 
 function MyNotesList({ notes }) {
   if (!notes.length) return (
-    <div className="card p-10 text-center text-gray-400 space-y-2">
+    <div className="card p-10 text-center text-gray-400 dark:text-slate-500 space-y-2">
       <FileText className="w-8 h-8 mx-auto opacity-40" />
       <p className="text-sm">No saved notes yet.</p>
     </div>
@@ -338,8 +338,8 @@ function MyNotesList({ notes }) {
             <FileText className="w-5 h-5 text-violet-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-gray-800 truncate">{note.title}</p>
-            <p className="text-xs text-gray-400">
+            <p className="font-medium text-gray-800 dark:text-slate-100 truncate">{note.title}</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500">
               {new Date(note.created_at).toLocaleDateString()}
             </p>
           </div>

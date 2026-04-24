@@ -7,6 +7,39 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!--
+      FEAT-012 AC-12.1.4: pre-paint theme application.
+      Read aq_theme from localStorage before React mounts. If absent,
+      fall back to OS prefers-color-scheme. Apply the `dark` class on
+      <html> synchronously so Tailwind `dark:` variants are active on
+      first paint and there is no flash of incorrect theme (FOIT).
+      Kept tiny and dependency-free; safe to inline.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("aq_theme");
+          var theme;
+          if (stored === "light" || stored === "dark") {
+            theme = stored;
+          } else if (
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+          ) {
+            theme = "dark";
+          } else {
+            theme = "light";
+          }
+          if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        } catch (e) {
+          /* localStorage unavailable — default to light, skip */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

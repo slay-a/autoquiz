@@ -62,28 +62,28 @@ export default function Upload({ onUpload, onSuccess }) {
             ? "border-violet-400 bg-violet-50 scale-[1.01]"
             : uploading
             ? "border-violet-300 bg-violet-50/50 cursor-default"
-            : "border-gray-200 hover:border-violet-300 hover:bg-violet-50/30 bg-white"
+            : "border-gray-200 dark:border-slate-700 hover:border-violet-300 hover:bg-violet-50/30 bg-white dark:bg-slate-800"
           }`}
       >
         {/* Icon */}
         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors
-          ${dragging || uploading ? "bg-violet-100" : "bg-gray-50"}`}>
+          ${dragging || uploading ? "bg-violet-100" : "bg-gray-50 dark:bg-slate-800"}`}>
           <UploadCloud className={`w-7 h-7 transition-colors
-            ${dragging || uploading ? "text-violet-500" : "text-gray-400"}`} />
+            ${dragging || uploading ? "text-violet-500" : "text-gray-400 dark:text-slate-500"}`} />
         </div>
 
         {/* Text */}
         {uploading && preview ? (
           <div className="text-center">
             <p className="text-sm font-medium text-violet-700">Uploading {preview.name}…</p>
-            <p className="text-xs text-gray-400">{preview.size} MB</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500">{preview.size} MB</p>
           </div>
         ) : (
           <div className="text-center">
-            <p className="text-sm font-semibold text-gray-700">
+            <p className="text-sm font-semibold text-gray-700 dark:text-slate-200">
               {dragging ? "Drop it!" : "Drag & drop or click to upload"}
             </p>
-            <p className="text-xs text-gray-400 mt-1">PDF · DOCX · PPTX — up to 50MB</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">PDF · DOCX · PPTX — up to 50MB</p>
           </div>
         )}
 

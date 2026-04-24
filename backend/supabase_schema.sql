@@ -12,8 +12,12 @@ create table if not exists profiles (
   email       text not null,
   full_name   text not null,
   role        text not null check (role in ('instructor', 'student')),
+  avatar_url  text,
   created_at  timestamptz default now()
 );
+
+-- Add avatar_url for existing deployments (safe to re-run)
+alter table profiles add column if not exists avatar_url text;
 
 -- Auto-create profile on signup
 create or replace function handle_new_user()
@@ -295,3 +299,30 @@ alter table student_notes enable row level security;
 create policy students_own_notes on student_notes
   for all using (created_by = auth.uid())
   with check (created_by = auth.uid());
+
+-- ─── Migration: FEAT-013 — Harden profiles RLS ───────────────
+-- Before: `auth_all` allowed any authenticated user to UPDATE any profile
+-- row (defacement vector for full_name / avatar_url). Replace with
+-- per-user UPDATE/INSERT/DELETE scoped to auth.uid() = id.
+-- SELECT stays permissive to authenticated users because class views,
+-- flashcard/note ownership displays, etc. read other users' display
+-- fields (full_name, avatar_url, role). No sensitive columns exist on
+-- this table beyond email, which is already exposed in membership flows.
+drop policy if exists auth_all on profiles;
+
+create policy profiles_select on profiles
+  for select to authenticated
+  using (true);
+
+create policy profiles_insert on profiles
+  for insert to authenticated
+  with check (id = auth.uid());
+
+create policy profiles_update on profiles
+  for update to authenticated
+  using (id = auth.uid())
+  with check (id = auth.uid());
+
+create policy profiles_delete on profiles
+  for delete to authenticated
+  using (id = auth.uid());

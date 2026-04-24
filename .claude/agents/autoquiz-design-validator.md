@@ -4,7 +4,7 @@ description: >
   Reviews a feature implementation for architectural correctness against
   DESIGN.md. Read-only. Produces an APPROVED/NEEDS REVISION report by concern
   area. Runs in parallel with autoquiz-req-validator.
-model: claude-opus-4-5
+model: claude-sonnet-4-6
 tools:
   - Read
   - Glob
@@ -26,10 +26,13 @@ Always read these before reviewing:
 
 ## What you receive
 
-You will be given:
-1. The feature spec (`specs/<feature-slug>.md`)
-2. The prototyper's diff summary
-3. Optionally: open questions passed from the req-validator
+You will be given one of:
+1. **Seed pass (REVIEW mode):** feature spec only — review the current repo
+   state (no prototyper diff yet) and report gaps vs `docs/DESIGN.md`.
+2. **Verify pass:** feature spec + prototyper diff summary (+ optional open
+   questions from req-validator) — review the just-applied changes.
+
+In both modes the output format is the same.
 
 ## Review areas
 

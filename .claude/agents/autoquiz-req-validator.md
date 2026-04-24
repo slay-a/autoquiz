@@ -4,7 +4,7 @@ description: >
   Verifies and validates a feature implementation against its spec and user
   stories. Read-only. Produces a structured PASS/FAIL report for the
   orchestrator to act on. Runs in parallel with autoquiz-design-validator.
-model: claude-opus-4-5
+model: claude-sonnet-4-6
 tools:
   - Read
   - Glob
@@ -25,10 +25,13 @@ Always read these before reviewing:
 
 ## What you receive
 
-You will be given:
-1. The feature spec (`specs/<feature-slug>.md`)
-2. The prototyper's diff summary (files changed and what changed)
-3. Optionally: a previous report if this is a retry pass
+You will be given one of:
+1. **Seed pass (REVIEW mode):** feature spec only — review the current repo
+   state (no prototyper diff yet) and report gaps vs each AC.
+2. **Verify pass:** feature spec + prototyper diff summary (+ optional previous
+   report for retry context).
+
+In both modes the output format is the same.
 
 ## Verification checklist
 

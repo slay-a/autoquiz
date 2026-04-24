@@ -4,7 +4,7 @@ description: >
   Implements features across the FastAPI backend, React frontend, and Supabase
   schema. Use when a task involves writing or modifying code. Receives a feature
   spec and an optional blocker list from the orchestrator.
-model: claude-sonnet-4-5
+model: claude-sonnet-4-6
 tools:
   - Read
   - Edit
@@ -61,12 +61,15 @@ a previous V&V or test cycle — address every blocker before emitting your diff
 ## What you receive
 
 You will be given one of:
-- **First pass:** a completed feature spec (`specs/<feature-slug>.md`)
-- **Retry pass:** the original spec plus a compiled blocker list from the
-  req-validator, design-validator, or tester
+- **Greenfield first pass:** a completed feature spec (`specs/<feature-slug>.md`)
+- **Review first pass:** the spec + a triaged blocker list from the orchestrator
+  (gaps between existing code and the latest spec/DESIGN.md) + Red-phase test report
+- **Retry pass:** the spec + a refreshed blocker list compiled from the latest
+  V&V reports and/or failing Green-phase tests
 
-On a retry pass, fix every listed blocker. Do not re-implement parts that were
-not flagged.
+In review and retry passes, fix every listed blocker and make the failing
+tests pass. Do not re-implement parts that were not flagged — unnecessary
+churn breaks other features.
 
 ## Output format
 

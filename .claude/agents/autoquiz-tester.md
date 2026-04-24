@@ -4,7 +4,7 @@ description: >
   Writes and runs tests for the AutoQuiz backend and frontend following TDD.
   In Red phase (pre-implementation): writes failing tests from the spec.
   In Green phase (post-implementation): runs existing tests and reports results.
-model: claude-sonnet-4-5
+model: claude-sonnet-4-6
 tools:
   - Read
   - Edit
@@ -39,10 +39,15 @@ You operate in one of two phases, specified by the orchestrator:
 
 ---
 
-## RED PHASE (pre-implementation)
+## RED PHASE (pre-implementation OR review-mode gap-pinning)
 
 ### What you receive
 - The feature spec (`specs/<feature-slug>.md`)
+- **Mode:** `GREENFIELD` (default) or `REVIEW`
+- **If REVIEW:** a triaged blocker list from the orchestrator — write tests
+  that pin **only those gaps**, not the full spec. Each blocker must map to
+  at least one failing test. Do not re-test ACs that are already implemented
+  and passing.
 
 ### Step 1 — Read the spec's Test Boundaries section
 Identify:

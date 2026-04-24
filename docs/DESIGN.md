@@ -150,6 +150,42 @@ components are purely presentational.
 
 ---
 
+### Cross-Layer Call Contracts
+
+Each arrow between layers is a contract. Contracts live in this document — the
+code implements them.
+
+1. **Signatures first.** Any function crossing a layer boundary has a typed
+   signature recorded in this document or the relevant feature spec before
+   implementation starts. Changing a signature is a DESIGN.md edit first, code
+   edit second.
+2. **No skipping layers.** Routes call services; services call infra; infra
+   reads/writes data. Any call that skips a layer (e.g. a route importing
+   `app.core.supabase` directly, or a Celery task writing to the DB without
+   going through a service) is a **CRITICAL** violation.
+3. **No upward imports.** Files in Layer 2, 3, or 4 never import from a higher
+   layer. `services/` never imports from `api/`; `core/` never imports from
+   `services/`. Enforced by grep in CI.
+4. **Errors cross boundaries as typed exceptions.** Services raise from the
+   hierarchy in §3.1. Routes translate to HTTP via the registry in §3.1.2.
+   Bare `except Exception` at a layer boundary is **MAJOR**.
+5. **No FastAPI primitives below Layer 1.** `Request`, `Response`, `Depends`,
+   and `HTTPException` are Layer 1 only. A service or util that imports from
+   `fastapi` is a **CRITICAL** violation.
+6. **Frontend mirror.** Pages fetch; components render. A component that
+   imports `fetch`, `axios`, or the Supabase client (beyond auth reads) is a
+   **CRITICAL** layer violation.
+7. **One context, one concern.** `AuthContext` owns identity and nothing else.
+   `ThemeContext` owns theme and nothing else. New global state requires the
+   spec to state why local state is insufficient; unjustified new contexts are
+   **MAJOR**.
+8. **Celery tasks are services with a queue in front.** A task body must call
+   service functions, not reach into `app.core` or raw SQL directly. Task
+   modules live at `backend/app/tasks/` (or the existing `celery_worker.py`),
+   never inside `routes/`.
+
+---
+
 ## 1. System Overview
 
 AutoQuiz is a two-role (instructor / student) web application for AI-powered quiz and
@@ -295,8 +331,12 @@ AutoQuizError (base)
 - Tasks do not retry automatically by default. Retry logic must be explicitly added with a max retry count and exponential backoff if a task targets a flaky external service (e.g., OpenAI embedding calls).
 
 **Logging:**
-- Use Python's `logging` module configured in `backend/app/core/logging.py`. Do not use `print()` statements in any layer.
-- Log level guidelines: `DEBUG` for verbose pipeline internals, `INFO` for job state transitions and successful completions, `WARNING` for recoverable anomalies (empty retrieval results, fallback to keyword search), `ERROR` for all caught exceptions before re-raising.
+- Structured JSON per the envelope and event catalog in §14. Do not use
+  `print()` statements in any layer.
+- Log-level guidelines: `DEBUG` for verbose pipeline internals; `INFO` for
+  job state transitions and successful completions; `WARNING` for recoverable
+  anomalies (empty retrieval results, fallback to keyword search); `ERROR`
+  for all caught exceptions before re-raising.
 
 ### 3.1.1 Standard Error Envelope
 
@@ -875,16 +915,342 @@ fix them unless a feature spec explicitly targets them.
 | GAP-4 | `difficulty` f-string injection in `quiz_gen.py` | Normalizes user-data-in-prompt; fix with dict mapping |
 | GAP-5 | No test suite yet (`backend/tests/` absent)     | Tester agent must create the directory          |
 | GAP-6 | CORS `allow_origins` is hardcoded               | Will need env var for production deployment     |
+| GAP-7 | No rate limiting on generation endpoints        | Uncapped OpenAI spend per user; abuse vector    |
+| GAP-8 | No client log sink for frontend events          | Frontend lifecycle events only reach `console`   |
 
 ---
 
 ## 13. Security Constraints
 
-These are non-negotiable. The design-validator will flag any violation as CRITICAL.
+These are non-negotiable. The design-validator flags any violation as CRITICAL
+unless a lower severity is explicitly noted.
 
-1. **No SQL string concatenation.** All DB queries use the Supabase client's parameterized methods.
-2. **No user input injected raw into LLM prompts.** All user-controlled values must pass through a pre-written mapping dict before entering a prompt string.
-3. **No API keys in frontend source.** `SUPABASE_SERVICE_KEY` must never appear in Vite env vars or frontend code.
-4. **File type validation is extension + MIME.** Allowed: `.pdf`, `.docx`, `.pptx`. Reject all others at the upload route boundary.
-5. **Max upload size enforced before reading full file into memory.** Currently: 50MB.
+### 13.1 Confidentiality
+
+1. **Row-level ownership checks on every read/write.** Until RLS is tightened
+   (GAP-1), every route that returns or mutates user-owned data filters on the
+   authenticated `actor_id`. Services must never return cross-user rows by
+   accident.
+2. **Service key is server-side only.** `SUPABASE_SERVICE_KEY` lives in
+   `backend/.env` and nowhere else — never in frontend code, git history,
+   client logs, or error responses.
+3. **Invite codes are shareable tokens, not secrets.** Display to instructors
+   only by default; revocable by regenerating.
+4. **Public share links use `share_code`, never row IDs.** The `id` column is
+   never embedded in a shareable URL.
+
+### 13.2 Integrity
+
+1. **All writes validate at the Layer 1 boundary.** Pydantic schemas in
+   `backend/app/models/schemas.py` are the single validation surface —
+   services trust their inputs.
+2. **Enum fields validated against a closed set.** `difficulty`, `role`,
+   `status`, `question_type`, `set_type`. Open-string enums are **MAJOR**.
+3. **Audit-relevant fields are append-only.** `processing_jobs.created_at`,
+   `saved_quizzes.created_by`, `class_members.joined_at` must not be mutated
+   by application code after the initial write.
+4. **Generated content is never silently truncated.** If an LLM response
+   fails schema validation, raise `LLM_RESPONSE_INVALID` (502) — never return
+   partial content.
+
+### 13.3 Authenticity
+
+1. **Until `get_current_user` ships (GAP-2), each protected route re-derives
+   the actor from the bearer token via `supabase.auth.get_user()` inside the
+   handler.** No route trusts an `actor_id` supplied in the request body.
+2. **Frontend never sets `actor_id` in a request body.** The backend derives
+   it from the token. Any route that accepts `actor_id` as input is a
+   **CRITICAL** violation.
+3. **Signed uploads.** When direct-to-storage uploads are introduced, use
+   short-lived signed URLs (≤5 minutes) scoped to the caller's class
+   membership.
+
+### 13.4 Accountability
+
+1. **Every state-changing action emits a structured log event** (see §14).
+   Reads do not need to log unless they cross user boundaries.
+2. **Every event carries `actor_id`, `actor_role`, `resource_type`,
+   `resource_id`, `request_id`, `outcome`** so a bad action can be traced
+   end-to-end.
+3. **`request_id` correlation.** Middleware generates a UUID per request and
+   attaches it to `request.state.request_id`. Every log line and every error
+   envelope includes it. Celery tasks inherit it via task kwargs.
+
+### 13.5 Privacy & Data Retention
+
+1. **No PII in logs, event `meta`, error messages, or analytics.** Forbidden
+   in all fields: email addresses, full names, file contents, chunk text,
+   question text, note summaries. Use `actor_id` (UUID) instead of email
+   anywhere user identity is needed. If a value must be retained for debugging
+   and could carry PII, hash it with SHA-256 and log the first 8 hex chars.
+2. **Minimise what is stored.** `profiles` keeps `email`, `full_name`, `role`,
+   and `avatar_url`. No bios, location, social IDs, or third-party identifiers
+   unless a feature explicitly requires them and documents retention.
+3. **Deletion semantics.** When a profile row is deleted (FK CASCADE from
+   `auth.users`), owned classes, quizzes, flashcards, notes, and processing
+   jobs are deleted transitively via `ON DELETE CASCADE`. Cross-user
+   references (e.g. `saved_quizzes.class_id`) use `ON DELETE SET NULL`.
+4. **Retention policy.** `processing_jobs` rows with `status='success'` older
+   than 90 days may be purged by a scheduled task (not yet built). Failed
+   jobs retained indefinitely for debugging.
+
+### 13.6 Compliance Posture
+
+1. **FERPA.** Student-identifiable academic records (quiz results, flashcard
+   performance, saved notes) are treated as educational records. Never expose
+   them cross-class or to anyone other than the owning student and their
+   class's instructor.
+2. **GDPR.** EU users have data-subject rights (access, deletion, export).
+   A deletion request is satisfied by cascading delete of the `profiles` row.
+   An export endpoint is not yet built — must land before onboarding EU users.
+3. **Data location.** Supabase region is the primary compliance surface.
+   Document the chosen region in deployment docs before production launch.
+
+### 13.7 Rate Limiting & Abuse Prevention
+
+1. **Per-actor rate limits on generation endpoints.** `/quiz/generate` and
+   `/notes/generate` must be capped per authenticated user — default 20
+   requests/hour — to bound OpenAI spend. Implemented via Redis counters
+   keyed on `actor_id` (GAP-7).
+2. **Upload rate limits.** Max 20 uploads/hour per user; max 200/hour per class.
+3. **LLM output size cap.** Every LLM response passes through a 64 KB length
+   guard before schema validation; oversize responses raise
+   `LLM_RESPONSE_INVALID`.
+
+### 13.8 Foundational Rules
+
+1. **No SQL string concatenation.** All DB queries use the Supabase client's
+   parameterised methods.
+2. **No user input injected raw into LLM prompts.** All user-controlled values
+   pass through a pre-written mapping dict before entering a prompt string.
+3. **No API keys in frontend source.** `SUPABASE_SERVICE_KEY` must never
+   appear in Vite env vars or frontend code.
+4. **File type validation is extension + MIME.** Allowed: `.pdf`, `.docx`,
+   `.pptx`. Reject all others at the upload route boundary.
+5. **Max upload size enforced before reading full file into memory.** 50 MB.
 6. **CORS is explicit allowlist only.** No `allow_origins=["*"]`.
+7. **Secrets never land in git.** `.env` files are gitignored; pre-commit
+   hook rejects commits containing `sk-`, `eyJ`, or recognisable JWT / API
+   key patterns.
+
+---
+
+## 14. Structured Logging & Event Catalog
+
+Every server-side log line is a structured JSON record with the envelope in
+§14.1. Unstructured log lines, `print()` statements, and PII-carrying messages
+are forbidden. The design-validator flags violations as **MAJOR**.
+
+### 14.1 Event Envelope
+
+```json
+{
+  "timestamp": "2026-04-24T15:19:14Z",
+  "event": "dot.separated.name",
+  "level": "INFO | WARNING | ERROR | DEBUG",
+  "actor_id": "uuid | null",
+  "actor_role": "instructor | student | system | null",
+  "resource_type": "file | job | quiz | note | class | flashcard_set | null",
+  "resource_id": "string | null",
+  "request_id": "uuid | null",
+  "duration_ms": "int | null",
+  "outcome": "success | failure",
+  "error_code": "string | null",
+  "meta": { "feature-specific non-PII fields" }
+}
+```
+
+**Envelope rules:**
+1. Every log line includes `timestamp`, `event`, `level`, `outcome`. Other
+   fields are nullable.
+2. `actor_id` is a UUID. Never log emails, names, file contents, or question
+   text in any field.
+3. `request_id` comes from `request.state.request_id` (populated by
+   middleware); Celery tasks inherit it via task kwargs.
+4. `duration_ms` is present on every event whose `event` name ends in
+   `.completed` or `.failed`.
+5. The envelope is emitted by a single helper (`backend/app/core/logging.py`
+   → `log_event()`) — no ad-hoc `logger.info("...")` string-formatting in
+   service or route code.
+
+### 14.2 Event Naming
+
+`domain.entity.action` — past tense for completions, imperative for starts.
+
+Allowed domains: `auth`, `upload`, `ingestion`, `retrieval`, `quiz`,
+`notes`, `flashcard`, `class`, `profile`. Adding a new domain requires a
+DESIGN.md edit.
+
+### 14.3 Event Catalog
+
+| event                         | level   | outcome  | Fires from              | meta fields                                         |
+|-------------------------------|---------|----------|-------------------------|-----------------------------------------------------|
+| `auth.session.started`        | INFO    | success  | Frontend · AuthContext  | —                                                   |
+| `auth.session.ended`          | INFO    | success  | Frontend · AuthContext  | —                                                   |
+| `upload.file.accepted`        | INFO    | success  | Route · upload          | `mime_type`, `size_bytes`                           |
+| `upload.file.rejected`        | WARNING | failure  | Route · upload          | `reason` (`ext` \| `size`), `size_bytes`            |
+| `ingestion.job.started`       | INFO    | success  | Celery · ingest         | `file_id`, `stage`                                  |
+| `ingestion.job.completed`     | INFO    | success  | Celery · ingest         | `chunk_count`, `stages_run`                         |
+| `ingestion.job.failed`        | ERROR   | failure  | Celery · ingest         | `stage`, `exception_type`                           |
+| `retrieval.search.completed`  | INFO    | success  | Service · retrieval     | `top_k`, `chunks_returned`, `fallback_keyword`      |
+| `quiz.generate.started`       | INFO    | success  | Service · quiz_gen      | `difficulty`, `num_questions`, `outside_sources`    |
+| `quiz.generate.completed`     | INFO    | success  | Service · quiz_gen      | `questions_returned`, `prompt_tokens`, `completion_tokens` |
+| `quiz.generate.failed`        | ERROR   | failure  | Service · quiz_gen      | `error_code`, `exception_type`                      |
+| `quiz.save.completed`         | INFO    | success  | Route · quiz            | `quiz_id`, `is_shared`                              |
+| `quiz.share.toggled`          | INFO    | success  | Route · quiz            | `quiz_id`, `is_shared`                              |
+| `notes.generate.started`      | INFO    | success  | Service · notes_gen     | `outside_sources`                                   |
+| `notes.generate.completed`    | INFO    | success  | Service · notes_gen     | `has_file`, `prompt_tokens`                         |
+| `notes.generate.failed`       | ERROR   | failure  | Service · notes_gen     | `error_code`, `exception_type`                      |
+| `notes.publish.toggled`       | INFO    | success  | Route · notes           | `note_id`, `is_published`                           |
+| `flashcard.set.created`       | INFO    | success  | Route · flashcards      | `set_id`, `card_count`, `set_type`                  |
+| `flashcard.set.shared`        | INFO    | success  | Route · flashcards      | `set_id`, `scope` (`class` \| `public`)             |
+| `class.created`               | INFO    | success  | Route · classes         | `class_id`                                          |
+| `class.member.joined`         | INFO    | success  | Route · classes         | `class_id`                                          |
+| `class.member.removed`        | INFO    | success  | Route · classes         | `class_id`, `removed_by_instructor`                 |
+| `profile.updated`             | INFO    | success  | Route · profiles        | `fields_changed` (list)                             |
+
+Adding a new event is a DESIGN.md change first, code change second. The
+design-validator flags any emitted event not in this table as **MAJOR**.
+
+### 14.4 Layer Ownership of Events
+
+- **Layer 1 (routes):** entry/exit of user-initiated actions
+  (`upload.file.accepted`, `quiz.save.completed`, `profile.updated`).
+- **Layer 2 (services):** events surrounding external calls (LLM, retrieval)
+  with `duration_ms` populated.
+- **Celery tasks:** `*.started` / `*.completed` / `*.failed` at the task boundary.
+- **Frontend:** emits auth lifecycle events only. Until GAP-8 is closed, they
+  go to `console.info` using the same envelope; a server sink endpoint is a
+  future addition.
+
+### 14.5 PII Forbidden List
+
+Never emit the following in `meta`, `error_code`, `message`, or any other
+logged field:
+
+- Email addresses, full names, usernames
+- File contents, extracted chunk text, quiz question text, note content
+- Tokens, API keys, session IDs, raw SQL payloads
+- IP addresses (permissible only in infrastructure layer access logs, not
+  application logs)
+
+When a value could carry PII and is needed for debugging, SHA-256 the value
+and log the first 8 hex chars (`meta.topic_hash = "a1b2c3d4"`).
+
+---
+
+## 15. Brand & UX System
+
+A shared design vocabulary keeps the product coherent across pages and makes
+accessibility auditable. Tokens are Tailwind-first; `frontend/tailwind.config.js`
+is the source of truth. Components must consume tokens, never hand-authored
+hex values.
+
+### 15.1 Color Tokens
+
+Exposed as CSS custom properties on `:root` and `html.dark`; mirrored into
+Tailwind via `theme.extend.colors`.
+
+| Token             | Light (Tailwind)         | Dark (Tailwind)          | Usage                          |
+|-------------------|--------------------------|--------------------------|--------------------------------|
+| `--color-bg`      | `slate-50`   `#f8fafc`   | `slate-900`  `#0f172a`   | App background                 |
+| `--color-surface` | `white`      `#ffffff`   | `slate-800`  `#1e293b`   | Cards, modals, inputs          |
+| `--color-border`  | `gray-100`   `#f3f4f6`   | `slate-700`  `#334155`   | Dividers, input outlines       |
+| `--color-text`    | `gray-900`   `#111827`   | `slate-100`  `#f1f5f9`   | Body text                      |
+| `--color-muted`   | `gray-500`   `#6b7280`   | `slate-400`  `#94a3b8`   | Secondary / helper text        |
+| `--color-primary` | `violet-600` `#7c3aed`   | `violet-400` `#a78bfa`   | Primary CTA, active nav        |
+| `--color-accent`  | `indigo-600` `#4f46e5`   | `indigo-400` `#818cf8`   | Gradient partner to primary    |
+| `--color-success` | `emerald-600` `#059669`  | `emerald-400` `#34d399`  | Success toasts, confirmations  |
+| `--color-warning` | `amber-500`  `#f59e0b`   | `amber-400`  `#fbbf24`   | Warnings, pending states       |
+| `--color-danger`  | `red-600`    `#dc2626`   | `red-400`    `#f87171`   | Errors, destructive actions    |
+
+**Contrast rule:** body text pairs must meet **WCAG 2.1 AA** (≥4.5:1).
+Interactive elements at default and hover states must meet AA. Verified in
+both themes by the prototyper before merge.
+
+### 15.2 Typography
+
+| Token         | Value                                                                |
+|---------------|----------------------------------------------------------------------|
+| Font family   | `Inter, ui-sans-serif, system-ui, sans-serif` (Tailwind `font-sans`) |
+| Mono family   | `ui-monospace, SFMono-Regular, Menlo, monospace`                     |
+| Base size     | 16 px (`text-base`)                                                  |
+| Line height   | 1.5 body · 1.25 headings                                             |
+| Heading scale | h1 `text-3xl` · h2 `text-2xl` · h3 `text-xl` · h4 `text-lg`          |
+| Weight usage  | 400 body · 500 labels · 600 headings · 700 brand emphasis            |
+
+### 15.3 Spacing & Layout
+
+- **4 px base grid.** Spacing tokens use Tailwind's default scale
+  (`space-1` = 4 px).
+- **Page width:** primary pages centred within `max-w-5xl` (64 rem).
+- **Vertical rhythm:** 24 px between form fields, 40 px between page sections.
+
+### 15.4 Radius & Elevation
+
+| Token          | Value     | Usage                 |
+|----------------|-----------|-----------------------|
+| `rounded-sm`   | 2 px      | Chips, tags           |
+| `rounded-md`   | 6 px      | Buttons, inputs       |
+| `rounded-lg`   | 8 px      | Cards, modals         |
+| `rounded-2xl`  | 16 px     | Hero panels           |
+| `shadow-sm`    | subtle    | Resting cards         |
+| `shadow-md`    | standard  | Hover, popovers       |
+| `shadow-lg`    | elevated  | Modals only           |
+
+### 15.5 Motion
+
+| Token           | Duration | Easing                             | Usage                        |
+|-----------------|----------|------------------------------------|------------------------------|
+| `--motion-fast` | 100 ms   | ease-out                           | Theme toggle, focus rings    |
+| `--motion-base` | 200 ms   | ease-in-out                        | Buttons, links               |
+| `--motion-slow` | 400 ms   | cubic-bezier(0.4, 0, 0.2, 1)       | Page transitions             |
+
+Respect `prefers-reduced-motion`. When set, animations collapse to instant
+state changes.
+
+### 15.6 Component Pattern Library
+
+Reuse before invent. Existing patterns in `frontend/src/components/` that
+must be preferred over new ones:
+
+| Pattern               | Component            | Purpose                               |
+|-----------------------|----------------------|---------------------------------------|
+| Top navigation        | `TopBar.jsx`         | Only nav surface — extend, don't replace |
+| Route gate            | `ProtectedRoute.jsx` | Role + auth enforcement               |
+| Quiz render           | `QuizView.jsx`       | Multi-type question rendering         |
+| File upload           | `Upload.jsx`         | Upload + job polling                  |
+| Topic form            | `TopicSearch.jsx`    | Topic + difficulty + options          |
+
+Adding a new shared component requires the feature spec's Design Decisions
+section to state why no existing pattern fits.
+
+### 15.7 GUI Checklist
+
+Every frontend feature satisfies the following before the prototyper marks a
+component done. The req-validator checks for evidence of each item.
+
+- [ ] **Five states:** idle, loading, empty, success, error — each designed
+      and render-tested.
+- [ ] **Learnability:** a first-time user completes the happy path without
+      documentation. Primary affordance is visually distinct.
+- [ ] **Recognizability:** reuses existing patterns from §15.6 where applicable.
+- [ ] **Keyboard operability:** linear tab order, visible focus outline on
+      every interactive element, Escape closes modals, Enter submits forms.
+- [ ] **Accessibility floor:** WCAG 2.1 AA contrast; every form input has an
+      associated label (`<label htmlFor>` or `aria-label`); every button has
+      an accessible name.
+- [ ] **Responsive:** works at 375 px (mobile) and 1440 px (desktop) viewports.
+- [ ] **Dark mode parity:** every surface tested in `html.dark` with no
+      hardcoded hex values.
+- [ ] **Reduced motion:** animations disabled when
+      `prefers-reduced-motion: reduce` is set.
+
+### 15.8 Copy & Voice
+
+- Active voice, sentence case for button labels and headings.
+- User-facing error messages are concrete and actionable ("File exceeds 50 MB
+  limit" not "Error: invalid file"). Copy aligns with the error registry in
+  §3.1.2.
+- Empty states include a next step ("Upload your first class material to get
+  started"), not just the fact of absence.

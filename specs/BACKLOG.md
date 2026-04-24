@@ -33,6 +33,7 @@
 | FEAT-009 | Notes Generation (Student) | P1 | ready | `specs/feat-009-notes-generation-student.md` | FEAT-006 |
 | FEAT-010 | Instructor Notes System | P0 | ready | `specs/feat-010-instructor-notes.md` | FEAT-008 |
 | FEAT-011 | Flashcard Study | P1 | ready | `specs/feat-011-flashcard-study.md` | FEAT-007 |
+| FEAT-013 | User Profile (Avatar & Display Name) | P2 | ready | `specs/feat-013-user-profile.md` | FEAT-001 |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -40,6 +41,15 @@
 ---
 
 ## Feature Details
+
+### FEAT-013 — User Profile (Avatar & Display Name)
+
+**Stories:** 13.1 View and edit profile, 13.2 Save profile changes, 13.3 Avatar surfaces in the navbar
+**ACs summary:** `/profile` reachable to authenticated students and instructors only; preview shows current avatar, full_name, email, role; display-name input pre-filled, required, 1–80 chars, Save disabled while empty/saving; avatar picker shows 8 DiceBear presets, click highlights and updates preview without saving; submit calls `supabase.from("profiles").update({ full_name, avatar_url }).eq("id", user.id)` writing only those two columns; success shows confirmation then reloads page; failure renders inline error; navbar right side renders `avatar_url` `<img>` (or `User` icon fallback when null) wrapped in `<Link to="/profile">`; updated avatar reflected in navbar after save.
+**Dependencies:** FEAT-001
+**Implementation status:** already in codebase — single MAJOR check needed: confirm `profiles` RLS scopes UPDATE to `auth.uid() = id`. Adds `avatar_url text` nullable column to `profiles`. No FastAPI routes added; no LLM/RAG impact.
+
+---
 
 ### FEAT-011 — Flashcard Study
 

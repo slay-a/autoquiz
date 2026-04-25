@@ -6,7 +6,9 @@ Steps: parse via LlamaIndex readers → chunk via SentenceSplitter → embed →
 import uuid
 from pathlib import Path
 from llama_index.core.node_parser import SentenceSplitter
+from openai import OpenAI
 from app.core.config import settings
+from app.core.supabase import get_supabase
 from app.utils.parsers import LLAMAINDEX_PARSERS
 
 
@@ -80,3 +82,67 @@ def ingest_document(file_bytes: bytes, filename: str, file_id: str) -> list[dict
         })
 
     return chunks
+
+
+# ── Embedding (Layer 2 — all OpenAI calls live here per DESIGN.md §7 rule 1) ─
+
+def embed_chunks(chunks: list[dict]) -> list[dict]:
+    """
+    Embed a list of chunk dicts (output of ingest_document) using
+    text-embedding-3-small. Returns a new list of dicts with an added
+    'embedding' key containing the vector.
+
+    Raises ValueError("embed|<message>") on OpenAI error so the Celery
+    task can map it to EMBED_FAILED.
+    """
+    if not chunks:
+        return []
+
+    try:
+        client = OpenAI(api_key=settings.openai_api_key)
+        texts = [c["text"] for c in chunks]
+        response = client.embeddings.create(
+            model="text-embedding-3-small",
+            input=texts,
+        )
+        embeddings = [e.embedding for e in response.data]
+    except Exception as exc:
+        raise ValueError(f"embed|{exc}") from exc
+
+    return [
+        {**chunk, "embedding": embedding}
+        for chunk, embedding in zip(chunks, embeddings)
+    ]
+
+
+# ── Storage (Layer 2 — DB writes live here per DESIGN.md §0 rule 8) ──────────
+
+def store_chunks(chunks_with_embeddings: list[dict]) -> None:
+    """
+    Insert a list of fully-populated chunk dicts (including 'embedding' field)
+    into the 'chunks' table via the Supabase client.
+
+    Raises ValueError("chunk|<message>") on DB error so the Celery task
+    can map it to CHUNK_FAILED.
+    """
+    if not chunks_with_embeddings:
+        return
+
+    rows = [
+        {
+            "chunk_id": c["chunk_id"],
+            "file_id": c["file_id"],
+            "section_id": c["section_id"],
+            "section_title": c["section_title"],
+            "page_numbers": c["page_numbers"],
+            "text": c["text"],
+            "embedding": c["embedding"],
+        }
+        for c in chunks_with_embeddings
+    ]
+
+    try:
+        supabase = get_supabase()
+        supabase.table("chunks").insert(rows).execute()
+    except Exception as exc:
+        raise ValueError(f"chunk|{exc}") from exc

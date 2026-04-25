@@ -6,15 +6,18 @@ Handles: extract → clean → section → chunk → embed → store
 from celery import Celery
 from app.core.config import settings
 from app.core.supabase import get_supabase
+from app.core.error_codes import (
+    EMBED_FAILED,
+    CHUNK_FAILED,
+    PARSE_FAILED,
+    INTERNAL_ERROR,
+)
 from app.models.schemas import JobStatus
-from app.services.ingestion import ingest_document
-from openai import OpenAI
+from app.services.ingestion import ingest_document, embed_chunks, store_chunks
 
 celery_app = Celery("autoquiz", broker=settings.redis_url, backend=settings.redis_url)
 celery_app.conf.task_serializer = "json"
 celery_app.conf.result_serializer = "json"
-
-_openai = OpenAI(api_key=settings.openai_api_key)
 
 
 def _update_job(job_id: str, status: JobStatus, stage: str, error_code: str = None, error_message: str = None):
@@ -38,10 +41,10 @@ def process_document(self, file_id: str, job_id: str, filename: str):
         # Download file from Supabase Storage
         file_bytes = supabase.storage.from_("uploads").download(f"{file_id}/{filename}")
 
-        # Stage 2: Clean (GAP 2)
+        # Stage 2: Clean (handled internally by LlamaIndex parsers)
         _update_job(job_id, JobStatus.in_progress, "clean")
 
-        # Stage 3: Section (GAP 2)
+        # Stage 3: Section (handled internally by LlamaIndex SentenceSplitter)
         _update_job(job_id, JobStatus.in_progress, "section")
 
         # Parse → clean → section → chunk (LlamaIndex handles internally)
@@ -50,28 +53,11 @@ def process_document(self, file_id: str, job_id: str, filename: str):
         # Stage 4: Chunk
         _update_job(job_id, JobStatus.in_progress, "chunk")
 
-        # Embed all chunks
-        texts = [c["text"] for c in chunks]
-        embed_response = _openai.embeddings.create(
-            model="text-embedding-3-small",
-            input=texts,
-        )
-        embeddings = [e.embedding for e in embed_response.data]
+        # Embed all chunks — delegated to Layer 2 service (DESIGN.md §7 rule 1)
+        chunks_with_embeddings = embed_chunks(chunks)
 
-        # Store chunks + embeddings in Supabase
-        rows = [
-            {
-                "chunk_id": chunks[i]["chunk_id"],
-                "file_id": chunks[i]["file_id"],
-                "section_id": chunks[i]["section_id"],
-                "section_title": chunks[i]["section_title"],
-                "page_numbers": chunks[i]["page_numbers"],
-                "text": chunks[i]["text"],
-                "embedding": embeddings[i],
-            }
-            for i in range(len(chunks))
-        ]
-        supabase.table("chunks").insert(rows).execute()
+        # Store chunks + embeddings — delegated to Layer 2 service (DESIGN.md §0 rule 8)
+        store_chunks(chunks_with_embeddings)
 
         _update_job(job_id, JobStatus.success, "chunk")
 
@@ -81,14 +67,22 @@ def process_document(self, file_id: str, job_id: str, filename: str):
         stage = parts[0] if len(parts) == 2 else "unknown"
         message = parts[1] if len(parts) == 2 else str(e)
 
+        # Map stage to registered error code (DESIGN.md §3.1.2)
+        _STAGE_TO_ERROR_CODE = {
+            "extract": PARSE_FAILED,
+            "chunk": CHUNK_FAILED,
+            "embed": EMBED_FAILED,
+        }
+        error_code = _STAGE_TO_ERROR_CODE.get(stage, INTERNAL_ERROR)
+
         try:
             # Retry transient failures
             self.retry(exc=e)
         except self.MaxRetriesExceededError:
-            _update_job(job_id, JobStatus.failed, stage, error_code="PROCESSING_ERROR", error_message=message)
+            _update_job(job_id, JobStatus.failed, stage, error_code=error_code, error_message=message)
 
     except Exception as e:
         try:
             self.retry(exc=e)
         except self.MaxRetriesExceededError:
-            _update_job(job_id, JobStatus.failed, "unknown", error_code="UNEXPECTED_ERROR", error_message=str(e))
+            _update_job(job_id, JobStatus.failed, "unknown", error_code=INTERNAL_ERROR, error_message=str(e))

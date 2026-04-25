@@ -1,10 +1,11 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
   Sparkles,
   LogOut,
   BookOpen,
   PlusCircle,
   LayoutDashboard,
+  User,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import ThemeToggle from "./ThemeToggle";
@@ -90,12 +91,29 @@ export default function TopBar({ children }) {
           {children}
           {authed && (
             <>
-              <span className="text-xs text-gray-500 dark:text-slate-400 hidden sm:block">
-                {profile?.full_name} ·{" "}
-                <span className="text-violet-600 dark:text-violet-400 font-medium capitalize">
-                  {profile?.role}
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                title="Profile"
+              >
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="avatar"
+                    className="w-6 h-6 rounded-full bg-white border border-gray-200"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                    <User className="w-3.5 h-3.5 text-gray-500 dark:text-slate-400" />
+                  </div>
+                )}
+                <span className="text-xs text-gray-500 dark:text-slate-400 hidden sm:block">
+                  {profile?.full_name} ·{" "}
+                  <span className="text-violet-600 dark:text-violet-400 font-medium capitalize">
+                    {profile?.role}
+                  </span>
                 </span>
-              </span>
+              </Link>
               <button
                 onClick={handleLogout}
                 aria-label="Log out"

@@ -507,3 +507,46 @@
 - AC-12.1.6: In dark mode, every page (login, registration, instructor dashboard, student dashboard, class detail, quiz study, flashcard study, notes view, upload, and generation pages) renders with dark backgrounds and light-on-dark text. No element renders as black text on a black background or white text on a white background.
 - AC-12.1.7: Text in dark mode meets WCAG 2.1 AA contrast requirements: body text has a contrast ratio of at least 4.5:1 against its background, and large text (≥18pt or ≥14pt bold) has a contrast ratio of at least 3:1.
 - AC-12.1.8: The theme preference is applied consistently across browser tabs of the same origin — toggling dark mode in one tab updates other open tabs within 1 second via the `storage` event listener.
+
+---
+
+## Feature Group 13 — User Profile (Avatar & Display Name)
+
+### Story 13.1 — View and edit profile
+
+**As a** student or instructor,
+**I want** to open a profile page that shows my current account details and lets me change my display name and avatar,
+**so that** my identity in the app reflects how I want to be seen.
+
+**Acceptance Criteria:**
+- AC-13.1.1: The profile page (`/profile`) is reachable only by authenticated users. Both `student` and `instructor` roles are permitted (`<ProtectedRoute allowedRole={["student", "instructor"]}>`).
+- AC-13.1.2: The page renders a preview block showing the currently selected avatar image, the current `full_name`, the user's `email`, and the user's `role` (capitalised).
+- AC-13.1.3: The display-name input is pre-filled with the user's existing `full_name`. It is `required`, `minLength=1`, `maxLength=80`. The Save button is disabled while the trimmed value is empty.
+- AC-13.1.4: The avatar picker renders a fixed list of preset DiceBear avatars (URLs of the form `https://api.dicebear.com/7.x/avataaars/svg?seed=<seed>`). Clicking a preset updates the preview block immediately without writing to Supabase. The currently selected preset has a visible selected state (ring/border).
+
+---
+
+### Story 13.2 — Save profile changes
+
+**As a** student or instructor,
+**I want** to save my chosen avatar and display name,
+**so that** the changes persist across sessions and devices.
+
+**Acceptance Criteria:**
+- AC-13.2.1: Submitting the form calls `supabase.from("profiles").update({ full_name, avatar_url }).eq("id", user.id)`. No other rows in `profiles` may be updated by the request.
+- AC-13.2.2: Both `full_name` (trimmed) and `avatar_url` are written in the same update. `email`, `role`, `created_at`, and `id` must not be modified by this feature.
+- AC-13.2.3: While saving, the Save button shows a loading state and is disabled. On success, a confirmation message is shown and the page is reloaded so the cached `profile` in `AuthContext` is refreshed. On failure, the error message returned by Supabase is displayed inline; the form remains editable.
+- AC-13.2.4: A user must not be able to update another user's profile row. Supabase RLS on `profiles` must enforce `auth.uid() = id` for `UPDATE`.
+
+---
+
+### Story 13.3 — Avatar surfaces in the navbar
+
+**As a** student or instructor,
+**I want** to see my avatar in the navbar and click it to reach the profile page,
+**so that** my profile is one click away from anywhere in the app.
+
+**Acceptance Criteria:**
+- AC-13.3.1: The right side of the navbar renders the user's `avatar_url` as a small round image. When `avatar_url` is `null`/missing, a fallback `User` lucide icon inside a neutral circle is shown instead.
+- AC-13.3.2: The avatar/name region is wrapped in a `<Link to="/profile">` and clicking it navigates to the profile page. The Logout button is unaffected and still works.
+- AC-13.3.3: After a successful save, the navbar reflects the updated `avatar_url` and `full_name` (achieved by reloading the page in this implementation — see §4c).

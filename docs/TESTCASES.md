@@ -2412,3 +2412,230 @@
 - `T2` is non-null (the change was detected in Context B).
 - `T2 - T1 <= 1000` (milliseconds).
 - `localStorage.getItem("aq_theme")` in Context B equals `"dark"` after the change.
+
+---
+
+## Feature Group 13 — User Profile (Avatar & Display Name)
+
+**TC-13.1.1 — Profile page is protected and requires authentication**
+**Type:** Routing
+
+**Setup:** No user is logged in.
+
+**Steps:**
+1. Navigate to `/profile`.
+2. Observe the page state and URL.
+
+**Assertions:**
+- The browser is redirected to `/login`.
+- The profile page is not rendered.
+
+---
+
+**TC-13.1.2 — Profile page renders current user details in preview block**
+**Type:** UI / Component
+
+**Setup:** An authenticated user (student or instructor) is logged in with:
+- `full_name = "Alice Smith"`
+- `email = "alice@example.com"`
+- `role = "student"`
+- `avatar_url = null` (not yet set)
+
+**Steps:**
+1. Navigate to `/profile`.
+2. Wait for the page to load.
+3. Locate the preview block (e.g., `[data-testid="profile-preview"]`).
+4. Verify the displayed text and icon.
+
+**Assertions:**
+- The preview block displays "Alice Smith" as the display name.
+- The preview block displays "alice@example.com" as the email.
+- The preview block displays "Student" (capitalised) as the role.
+- When `avatar_url` is null, a `<User>` lucide icon is displayed in the preview instead of an image.
+
+---
+
+**TC-13.1.3 — Display name input is pre-filled and validates length**
+**Type:** UI / Component
+
+**Setup:** An authenticated user with `full_name = "Bob Jones"` navigates to `/profile`.
+
+**Steps:**
+1. Locate the display-name input field (e.g., `[data-testid="input-full-name"]`).
+2. Verify the input's current value.
+3. Clear the input to empty string.
+4. Verify the Save button state.
+5. Type 81 characters into the input.
+6. Verify the input's rendered value and Save button state.
+
+**Assertions:**
+- The input is initially pre-filled with "Bob Jones".
+- The input has `required` and `minLength="1"` attributes.
+- When the input is empty or contains only whitespace, the Save button is disabled.
+- When the input exceeds 80 characters, the input's `maxLength="80"` prevents further typing or truncates at 80.
+- When the input contains a valid non-empty value (1–80 characters, trimmed), the Save button is enabled.
+
+---
+
+**TC-13.1.4 — Avatar picker renders presets and highlights selection**
+**Type:** UI / Component
+
+**Setup:** An authenticated user navigates to `/profile`. The avatar picker is visible.
+
+**Steps:**
+1. Count the number of preset avatar buttons displayed (e.g., `[data-testid="avatar-preset"]`).
+2. Click the first preset button.
+3. Observe the preview block and the picker button states.
+4. Click a different preset button.
+5. Observe the changes.
+
+**Assertions:**
+- Exactly 8 preset avatar buttons are rendered.
+- Each button displays an avatar image with a DiceBear URL (e.g., `https://api.dicebear.com/7.x/avataaars/svg?seed=<seed>`).
+- Clicking a preset does NOT immediately call `supabase.from("profiles").update()` (no network call yet).
+- The preview block's avatar image updates immediately to the clicked preset's avatar.
+- The clicked preset button has a visible selected state (e.g., ring or border style). Other buttons do not.
+
+---
+
+**TC-13.2.1 — Save button calls Supabase update with correct parameters**
+**Type:** Component / Integration
+
+**Setup:** An authenticated user with `id = "user-123"` is on the profile page. The display name has been changed to "Charlie Brown" and an avatar preset has been selected (e.g., `https://api.dicebear.com/7.x/avataaars/svg?seed=violet`). Mock `supabase.from("profiles").update(...).eq(...)` to track the call.
+
+**Steps:**
+1. Click the Save button.
+2. Capture the Supabase call.
+3. Verify the call's chain.
+
+**Assertions:**
+- `supabase.from("profiles")` is called once.
+- `.update({ full_name: "Charlie Brown", avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=violet" })` is chained.
+- `.eq("id", "user-123")` is chained (no other rows are targeted).
+- No other fields (`email`, `role`, `created_at`, `id`) are included in the update object.
+
+---
+
+**TC-13.2.2 — Save success shows confirmation and reloads page**
+**Type:** Component / Integration
+
+**Setup:** The profile form is ready to submit. Mock `supabase.from("profiles").update(...).eq(...)` to resolve successfully. Mock `window.location.reload` to a spy function.
+
+**Steps:**
+1. Click the Save button.
+2. Wait for the async update to resolve.
+3. Observe the success message and button state.
+4. Verify the page reload call.
+
+**Assertions:**
+- While the request is in flight, the Save button displays a loading state (e.g., spinner or disabled text) and is disabled.
+- On success, a confirmation message is displayed (e.g., "Profile updated successfully").
+- After ~600ms, `window.location.reload()` is called (the spy confirms the call).
+- After reload, the cached `AuthContext` profile is refreshed.
+
+---
+
+**TC-13.2.3 — Save error displays inline message and leaves form editable**
+**Type:** Component / Integration
+
+**Setup:** The profile form is ready to submit. Mock `supabase.from("profiles").update(...).eq(...)` to reject with error `{ message: "Database error: update failed" }`.
+
+**Steps:**
+1. Click the Save button.
+2. Wait for the async update to reject.
+3. Observe the error message and button state.
+4. Verify the form is still editable.
+
+**Assertions:**
+- The error message "Database error: update failed" is displayed inline (e.g., in a red error block).
+- The Save button returns to its normal enabled state.
+- The display-name input remains editable and retains the user's last input.
+- The avatar picker remains clickable and functional.
+
+---
+
+**TC-13.2.4 — RLS prevents a user from updating another user's profile**
+**Type:** Backend / Integration (Supabase RLS)
+
+**Setup:** Two test users: `user-a-id` and `user-b-id`. Supabase RLS on `profiles` enforces `auth.uid() = id` for UPDATE.
+
+**Steps:**
+1. As `user-a`, attempt to call `supabase.from("profiles").update({ full_name: "Hacker" }).eq("id", "user-b-id")`.
+2. Observe the Supabase response.
+
+**Assertions:**
+- The update is rejected by RLS.
+- The response contains an error (e.g., HTTP 403 or PGRST error code).
+- `user-b`'s profile row is unchanged.
+
+---
+
+**TC-13.3.1 — Navbar displays avatar image when avatar_url is set**
+**Type:** UI / Component
+
+**Setup:** An authenticated user with `avatar_url = "https://api.dicebear.com/7.x/avataaars/svg?seed=mint"` is logged in.
+
+**Steps:**
+1. Load any authenticated page (e.g., `/student` or `/instructor`).
+2. Locate the navbar (e.g., `[data-testid="navbar"]`).
+3. Find the avatar region on the right side of the navbar.
+4. Verify the avatar element.
+
+**Assertions:**
+- An `<img>` element is rendered in the navbar's right-side avatar region.
+- The `src` attribute is set to the user's `avatar_url`.
+- The image has a circular style (e.g., `rounded-full` or `border-radius: 50%`).
+
+---
+
+**TC-13.3.2 — Navbar displays fallback icon when avatar_url is null**
+**Type:** UI / Component
+
+**Setup:** An authenticated user with `avatar_url = null` is logged in.
+
+**Steps:**
+1. Load any authenticated page (e.g., `/student` or `/instructor`).
+2. Locate the navbar's right-side avatar region.
+3. Verify the fallback element.
+
+**Assertions:**
+- No `<img>` element is rendered in the avatar region.
+- A `<User>` lucide icon is displayed instead.
+- The icon is inside a neutral-coloured circle (e.g., `bg-gray-100`).
+
+---
+
+**TC-13.3.3 — Avatar region links to profile page**
+**Type:** UI / Component
+
+**Setup:** An authenticated user is logged in. The navbar is rendered.
+
+**Steps:**
+1. Locate the avatar region in the navbar (either the `<img>` or `<User>` icon).
+2. Verify the parent link element.
+3. Click the avatar region.
+4. Observe the navigation.
+
+**Assertions:**
+- The avatar region (whether image or icon) is wrapped in a `<Link to="/profile">`.
+- Clicking the avatar navigates to the profile page (`/profile`).
+- The page transitions to the profile page without a full reload.
+
+---
+
+**TC-13.3.4 — Logout button remains functional with avatar link**
+**Type:** UI / Component
+
+**Setup:** An authenticated user is logged in. The navbar is rendered with both the avatar link and the Logout button.
+
+**Steps:**
+1. Locate the Logout button (e.g., `[data-testid="logout-button"]`).
+2. Click the Logout button.
+3. Observe the logout flow.
+
+**Assertions:**
+- The Logout button is still clickable and not obscured by the avatar link.
+- Clicking the Logout button calls `supabase.signOut()`.
+- The user is redirected to `/login`.
+- The `aq_profile` key is cleared from `localStorage`.
+- The user's session is terminated.

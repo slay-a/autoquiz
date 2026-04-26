@@ -1,6 +1,7 @@
 """Class management routes — create, list, and view classes."""
 
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
 
@@ -9,10 +10,15 @@ from app.core.error_codes import (
     INTERNAL_ERROR,
     VALIDATION_FAILED,
     ROLE_FORBIDDEN,
+    CLASS_CODE_CONFLICT,
 )
 from app.core.logging import log_event
 from app.api.dependencies import get_current_user
-from app.services.class_service import create_class, list_classes, get_class_detail
+from app.services.class_service import (
+    create_class, list_classes, get_class_detail,
+    join_class_by_code, get_student_classes as svc_get_student_classes,
+    get_student_content as svc_get_student_content,
+)
 
 
 router = APIRouter(prefix="/classes", tags=["classes"])
@@ -228,180 +234,155 @@ def join_class(
     current_user: dict = Depends(get_current_user),
 ):
     """
-    Join a class using a class code.
+    Join a class using a class code (AC-3.1.2).
 
     student_id is extracted from the JWT — never from the request body.
     Returns 404 if class not found, 409 if already a member.
+    Delegates to class_service.join_class_by_code() — no inline DB calls.
+    Emits class.member.joined log event on success (DESIGN.md §14.3).
     """
+    import uuid as _uuid
     if not req.class_code or not req.class_code.strip():
-        raise HTTPException(status_code=400, detail="Class code is required")
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": VALIDATION_FAILED,
+                    "message": "Class code is required.",
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
+        )
 
     supabase = get_supabase()
 
     try:
-        # Case-insensitive lookup of class by class_code
-        class_result = (
-            supabase.table("classes")
-            .select("id, name")
-            .ilike("class_code", req.class_code.strip())
-            .execute()
+        result = join_class_by_code(
+            supabase=supabase,
+            class_code=req.class_code.strip(),
+            student_id=current_user["id"],
         )
-
-        if not class_result.data or len(class_result.data) == 0:
-            raise HTTPException(status_code=404, detail="Class not found")
-
-        cls = class_result.data[0]
-
-        # Insert into class_members
-        supabase.table("class_members").insert(
-            {
-                "class_id": cls["id"],
-                "student_id": current_user["id"],
-            }
-        ).execute()
-
-        return {
-            "message": "Successfully joined class",
-            "class_id": cls["id"],
-            "class_name": cls["name"],
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        # Check if it's a duplicate constraint error (Supabase error code 23505)
-        error_str = str(e)
-        if "23505" in error_str or "duplicate" in error_str.lower():
-            raise HTTPException(
-                status_code=409, detail="Already a member of this class"
+    except ValueError as exc:
+        import uuid as _uuid2
+        msg = str(exc)
+        if msg == "CLASS_NOT_FOUND":
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": {
+                        "code": "CLASS_NOT_FOUND",
+                        "message": "Class not found. Check the code and try again.",
+                        "request_id": str(_uuid2.uuid4()),
+                    }
+                },
             )
-        raise HTTPException(
+        if msg == "ALREADY_MEMBER":
+            return JSONResponse(
+                status_code=409,
+                content={
+                    "error": {
+                        "code": CLASS_CODE_CONFLICT,
+                        "message": "You're already a member of this class.",
+                        "request_id": str(_uuid2.uuid4()),
+                    }
+                },
+            )
+        return JSONResponse(
             status_code=500,
-            detail="Failed to join class. Please try again.",
+            content={
+                "error": {
+                    "code": INTERNAL_ERROR,
+                    "message": "Something went wrong on our end. Please try again.",
+                    "request_id": str(_uuid2.uuid4()),
+                }
+            },
         )
+
+    log_event(
+        event="class.member.joined",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user["id"],
+        actor_role=current_user.get("role"),
+        resource_type="class",
+        resource_id=result["class_id"],
+        meta={"class_id": result["class_id"]},
+    )
+
+    return {
+        "message": "Successfully joined class",
+        "class_id": result["class_id"],
+        "class_name": result["class_name"],
+    }
 
 
 @router.get("/student/classes", response_model=list[StudentClassItem])
-def get_student_classes(current_user: dict = Depends(get_current_user)):
+def get_student_classes_route(current_user: dict = Depends(get_current_user)):
     """
     Get list of classes the current student has joined.
+    Delegates to class_service.get_student_classes() — no inline DB calls (DESIGN.md §0).
     """
+    import uuid as _uuid
     supabase = get_supabase()
 
     try:
-        result = (
-            supabase.table("class_members")
-            .select("classes(id, name, description, class_code, created_at)")
-            .eq("student_id", current_user["id"])
-            .execute()
+        classes = svc_get_student_classes(
+            supabase=supabase,
+            student_id=current_user["id"],
+        )
+    except ValueError as exc:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": VALIDATION_FAILED,
+                    "message": str(exc),
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
         )
 
-        memberships = result.data or []
-
-        classes = []
-        for m in memberships:
-            cls = m.get("classes")
-            if cls:
-                classes.append(
-                    StudentClassItem(
-                        id=cls["id"],
-                        name=cls["name"],
-                        description=cls.get("description"),
-                        class_code=cls["class_code"],
-                        created_at=cls["created_at"],
-                    )
-                )
-
-        return classes
-
-    except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to fetch student classes. Please try again.",
+    return [
+        StudentClassItem(
+            id=c["id"],
+            name=c["name"],
+            description=c.get("description"),
+            class_code=c["class_code"],
+            created_at=c["created_at"],
         )
+        for c in classes
+    ]
 
 
 @router.get("/student/content", response_model=StudentContentResponse)
-def get_student_content(current_user: dict = Depends(get_current_user)):
+def get_student_content_route(current_user: dict = Depends(get_current_user)):
     """
     Get quizzes and notes from joined classes.
 
-    Applies is_shared=true filter on saved_quizzes and is_published=true
-    filter on class_notes AT THE QUERY LEVEL.
+    Applies is_shared=true and is_published=true filters at the service/query level.
+    Delegates to class_service.get_student_content() — no inline DB calls (DESIGN.md §0).
     """
+    import uuid as _uuid
     supabase = get_supabase()
 
     try:
-        memberships_result = (
-            supabase.table("class_members")
-            .select("class_id, classes(id, name)")
-            .eq("student_id", current_user["id"])
-            .execute()
+        content = svc_get_student_content(
+            supabase=supabase,
+            student_id=current_user["id"],
+        )
+    except ValueError as exc:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": VALIDATION_FAILED,
+                    "message": str(exc),
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
         )
 
-        memberships = memberships_result.data or []
-        class_ids = [m["class_id"] for m in memberships if m.get("class_id")]
-
-        if not class_ids:
-            return StudentContentResponse(quizzes=[], notes=[])
-
-        class_name_map = {}
-        for m in memberships:
-            cls = m.get("classes")
-            if cls:
-                class_name_map[m["class_id"]] = cls["name"]
-
-        quizzes_result = (
-            supabase.table("saved_quizzes")
-            .select("id, title, topic, difficulty, questions, created_at, class_id")
-            .in_("class_id", class_ids)
-            .eq("is_shared", True)
-            .order("created_at", desc=True)
-            .execute()
-        )
-
-        quizzes_data = quizzes_result.data or []
-        quizzes = []
-        for q in quizzes_data:
-            quizzes.append(
-                QuizItem(
-                    id=q["id"],
-                    title=q["title"],
-                    topic=q["topic"],
-                    difficulty=q["difficulty"],
-                    questions=q["questions"],
-                    created_at=q["created_at"],
-                    className=class_name_map.get(q["class_id"], "Unknown Class"),
-                )
-            )
-
-        notes_result = (
-            supabase.table("class_notes")
-            .select("id, title, topic, content, created_at, class_id")
-            .in_("class_id", class_ids)
-            .eq("is_published", True)
-            .order("created_at", desc=True)
-            .execute()
-        )
-
-        notes_data = notes_result.data or []
-        notes = []
-        for n in notes_data:
-            notes.append(
-                NoteItem(
-                    id=n["id"],
-                    title=n["title"],
-                    topic=n["topic"],
-                    content=n["content"],
-                    created_at=n["created_at"],
-                    className=class_name_map.get(n["class_id"], "Unknown Class"),
-                )
-            )
-
-        return StudentContentResponse(quizzes=quizzes, notes=notes)
-
-    except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to fetch student content. Please try again.",
-        )
+    return StudentContentResponse(
+        quizzes=[QuizItem(**q) for q in content["quizzes"]],
+        notes=[NoteItem(**n) for n in content["notes"]],
+    )

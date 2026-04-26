@@ -89,11 +89,22 @@ describe('StudentDashboard - FEAT-003', () => {
       data: [],
     });
 
-    // Default mock for fetch (empty responses)
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({ quizzes: [], notes: [] }),
-      text: async () => '',
+    // Default mock for fetch (empty responses for all 5 FastAPI calls):
+    // 1. GET /quiz/my, 2. GET /flashcards/my, 3. GET /classes/student/classes,
+    // 4. GET /classes/student/content, 5. GET /notes/my
+    global.fetch.mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/classes/student/content')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ quizzes: [], notes: [] }),
+          text: async () => '',
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => [],
+        text: async () => '',
+      });
     });
   });
 
@@ -131,15 +142,7 @@ describe('StudentDashboard - FEAT-003', () => {
   it('AC-3.1.3: class not found error shown on 404 response', async () => {
     const user = userEvent.setup();
 
-    // Mock initial fetch (empty data)
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ quizzes: [], notes: [] }),
-    });
+    // Default fetch mock covers initial 5 fetch calls via mockImplementation in beforeEach
 
     renderDashboard();
 
@@ -151,7 +154,7 @@ describe('StudentDashboard - FEAT-003', () => {
     const input = screen.getByPlaceholderText(/enter class code/i);
     await user.type(input, 'NOTFOUND');
 
-    // Mock 404 response for join
+    // Mock 404 response for join (override for the specific join call)
     global.fetch.mockResolvedValueOnce({
       ok: false,
       status: 404,
@@ -171,15 +174,7 @@ describe('StudentDashboard - FEAT-003', () => {
   it('AC-3.1.4: already a member message on 409 response', async () => {
     const user = userEvent.setup();
 
-    // Mock initial fetch
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ quizzes: [], notes: [] }),
-    });
+    // Default fetch mock covers initial calls via mockImplementation in beforeEach
 
     renderDashboard();
 
@@ -211,15 +206,7 @@ describe('StudentDashboard - FEAT-003', () => {
   it('AC-3.1.3: no page redirect after failed join', async () => {
     const user = userEvent.setup();
 
-    // Mock initial fetch
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ quizzes: [], notes: [] }),
-    });
+    // Default fetch mock covers initial calls via mockImplementation in beforeEach
 
     renderDashboard();
 
@@ -260,15 +247,7 @@ describe('StudentDashboard - FEAT-003', () => {
       created_at: '2026-04-11T10:00:00Z',
     };
 
-    // Mock initial fetch (no classes)
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ quizzes: [], notes: [] }),
-    });
+    // Default fetch mock covers initial 5 calls via mockImplementation in beforeEach
 
     renderDashboard();
 
@@ -289,15 +268,17 @@ describe('StudentDashboard - FEAT-003', () => {
       }),
     });
 
-    // Mock refetch after join (now includes the new class)
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [newClass],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ quizzes: [], notes: [] }),
-    });
+    // Mock refetch after join: now 5 calls
+    // 1. /quiz/my — empty
+    global.fetch.mockResolvedValueOnce({ ok: true, json: async () => [] });
+    // 2. /flashcards/my — empty
+    global.fetch.mockResolvedValueOnce({ ok: true, json: async () => [] });
+    // 3. /classes/student/classes — now includes the new class
+    global.fetch.mockResolvedValueOnce({ ok: true, json: async () => [newClass] });
+    // 4. /classes/student/content — empty
+    global.fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ quizzes: [], notes: [] }) });
+    // 5. /notes/my — empty
+    global.fetch.mockResolvedValueOnce({ ok: true, json: async () => [] });
 
     const joinButton = screen.getByRole('button', { name: /^join$/i });
     await user.click(joinButton);
@@ -334,17 +315,16 @@ describe('StudentDashboard - FEAT-003', () => {
       className: 'Math 101',
     };
 
-    // Mock initial fetch
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        quizzes: [mockQuiz],
-        notes: [],
-      }),
+    // Set up fetch mocks for 5 FastAPI calls:
+    // 1. /quiz/my, 2. /flashcards/my, 3. /classes/student/classes, 4. content, 5. notes
+    global.fetch.mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/classes/student/content')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ quizzes: [mockQuiz], notes: [] }),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
     });
 
     renderDashboard();
@@ -375,17 +355,15 @@ describe('StudentDashboard - FEAT-003', () => {
       className: 'Math 101',
     };
 
-    // Mock initial fetch
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        quizzes: [mockQuiz],
-        notes: [],
-      }),
+    // Set up fetch mocks for 5 FastAPI calls
+    global.fetch.mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/classes/student/content')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ quizzes: [mockQuiz], notes: [] }),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
     });
 
     renderDashboard();
@@ -413,17 +391,15 @@ describe('StudentDashboard - FEAT-003', () => {
       className: 'Math 101',
     };
 
-    // Mock initial fetch
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        quizzes: [],
-        notes: [mockNote],
-      }),
+    // Set up fetch mocks for 5 FastAPI calls
+    global.fetch.mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/classes/student/content')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ quizzes: [], notes: [mockNote] }),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
     });
 
     renderDashboard();
@@ -454,16 +430,14 @@ describe('StudentDashboard - FEAT-003', () => {
 
     // The backend should only return is_shared=true quizzes
     // This test verifies that the frontend displays what it receives
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        quizzes: [sharedQuiz], // Only shared quizzes
-        notes: [],
-      }),
+    global.fetch.mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/classes/student/content')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ quizzes: [sharedQuiz], notes: [] }),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
     });
 
     renderDashboard();
@@ -500,16 +474,14 @@ describe('StudentDashboard - FEAT-003', () => {
     };
 
     // The backend should only return is_published=true notes
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [],
-    });
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        quizzes: [],
-        notes: [publishedNote], // Only published notes
-      }),
+    global.fetch.mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/classes/student/content')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ quizzes: [], notes: [publishedNote] }),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
     });
 
     renderDashboard();

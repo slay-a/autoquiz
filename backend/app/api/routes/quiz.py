@@ -56,3 +56,20 @@ async def generate_quiz_endpoint(
         num_questions=request.num_questions,
         questions=questions,
     )
+
+
+@router.get("/my", tags=["quiz"])
+def get_my_quizzes(current_user: dict = Depends(get_current_user)):
+    """
+    Return saved quizzes for the authenticated student.
+    Filters by created_by = current_user["id"], ordered newest-first.
+    """
+    supabase = get_supabase()
+    result = (
+        supabase.table("saved_quizzes")
+        .select("*")
+        .eq("created_by", current_user["id"])
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return result.data or []

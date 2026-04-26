@@ -166,3 +166,152 @@ def get_class_detail(supabase: Client, class_id: str) -> Optional[dict]:
         )
 
     return {**cls, "members": members}
+
+
+def join_class_by_code(supabase: Client, class_code: str, student_id: str) -> dict:
+    """
+    Join a class by class_code (case-insensitive).
+
+    Returns the joined class info dict: {"class_id": ..., "class_name": ...}
+
+    Raises:
+        ValueError("CLASS_NOT_FOUND")  — no class with that code
+        ValueError("ALREADY_MEMBER")   — student already in class (23505 constraint)
+        Exception                      — unexpected DB error
+    """
+    class_result = (
+        supabase.table("classes")
+        .select("id, name")
+        .ilike("class_code", class_code.strip())
+        .execute()
+    )
+
+    if not class_result.data:
+        raise ValueError("CLASS_NOT_FOUND")
+
+    cls = class_result.data[0]
+
+    insert_result = (
+        supabase.table("class_members")
+        .insert({"class_id": cls["id"], "student_id": student_id})
+        .execute()
+    )
+
+    # supabase-py v2 returns constraint violations as result.error, not exceptions.
+    if insert_result.error:
+        error_info = insert_result.error
+        code = str(error_info.get("code", "")) if isinstance(error_info, dict) else str(error_info)
+        message = str(error_info.get("message", "")).lower() if isinstance(error_info, dict) else str(error_info).lower()
+        if "23505" in code or "23505" in message or "duplicate" in message:
+            raise ValueError("ALREADY_MEMBER")
+        raise Exception(f"DB insert error: {error_info}")
+
+    return {"class_id": cls["id"], "class_name": cls["name"]}
+
+
+def get_student_classes(supabase: Client, student_id: str) -> list[dict]:
+    """
+    Return a list of classes the student has joined.
+
+    Each item: {id, name, description, class_code, created_at}
+
+    Raises:
+        Exception — on DB error
+    """
+    result = (
+        supabase.table("class_members")
+        .select("classes(id, name, description, class_code, created_at)")
+        .eq("student_id", student_id)
+        .execute()
+    )
+
+    memberships = result.data or []
+    classes = []
+    for m in memberships:
+        cls = m.get("classes")
+        if cls:
+            classes.append({
+                "id": cls["id"],
+                "name": cls["name"],
+                "description": cls.get("description"),
+                "class_code": cls["class_code"],
+                "created_at": cls["created_at"],
+            })
+    return classes
+
+
+def get_student_content(supabase: Client, student_id: str) -> dict:
+    """
+    Return shared quizzes and published notes for the student's joined classes.
+
+    Filters:
+      - saved_quizzes: is_shared=True, class_id in student's classes
+      - class_notes:   is_published=True, class_id in student's classes
+
+    Returns:
+        {"quizzes": [...], "notes": [...]}
+
+    Raises:
+        Exception — on DB error
+    """
+    memberships_result = (
+        supabase.table("class_members")
+        .select("class_id, classes(id, name)")
+        .eq("student_id", student_id)
+        .execute()
+    )
+
+    memberships = memberships_result.data or []
+    class_ids = [m["class_id"] for m in memberships if m.get("class_id")]
+
+    if not class_ids:
+        return {"quizzes": [], "notes": []}
+
+    class_name_map = {}
+    for m in memberships:
+        cls = m.get("classes")
+        if cls:
+            class_name_map[m["class_id"]] = cls["name"]
+
+    quizzes_result = (
+        supabase.table("saved_quizzes")
+        .select("id, title, topic, difficulty, questions, created_at, class_id")
+        .in_("class_id", class_ids)
+        .eq("is_shared", True)
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    quizzes = []
+    for q in (quizzes_result.data or []):
+        quizzes.append({
+            "id": q["id"],
+            "title": q["title"],
+            "topic": q["topic"],
+            "difficulty": q["difficulty"],
+            "questions": q["questions"],
+            "created_at": q["created_at"],
+            "className": class_name_map.get(q["class_id"], "Unknown Class"),
+        })
+
+    notes_result = (
+        supabase.table("class_notes")
+        .select("id, title, topic, content, created_at, class_id")
+        .in_("class_id", class_ids)
+        .eq("is_published", True)
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    notes = []
+    for n in (notes_result.data or []):
+        notes.append({
+            "id": n["id"],
+            "title": n["title"],
+            "topic": n["topic"],
+            "content": n["content"],
+            "created_at": n["created_at"],
+            "className": class_name_map.get(n["class_id"], "Unknown Class"),
+        })
+
+    return {"quizzes": quizzes, "notes": notes}

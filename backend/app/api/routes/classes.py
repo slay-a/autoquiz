@@ -4,11 +4,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
+
 from app.core.supabase import get_supabase
-<<<<<<< Updated upstream
-from app.api.dependencies import get_current_user
-from app.services.class_service import create_class
-=======
 from app.core.error_codes import (
     INTERNAL_ERROR,
     VALIDATION_FAILED,
@@ -22,7 +19,6 @@ from app.services.class_service import (
     join_class_by_code, get_student_classes as svc_get_student_classes,
     get_student_content as svc_get_student_content,
 )
->>>>>>> Stashed changes
 
 
 router = APIRouter(prefix="/classes", tags=["classes"])
@@ -111,6 +107,7 @@ def create_class_route(
     Create a new class.
 
     instructor_id is extracted from the JWT — never from the request body.
+    Emits class.created log event on success (DESIGN.md §14.3).
     """
     if not req.name or not req.name.strip():
         raise HTTPException(status_code=400, detail="Class name is required")
@@ -125,129 +122,110 @@ def create_class_route(
             instructor_id=current_user["id"],
         )
 
+        log_event(
+            event="class.created",
+            level="INFO",
+            outcome="success",
+            actor_id=current_user["id"],
+            actor_role=current_user.get("role"),
+            resource_type="class",
+            resource_id=class_data.get("id"),
+            meta={"class_id": class_data.get("id")},
+        )
+
         return class_data
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create class: {str(e)}")
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create class. Please try again.",
+        )
 
 
 @router.get("/", response_model=list[ClassListItem])
-def list_classes(current_user: dict = Depends(get_current_user)):
+def list_classes_route(current_user: dict = Depends(get_current_user)):
     """
     List all classes for the current instructor.
 
     Returns classes in descending order by created_at (newest first).
     Includes member count for each class.
+    Delegates to class_service.list_classes() — no DB calls in this layer.
     """
     supabase = get_supabase()
 
     try:
-        # Fetch classes for this instructor
-        result = (
-            supabase.table("classes")
-            .select("*")
-            .eq("instructor_id", current_user["id"])
-            .order("created_at", desc=True)
-            .execute()
+        classes = list_classes(
+            supabase=supabase,
+            instructor_id=current_user["id"],
         )
 
-        classes = result.data or []
-
-        # For each class, count members
-        enriched_classes = []
-        for cls in classes:
-            member_count_result = (
-                supabase.table("class_members")
-                .select("*", count="exact")
-                .eq("class_id", cls["id"])
-                .execute()
+        return [
+            ClassListItem(
+                id=cls["id"],
+                name=cls["name"],
+                description=cls.get("description"),
+                class_code=cls["class_code"],
+                instructor_id=cls["instructor_id"],
+                created_at=cls["created_at"],
+                member_count=cls.get("member_count", 0),
             )
+            for cls in classes
+        ]
 
-            member_count = member_count_result.count or 0
-
-            enriched_classes.append(
-                ClassListItem(
-                    id=cls["id"],
-                    name=cls["name"],
-                    description=cls.get("description"),
-                    class_code=cls["class_code"],
-                    instructor_id=cls["instructor_id"],
-                    created_at=cls["created_at"],
-                    member_count=member_count,
-                )
-            )
-
-        return enriched_classes
-
-    except Exception as e:
+    except Exception:
         raise HTTPException(
-            status_code=500, detail=f"Failed to fetch classes: {str(e)}"
+            status_code=500,
+            detail="Failed to fetch classes. Please try again.",
         )
 
 
 @router.get("/{class_id}", response_model=ClassDetail)
-def get_class_detail(class_id: str, current_user: dict = Depends(get_current_user)):
+def get_class_detail_route(
+    class_id: str, current_user: dict = Depends(get_current_user)
+):
     """
     Get class detail including enrolled students.
 
-    Joins class_members to profiles to get student info.
+    Enforces ownership: only the instructor who created the class may access it.
+    Delegates to class_service.get_class_detail() — no DB calls in this layer.
     """
     supabase = get_supabase()
 
     try:
-        # Fetch the class
-        class_result = (
-            supabase.table("classes")
-            .select("*")
-            .eq("id", class_id)
-            .single()
-            .execute()
-        )
-
-        if not class_result.data:
-            raise HTTPException(status_code=404, detail="Class not found")
-
-        cls = class_result.data
-
-        # Fetch members with profile info
-        members_result = (
-            supabase.table("class_members")
-            .select("student_id, joined_at, profiles(full_name, email)")
-            .eq("class_id", class_id)
-            .execute()
-        )
-
-        members_data = members_result.data or []
-
-        members = []
-        for m in members_data:
-            profile = m.get("profiles") or {}
-            members.append(
-                ClassMember(
-                    student_id=m["student_id"],
-                    full_name=profile.get("full_name"),
-                    email=profile.get("email"),
-                    joined_at=m["joined_at"],
-                )
-            )
-
-        return ClassDetail(
-            id=cls["id"],
-            name=cls["name"],
-            description=cls.get("description"),
-            class_code=cls["class_code"],
-            instructor_id=cls["instructor_id"],
-            created_at=cls["created_at"],
-            members=members,
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
+        cls_detail = get_class_detail(supabase=supabase, class_id=class_id)
+    except Exception:
         raise HTTPException(
-            status_code=500, detail=f"Failed to fetch class detail: {str(e)}"
+            status_code=500,
+            detail="Failed to fetch class detail. Please try again.",
         )
 
+    if cls_detail is None:
+        raise HTTPException(status_code=404, detail="Class not found")
+
+    # Ownership check: only the owning instructor may access this class (DESIGN.md §13.1.1)
+    if cls_detail["instructor_id"] != current_user["id"]:
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to access this class.",
+        )
+
+    return ClassDetail(
+        id=cls_detail["id"],
+        name=cls_detail["name"],
+        description=cls_detail.get("description"),
+        class_code=cls_detail["class_code"],
+        instructor_id=cls_detail["instructor_id"],
+        created_at=cls_detail["created_at"],
+        members=[
+            ClassMember(
+                student_id=m["student_id"],
+                full_name=m.get("full_name"),
+                email=m.get("email"),
+                joined_at=m["joined_at"],
+            )
+            for m in cls_detail.get("members", [])
+        ],
+    )
 
 
 @router.post("/join", status_code=200)
@@ -284,38 +262,6 @@ def join_class(
             class_code=req.class_code.strip(),
             student_id=current_user["id"],
         )
-<<<<<<< Updated upstream
-
-        if not class_result.data or len(class_result.data) == 0:
-            raise HTTPException(status_code=404, detail="Class not found")
-
-        cls = class_result.data[0]
-
-        # Insert into class_members
-        insert_result = (
-            supabase.table("class_members")
-            .insert({
-                "class_id": cls["id"],
-                "student_id": current_user["id"]
-            })
-            .execute()
-        )
-
-        return {
-            "message": "Successfully joined class",
-            "class_id": cls["id"],
-            "class_name": cls["name"]
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        # Check if it's a duplicate constraint error (Supabase error code 23505)
-        error_str = str(e)
-        if "23505" in error_str or "duplicate" in error_str.lower():
-            raise HTTPException(status_code=409, detail="Already a member of this class")
-        raise HTTPException(status_code=500, detail=f"Failed to join class: {str(e)}")
-=======
     except ValueError as exc:
         import uuid as _uuid2
         msg = str(exc)
@@ -351,7 +297,6 @@ def join_class(
                 }
             },
         )
->>>>>>> Stashed changes
 
     log_event(
         event="class.member.joined",
@@ -375,49 +320,12 @@ def join_class(
 def get_student_classes_route(current_user: dict = Depends(get_current_user)):
     """
     Get list of classes the current student has joined.
-<<<<<<< Updated upstream
-
-    Joins class_members + classes, filtered by student_id = auth.uid().
-=======
     Delegates to class_service.get_student_classes() — no inline DB calls (DESIGN.md §0).
->>>>>>> Stashed changes
     """
     import uuid as _uuid
     supabase = get_supabase()
 
     try:
-<<<<<<< Updated upstream
-        # Fetch class memberships for this student
-        result = (
-            supabase.table("class_members")
-            .select("classes(id, name, description, class_code, created_at)")
-            .eq("student_id", current_user["id"])
-            .execute()
-        )
-
-        memberships = result.data or []
-
-        # Extract classes from nested structure
-        classes = []
-        for m in memberships:
-            cls = m.get("classes")
-            if cls:
-                classes.append(
-                    StudentClassItem(
-                        id=cls["id"],
-                        name=cls["name"],
-                        description=cls.get("description"),
-                        class_code=cls["class_code"],
-                        created_at=cls["created_at"],
-                    )
-                )
-
-        return classes
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to fetch student classes: {str(e)}"
-=======
         classes = svc_get_student_classes(
             supabase=supabase,
             student_id=current_user["id"],
@@ -441,7 +349,6 @@ def get_student_classes_route(current_user: dict = Depends(get_current_user)):
             description=c.get("description"),
             class_code=c["class_code"],
             created_at=c["created_at"],
->>>>>>> Stashed changes
         )
         for c in classes
     ]
@@ -452,98 +359,13 @@ def get_student_content_route(current_user: dict = Depends(get_current_user)):
     """
     Get quizzes and notes from joined classes.
 
-<<<<<<< Updated upstream
-    Applies is_shared=true filter on saved_quizzes and is_published=true
-    filter on class_notes AT THE QUERY LEVEL. Each item includes the class name.
-=======
     Applies is_shared=true and is_published=true filters at the service/query level.
     Delegates to class_service.get_student_content() — no inline DB calls (DESIGN.md §0).
->>>>>>> Stashed changes
     """
     import uuid as _uuid
     supabase = get_supabase()
 
     try:
-<<<<<<< Updated upstream
-        # Fetch class memberships for this student
-        memberships_result = (
-            supabase.table("class_members")
-            .select("class_id, classes(id, name)")
-            .eq("student_id", current_user["id"])
-            .execute()
-        )
-
-        memberships = memberships_result.data or []
-        class_ids = [m["class_id"] for m in memberships if m.get("class_id")]
-
-        if not class_ids:
-            return StudentContentResponse(quizzes=[], notes=[])
-
-        # Build a map of class_id -> class_name
-        class_name_map = {}
-        for m in memberships:
-            cls = m.get("classes")
-            if cls:
-                class_name_map[m["class_id"]] = cls["name"]
-
-        # Fetch shared quizzes from joined classes
-        quizzes_result = (
-            supabase.table("saved_quizzes")
-            .select("id, title, topic, difficulty, questions, created_at, class_id")
-            .in_("class_id", class_ids)
-            .eq("is_shared", True)
-            .order("created_at", desc=True)
-            .execute()
-        )
-
-        quizzes_data = quizzes_result.data or []
-
-        quizzes = []
-        for q in quizzes_data:
-            quizzes.append(
-                QuizItem(
-                    id=q["id"],
-                    title=q["title"],
-                    topic=q["topic"],
-                    difficulty=q["difficulty"],
-                    questions=q["questions"],
-                    created_at=q["created_at"],
-                    className=class_name_map.get(q["class_id"], "Unknown Class"),
-                )
-            )
-
-        # Fetch published notes from joined classes
-        notes_result = (
-            supabase.table("class_notes")
-            .select("id, title, topic, content, created_at, class_id")
-            .in_("class_id", class_ids)
-            .eq("is_published", True)
-            .order("created_at", desc=True)
-            .execute()
-        )
-
-        notes_data = notes_result.data or []
-
-        notes = []
-        for n in notes_data:
-            notes.append(
-                NoteItem(
-                    id=n["id"],
-                    title=n["title"],
-                    topic=n["topic"],
-                    content=n["content"],
-                    created_at=n["created_at"],
-                    className=class_name_map.get(n["class_id"], "Unknown Class"),
-                )
-            )
-
-        return StudentContentResponse(quizzes=quizzes, notes=notes)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to fetch student content: {str(e)}"
-        )
-=======
         content = svc_get_student_content(
             supabase=supabase,
             student_id=current_user["id"],
@@ -564,4 +386,3 @@ def get_student_content_route(current_user: dict = Depends(get_current_user)):
         quizzes=[QuizItem(**q) for q in content["quizzes"]],
         notes=[NoteItem(**n) for n in content["notes"]],
     )
->>>>>>> Stashed changes

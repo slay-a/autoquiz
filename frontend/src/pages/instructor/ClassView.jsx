@@ -507,6 +507,7 @@ export default function ClassView() {
           </div>
           <button
             onClick={copyCode}
+            aria-label={copied ? `Copied class code ${cls.class_code}` : `Copy class code ${cls.class_code}`}
             className="flex items-center gap-2 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-4 py-2 rounded-xl text-sm font-bold font-mono text-violet-700 transition-colors"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}

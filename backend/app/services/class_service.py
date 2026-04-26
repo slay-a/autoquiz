@@ -2,6 +2,7 @@
 
 import random
 import string
+from typing import Optional
 from supabase import Client
 
 
@@ -11,7 +12,7 @@ def generate_class_code() -> str:
 
 
 def create_class(
-    supabase: Client, name: str, description: str | None, instructor_id: str
+    supabase: Client, name: str, description: Optional[str], instructor_id: str
 ) -> dict:
     """
     Create a new class with a unique class_code.
@@ -70,8 +71,6 @@ def create_class(
                 raise
 
     raise Exception("Failed to create class after 10 attempts")
-<<<<<<< Updated upstream
-=======
 
 
 def list_classes(supabase: Client, instructor_id: str) -> list[dict]:
@@ -316,4 +315,3 @@ def get_student_content(supabase: Client, student_id: str) -> dict:
         })
 
     return {"quizzes": quizzes, "notes": notes}
->>>>>>> Stashed changes

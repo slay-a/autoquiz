@@ -7,7 +7,8 @@ Tests cover:
 - Story 2.3: View class detail
 
 Test strategy:
-- Unit tests for class_service.py functions (generate_class_code, create_class)
+- Unit tests for class_service.py functions (generate_class_code, create_class,
+  list_classes, get_class_detail)
 - Integration tests for route handlers with mocked Supabase client
 """
 
@@ -21,7 +22,7 @@ import string
 
 # Import the app and dependencies
 from main import app
-from app.services.class_service import generate_class_code, create_class
+from app.services.class_service import generate_class_code, create_class, list_classes, get_class_detail
 from app.api.dependencies import get_current_user
 
 
@@ -222,6 +223,139 @@ class TestCreateClass:
         assert "Connection timeout" in str(exc_info.value)
 
 
+class TestListClassesService:
+    """Tests for list_classes() service function."""
+
+    def test_returns_classes_for_instructor_with_member_counts(self, mock_supabase, instructor_user):
+        """AC-2.2.1, AC-2.2.2: list_classes returns only instructor's classes with member counts."""
+        classes_result = Mock()
+        classes_result.data = [
+            {
+                "id": "class-1",
+                "name": "Class A",
+                "description": "Desc A",
+                "class_code": "CLSA01",
+                "instructor_id": instructor_user["id"],
+                "created_at": "2026-04-11T10:00:00Z",
+            },
+        ]
+
+        member_count_result = Mock()
+        member_count_result.count = 5
+
+        def mock_table_method(table_name):
+            mock_table = Mock()
+            if table_name == "classes":
+                mock_chain = Mock()
+                mock_chain.eq.return_value = mock_chain
+                mock_chain.order.return_value = mock_chain
+                mock_chain.execute.return_value = classes_result
+                mock_table.select.return_value = mock_chain
+            elif table_name == "class_members":
+                mock_chain = Mock()
+                mock_chain.eq.return_value = mock_chain
+                mock_chain.execute.return_value = member_count_result
+                mock_table.select.return_value = mock_chain
+            return mock_table
+
+        mock_supabase.table.side_effect = mock_table_method
+
+        result = list_classes(supabase=mock_supabase, instructor_id=instructor_user["id"])
+
+        assert len(result) == 1
+        assert result[0]["id"] == "class-1"
+        assert result[0]["member_count"] == 5
+
+    def test_filters_by_instructor_id(self, mock_supabase, instructor_user):
+        """AC-2.2.1: list_classes passes instructor_id to the DB query."""
+        classes_result = Mock()
+        classes_result.data = []
+
+        eq_calls = []
+
+        def mock_table_method(table_name):
+            mock_table = Mock()
+            if table_name == "classes":
+                mock_chain = Mock()
+                mock_chain.eq.side_effect = lambda col, val: (eq_calls.append((col, val)), mock_chain)[1]
+                mock_chain.order.return_value = mock_chain
+                mock_chain.execute.return_value = classes_result
+                mock_table.select.return_value = mock_chain
+            return mock_table
+
+        mock_supabase.table.side_effect = mock_table_method
+
+        list_classes(supabase=mock_supabase, instructor_id=instructor_user["id"])
+
+        assert ("instructor_id", instructor_user["id"]) in eq_calls
+
+
+class TestGetClassDetailService:
+    """Tests for get_class_detail() service function."""
+
+    def test_returns_class_with_members(self, mock_supabase, instructor_user):
+        """AC-2.3.1, AC-2.3.2: get_class_detail returns class info and members."""
+        class_result = Mock()
+        class_result.data = {
+            "id": "class-svc-1",
+            "name": "Physics 101",
+            "description": "Introduction to Physics",
+            "class_code": "PHY101",
+            "instructor_id": instructor_user["id"],
+            "created_at": "2026-04-11T10:00:00Z",
+        }
+
+        members_result = Mock()
+        members_result.data = [
+            {
+                "student_id": "student-1",
+                "joined_at": "2026-04-11T11:00:00Z",
+                "profiles": {"full_name": "Alice", "email": "alice@example.com"},
+            },
+        ]
+
+        def mock_table_method(table_name):
+            mock_table = Mock()
+            if table_name == "classes":
+                mock_chain = Mock()
+                mock_chain.eq.return_value = mock_chain
+                mock_chain.single.return_value = mock_chain
+                mock_chain.execute.return_value = class_result
+                mock_table.select.return_value = mock_chain
+            elif table_name == "class_members":
+                mock_chain = Mock()
+                mock_chain.eq.return_value = mock_chain
+                mock_chain.execute.return_value = members_result
+                mock_table.select.return_value = mock_chain
+            return mock_table
+
+        mock_supabase.table.side_effect = mock_table_method
+
+        result = get_class_detail(supabase=mock_supabase, class_id="class-svc-1")
+
+        assert result is not None
+        assert result["id"] == "class-svc-1"
+        assert result["name"] == "Physics 101"
+        assert len(result["members"]) == 1
+        assert result["members"][0]["student_id"] == "student-1"
+        assert result["members"][0]["full_name"] == "Alice"
+
+    def test_returns_none_for_nonexistent_class(self, mock_supabase):
+        """get_class_detail returns None when class not found."""
+        class_result = Mock()
+        class_result.data = None
+
+        mock_chain = Mock()
+        mock_chain.eq.return_value = mock_chain
+        mock_chain.single.return_value = mock_chain
+        mock_chain.execute.return_value = class_result
+        mock_supabase.table.return_value.select.return_value = mock_chain
+
+        result = get_class_detail(supabase=mock_supabase, class_id="nonexistent")
+
+        assert result is None
+
+
 # ── Integration Tests: Route Handlers ─────────────────────────────
 
 
@@ -320,28 +454,28 @@ class TestCreateClassRoute:
         assert data["instructor_id"] != "malicious-user-id"
 
     def test_no_token_returns_401(self, client):
-        """All routes return 401 when no token provided."""
+        """All routes return 401 when no token provided — using standard error envelope."""
         response = client.post(
             "/classes/",
             json={"name": "Test Class"},
         )
 
         assert response.status_code == 401
-        assert "Missing authorization header" in response.json()["detail"]
+        # Standard error envelope: {"error": {"code": "AUTH_REQUIRED", "message": "..."}}
+        body = response.json()
+        assert "error" in body
+        assert body["error"]["code"] == "AUTH_REQUIRED"
+        assert "message" in body["error"]
 
 
 class TestListClassesRoute:
     """Tests for GET /classes route."""
 
-    @patch("app.api.routes.classes.get_supabase")
-    def test_returns_only_instructor_classes(self, mock_get_supabase, client, auth_token, instructor_user):
-        """AC-2.2.1: Fetch only classes where instructor_id equals current user's ID."""
-        mock_supabase = Mock()
-        mock_get_supabase.return_value = mock_supabase
-
-        # Mock classes query
-        mock_classes_result = Mock()
-        mock_classes_result.data = [
+    @patch("app.api.routes.classes.list_classes")
+    def test_returns_only_instructor_classes(self, mock_list_service, client, auth_token, instructor_user):
+        """AC-2.2.1: Fetch only classes where instructor_id equals current user's ID.
+        Route delegates to class_service.list_classes()."""
+        mock_list_service.return_value = [
             {
                 "id": "class-1",
                 "name": "Class A",
@@ -349,6 +483,7 @@ class TestListClassesRoute:
                 "class_code": "CLSA01",
                 "instructor_id": instructor_user["id"],
                 "created_at": "2026-04-11T10:00:00Z",
+                "member_count": 5,
             },
             {
                 "id": "class-2",
@@ -357,35 +492,9 @@ class TestListClassesRoute:
                 "class_code": "CLSB01",
                 "instructor_id": instructor_user["id"],
                 "created_at": "2026-04-10T10:00:00Z",
+                "member_count": 3,
             },
         ]
-
-        # Mock member count queries
-        mock_member_count_1 = Mock()
-        mock_member_count_1.count = 5
-        mock_member_count_2 = Mock()
-        mock_member_count_2.count = 3
-
-        def mock_table_method(table_name):
-            mock_table = Mock()
-            if table_name == "classes":
-                mock_chain = Mock()
-                mock_chain.order.return_value.execute.return_value = mock_classes_result
-                mock_chain.eq.return_value = mock_chain
-                mock_table.select.return_value = mock_chain
-            elif table_name == "class_members":
-                calls = []
-                def mock_execute():
-                    calls.append(1)
-                    return mock_member_count_1 if len(calls) == 1 else mock_member_count_2
-
-                mock_chain = Mock()
-                mock_chain.execute.side_effect = mock_execute
-                mock_chain.eq.return_value = mock_chain
-                mock_table.select.return_value = mock_chain
-            return mock_table
-
-        mock_supabase.table.side_effect = mock_table_method
 
         response = client.get(
             "/classes/",
@@ -397,15 +506,20 @@ class TestListClassesRoute:
         assert len(data) == 2
         assert data[0]["id"] == "class-1"
         assert data[1]["id"] == "class-2"
+        # Verify service was called with correct instructor_id
+        mock_list_service.assert_called_once()
+        call_kwargs = mock_list_service.call_args[1] if mock_list_service.call_args[1] else {}
+        call_args = mock_list_service.call_args[0] if mock_list_service.call_args[0] else []
+        # instructor_id should be the JWT user's id
+        all_args = list(call_args) + list(call_kwargs.values())
+        assert any(instructor_user["id"] in str(a) for a in all_args), (
+            "list_classes service must be called with the JWT user's instructor_id"
+        )
 
-    @patch("app.api.routes.classes.get_supabase")
-    def test_includes_member_count(self, mock_get_supabase, client, auth_token, instructor_user):
+    @patch("app.api.routes.classes.list_classes")
+    def test_includes_member_count(self, mock_list_service, client, auth_token, instructor_user):
         """AC-2.2.2: Each class includes member_count."""
-        mock_supabase = Mock()
-        mock_get_supabase.return_value = mock_supabase
-
-        mock_classes_result = Mock()
-        mock_classes_result.data = [
+        mock_list_service.return_value = [
             {
                 "id": "class-1",
                 "name": "Class A",
@@ -413,27 +527,9 @@ class TestListClassesRoute:
                 "class_code": "CLSA01",
                 "instructor_id": instructor_user["id"],
                 "created_at": "2026-04-11T10:00:00Z",
+                "member_count": 7,
             },
         ]
-
-        mock_member_count = Mock()
-        mock_member_count.count = 7
-
-        def mock_table_method(table_name):
-            mock_table = Mock()
-            if table_name == "classes":
-                mock_chain = Mock()
-                mock_chain.order.return_value.execute.return_value = mock_classes_result
-                mock_chain.eq.return_value = mock_chain
-                mock_table.select.return_value = mock_chain
-            elif table_name == "class_members":
-                mock_chain = Mock()
-                mock_chain.execute.return_value = mock_member_count
-                mock_chain.eq.return_value = mock_chain
-                mock_table.select.return_value = mock_chain
-            return mock_table
-
-        mock_supabase.table.side_effect = mock_table_method
 
         response = client.get(
             "/classes/",
@@ -445,14 +541,10 @@ class TestListClassesRoute:
         assert len(data) == 1
         assert data[0]["member_count"] == 7
 
-    @patch("app.api.routes.classes.get_supabase")
-    def test_sorted_by_created_at_desc(self, mock_get_supabase, client, auth_token, instructor_user):
+    @patch("app.api.routes.classes.list_classes")
+    def test_sorted_by_created_at_desc(self, mock_list_service, client, auth_token, instructor_user):
         """AC-2.2.3: Classes are sorted by created_at descending (newest first)."""
-        mock_supabase = Mock()
-        mock_get_supabase.return_value = mock_supabase
-
-        mock_classes_result = Mock()
-        mock_classes_result.data = [
+        mock_list_service.return_value = [
             {
                 "id": "class-new",
                 "name": "Newest Class",
@@ -460,6 +552,7 @@ class TestListClassesRoute:
                 "class_code": "NEW001",
                 "instructor_id": instructor_user["id"],
                 "created_at": "2026-04-11T12:00:00Z",
+                "member_count": 0,
             },
             {
                 "id": "class-old",
@@ -468,27 +561,9 @@ class TestListClassesRoute:
                 "class_code": "OLD001",
                 "instructor_id": instructor_user["id"],
                 "created_at": "2026-04-10T12:00:00Z",
+                "member_count": 0,
             },
         ]
-
-        mock_member_count = Mock()
-        mock_member_count.count = 0
-
-        def mock_table_method(table_name):
-            mock_table = Mock()
-            if table_name == "classes":
-                mock_chain = Mock()
-                mock_chain.order.return_value.execute.return_value = mock_classes_result
-                mock_chain.eq.return_value = mock_chain
-                mock_table.select.return_value = mock_chain
-            elif table_name == "class_members":
-                mock_chain = Mock()
-                mock_chain.execute.return_value = mock_member_count
-                mock_chain.eq.return_value = mock_chain
-                mock_table.select.return_value = mock_chain
-            return mock_table
-
-        mock_supabase.table.side_effect = mock_table_method
 
         response = client.get(
             "/classes/",
@@ -503,69 +578,44 @@ class TestListClassesRoute:
         assert data[1]["id"] == "class-old"
 
     def test_no_token_returns_401(self, client):
-        """All routes return 401 when no token provided."""
+        """All routes return 401 when no token provided — using standard error envelope."""
         response = client.get("/classes/")
 
         assert response.status_code == 401
-        assert "Missing authorization header" in response.json()["detail"]
+        body = response.json()
+        assert "error" in body
+        assert body["error"]["code"] == "AUTH_REQUIRED"
+        assert "message" in body["error"]
 
 
 class TestGetClassDetailRoute:
     """Tests for GET /classes/{class_id} route."""
 
-    @patch("app.api.routes.classes.get_supabase")
-    def test_returns_class_detail_with_members(self, mock_get_supabase, client, auth_token, instructor_user):
+    @patch("app.api.routes.classes.get_class_detail")
+    def test_returns_class_detail_with_members(self, mock_detail_service, client, auth_token, instructor_user):
         """AC-2.3.1, AC-2.3.2: Return class name, class_code, description, and members list."""
-        mock_supabase = Mock()
-        mock_get_supabase.return_value = mock_supabase
-
-        # Mock class query
-        mock_class_result = Mock()
-        mock_class_result.data = {
+        mock_detail_service.return_value = {
             "id": "class-detail-1",
             "name": "Physics 101",
             "description": "Introduction to Physics",
             "class_code": "PHY101",
             "instructor_id": instructor_user["id"],
             "created_at": "2026-04-11T10:00:00Z",
-        }
-
-        # Mock members query
-        mock_members_result = Mock()
-        mock_members_result.data = [
-            {
-                "student_id": "student-1",
-                "joined_at": "2026-04-11T11:00:00Z",
-                "profiles": {
+            "members": [
+                {
+                    "student_id": "student-1",
+                    "joined_at": "2026-04-11T11:00:00Z",
                     "full_name": "Alice Student",
                     "email": "alice@example.com",
                 },
-            },
-            {
-                "student_id": "student-2",
-                "joined_at": "2026-04-11T11:30:00Z",
-                "profiles": {
+                {
+                    "student_id": "student-2",
+                    "joined_at": "2026-04-11T11:30:00Z",
                     "full_name": "Bob Student",
                     "email": "bob@example.com",
                 },
-            },
-        ]
-
-        def mock_table_method(table_name):
-            mock_table = Mock()
-            if table_name == "classes":
-                mock_chain = Mock()
-                mock_chain.single.return_value.execute.return_value = mock_class_result
-                mock_chain.eq.return_value = mock_chain
-                mock_table.select.return_value = mock_chain
-            elif table_name == "class_members":
-                mock_chain = Mock()
-                mock_chain.execute.return_value = mock_members_result
-                mock_chain.eq.return_value = mock_chain
-                mock_table.select.return_value = mock_chain
-            return mock_table
-
-        mock_supabase.table.side_effect = mock_table_method
+            ],
+        }
 
         response = client.get(
             "/classes/class-detail-1",
@@ -584,22 +634,10 @@ class TestGetClassDetailRoute:
         assert data["members"][0]["email"] == "alice@example.com"
         assert data["members"][1]["student_id"] == "student-2"
 
-    @patch("app.api.routes.classes.get_supabase")
-    def test_returns_404_for_nonexistent_class(self, mock_get_supabase, client, auth_token):
+    @patch("app.api.routes.classes.get_class_detail")
+    def test_returns_404_for_nonexistent_class(self, mock_detail_service, client, auth_token):
         """AC-2.3 boundary: Return 404 for non-existent class."""
-        mock_supabase = Mock()
-        mock_get_supabase.return_value = mock_supabase
-
-        # Mock empty result
-        mock_class_result = Mock()
-        mock_class_result.data = None
-
-        mock_table = Mock()
-        mock_chain = Mock()
-        mock_chain.single.return_value.execute.return_value = mock_class_result
-        mock_chain.eq.return_value = mock_chain
-        mock_table.select.return_value = mock_chain
-        mock_supabase.table.return_value = mock_table
+        mock_detail_service.return_value = None
 
         response = client.get(
             "/classes/nonexistent-id",
@@ -609,9 +647,34 @@ class TestGetClassDetailRoute:
         assert response.status_code == 404
         assert "Class not found" in response.json()["detail"]
 
+    @patch("app.api.routes.classes.get_class_detail")
+    def test_returns_403_for_non_owner(self, mock_detail_service, client, auth_token):
+        """B-4: GET /classes/{id} must return 403 when authenticated user is not the owner."""
+        # Class is owned by a different instructor
+        mock_detail_service.return_value = {
+            "id": "class-other",
+            "name": "Other's Class",
+            "description": None,
+            "class_code": "OTH001",
+            "instructor_id": "different-instructor-id",  # NOT the JWT user
+            "created_at": "2026-04-11T10:00:00Z",
+            "members": [],
+        }
+
+        # auth_token belongs to instructor-123-uuid
+        response = client.get(
+            "/classes/class-other",
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+
+        assert response.status_code == 403
+
     def test_no_token_returns_401(self, client):
-        """All routes return 401 when no token provided."""
+        """All routes return 401 when no token provided — using standard error envelope."""
         response = client.get("/classes/some-id")
 
         assert response.status_code == 401
-        assert "Missing authorization header" in response.json()["detail"]
+        body = response.json()
+        assert "error" in body
+        assert body["error"]["code"] == "AUTH_REQUIRED"
+        assert "message" in body["error"]

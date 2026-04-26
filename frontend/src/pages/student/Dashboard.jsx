@@ -37,7 +37,6 @@ export default function StudentDashboard() {
       const token = session?.data?.session?.access_token;
 
       if (!token) {
-        console.error("No auth token available");
         setLoading(false);
         return;
       }
@@ -47,29 +46,39 @@ export default function StudentDashboard() {
         "Authorization": `Bearer ${token}`,
       };
 
+      // All data fetches go through the FastAPI backend — no direct Supabase
+      // table queries from the page (DESIGN.md §0, §8.5).
       const [
-        { data: myQ },
-        { data: fsets },
+        myQuizzesRes,
+        flashcardsRes,
         classesRes,
         contentRes,
         myNotesRes,
       ] = await Promise.all([
-        supabase.from("saved_quizzes").select("*").eq("created_by", user.id).order("created_at", { ascending: false }),
-        supabase.from("flashcard_sets").select("*").eq("created_by", user.id).order("created_at", { ascending: false }),
+        fetch("http://localhost:8000/quiz/my", { headers }),
+        fetch("http://localhost:8000/flashcards/my", { headers }),
         fetch("http://localhost:8000/classes/student/classes", { headers }),
         fetch("http://localhost:8000/classes/student/content", { headers }),
         fetch("http://localhost:8000/notes/my", { headers }),
       ]);
 
-      setMyQuizzes(myQ ?? []);
-      setFlashcardSets(fsets ?? []);
+      if (myQuizzesRes.ok) {
+        setMyQuizzes(await myQuizzesRes.json() ?? []);
+      } else {
+        setMyQuizzes([]);
+      }
+
+      if (flashcardsRes.ok) {
+        setFlashcardSets(await flashcardsRes.json() ?? []);
+      } else {
+        setFlashcardSets([]);
+      }
 
       // Handle classes response
       if (classesRes.ok) {
         const classesData = await classesRes.json();
         setClasses(classesData);
       } else {
-        console.error("Failed to fetch classes:", await classesRes.text());
         setClasses([]);
       }
 
@@ -79,7 +88,6 @@ export default function StudentDashboard() {
         setClassQuizzes(contentData.quizzes ?? []);
         setClassNotes(contentData.notes ?? []);
       } else {
-        console.error("Failed to fetch content:", await contentRes.text());
         setClassQuizzes([]);
         setClassNotes([]);
       }
@@ -89,7 +97,6 @@ export default function StudentDashboard() {
         const notesData = await myNotesRes.json();
         setMyNotes(notesData ?? []);
       } else {
-        console.error("Failed to fetch my notes:", await myNotesRes.text());
         setMyNotes([]);
       }
     } finally {

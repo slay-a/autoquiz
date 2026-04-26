@@ -1,11 +1,28 @@
 """Class management routes — create, list, and view classes."""
 
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
 from app.core.supabase import get_supabase
+<<<<<<< Updated upstream
 from app.api.dependencies import get_current_user
 from app.services.class_service import create_class
+=======
+from app.core.error_codes import (
+    INTERNAL_ERROR,
+    VALIDATION_FAILED,
+    ROLE_FORBIDDEN,
+    CLASS_CODE_CONFLICT,
+)
+from app.core.logging import log_event
+from app.api.dependencies import get_current_user
+from app.services.class_service import (
+    create_class, list_classes, get_class_detail,
+    join_class_by_code, get_student_classes as svc_get_student_classes,
+    get_student_content as svc_get_student_content,
+)
+>>>>>>> Stashed changes
 
 
 router = APIRouter(prefix="/classes", tags=["classes"])
@@ -232,30 +249,42 @@ def get_class_detail(class_id: str, current_user: dict = Depends(get_current_use
         )
 
 
+
 @router.post("/join", status_code=200)
 def join_class(
     req: JoinClassRequest,
     current_user: dict = Depends(get_current_user),
 ):
     """
-    Join a class using a class code.
+    Join a class using a class code (AC-3.1.2).
 
     student_id is extracted from the JWT — never from the request body.
     Returns 404 if class not found, 409 if already a member.
+    Delegates to class_service.join_class_by_code() — no inline DB calls.
+    Emits class.member.joined log event on success (DESIGN.md §14.3).
     """
+    import uuid as _uuid
     if not req.class_code or not req.class_code.strip():
-        raise HTTPException(status_code=400, detail="Class code is required")
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": VALIDATION_FAILED,
+                    "message": "Class code is required.",
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
+        )
 
     supabase = get_supabase()
 
     try:
-        # Case-insensitive lookup of class by class_code
-        class_result = (
-            supabase.table("classes")
-            .select("id, name")
-            .ilike("class_code", req.class_code.strip())
-            .execute()
+        result = join_class_by_code(
+            supabase=supabase,
+            class_code=req.class_code.strip(),
+            student_id=current_user["id"],
         )
+<<<<<<< Updated upstream
 
         if not class_result.data or len(class_result.data) == 0:
             raise HTTPException(status_code=404, detail="Class not found")
@@ -286,18 +315,78 @@ def join_class(
         if "23505" in error_str or "duplicate" in error_str.lower():
             raise HTTPException(status_code=409, detail="Already a member of this class")
         raise HTTPException(status_code=500, detail=f"Failed to join class: {str(e)}")
+=======
+    except ValueError as exc:
+        import uuid as _uuid2
+        msg = str(exc)
+        if msg == "CLASS_NOT_FOUND":
+            return JSONResponse(
+                status_code=404,
+                content={
+                    "error": {
+                        "code": "CLASS_NOT_FOUND",
+                        "message": "Class not found. Check the code and try again.",
+                        "request_id": str(_uuid2.uuid4()),
+                    }
+                },
+            )
+        if msg == "ALREADY_MEMBER":
+            return JSONResponse(
+                status_code=409,
+                content={
+                    "error": {
+                        "code": CLASS_CODE_CONFLICT,
+                        "message": "You're already a member of this class.",
+                        "request_id": str(_uuid2.uuid4()),
+                    }
+                },
+            )
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": {
+                    "code": INTERNAL_ERROR,
+                    "message": "Something went wrong on our end. Please try again.",
+                    "request_id": str(_uuid2.uuid4()),
+                }
+            },
+        )
+>>>>>>> Stashed changes
+
+    log_event(
+        event="class.member.joined",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user["id"],
+        actor_role=current_user.get("role"),
+        resource_type="class",
+        resource_id=result["class_id"],
+        meta={"class_id": result["class_id"]},
+    )
+
+    return {
+        "message": "Successfully joined class",
+        "class_id": result["class_id"],
+        "class_name": result["class_name"],
+    }
 
 
 @router.get("/student/classes", response_model=list[StudentClassItem])
-def get_student_classes(current_user: dict = Depends(get_current_user)):
+def get_student_classes_route(current_user: dict = Depends(get_current_user)):
     """
     Get list of classes the current student has joined.
+<<<<<<< Updated upstream
 
     Joins class_members + classes, filtered by student_id = auth.uid().
+=======
+    Delegates to class_service.get_student_classes() — no inline DB calls (DESIGN.md §0).
+>>>>>>> Stashed changes
     """
+    import uuid as _uuid
     supabase = get_supabase()
 
     try:
+<<<<<<< Updated upstream
         # Fetch class memberships for this student
         result = (
             supabase.table("class_members")
@@ -328,20 +417,54 @@ def get_student_classes(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to fetch student classes: {str(e)}"
+=======
+        classes = svc_get_student_classes(
+            supabase=supabase,
+            student_id=current_user["id"],
         )
+    except ValueError as exc:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": VALIDATION_FAILED,
+                    "message": str(exc),
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
+        )
+
+    return [
+        StudentClassItem(
+            id=c["id"],
+            name=c["name"],
+            description=c.get("description"),
+            class_code=c["class_code"],
+            created_at=c["created_at"],
+>>>>>>> Stashed changes
+        )
+        for c in classes
+    ]
 
 
 @router.get("/student/content", response_model=StudentContentResponse)
-def get_student_content(current_user: dict = Depends(get_current_user)):
+def get_student_content_route(current_user: dict = Depends(get_current_user)):
     """
     Get quizzes and notes from joined classes.
 
+<<<<<<< Updated upstream
     Applies is_shared=true filter on saved_quizzes and is_published=true
     filter on class_notes AT THE QUERY LEVEL. Each item includes the class name.
+=======
+    Applies is_shared=true and is_published=true filters at the service/query level.
+    Delegates to class_service.get_student_content() — no inline DB calls (DESIGN.md §0).
+>>>>>>> Stashed changes
     """
+    import uuid as _uuid
     supabase = get_supabase()
 
     try:
+<<<<<<< Updated upstream
         # Fetch class memberships for this student
         memberships_result = (
             supabase.table("class_members")
@@ -420,3 +543,25 @@ def get_student_content(current_user: dict = Depends(get_current_user)):
         raise HTTPException(
             status_code=500, detail=f"Failed to fetch student content: {str(e)}"
         )
+=======
+        content = svc_get_student_content(
+            supabase=supabase,
+            student_id=current_user["id"],
+        )
+    except ValueError as exc:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": VALIDATION_FAILED,
+                    "message": str(exc),
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
+        )
+
+    return StudentContentResponse(
+        quizzes=[QuizItem(**q) for q in content["quizzes"]],
+        notes=[NoteItem(**n) for n in content["notes"]],
+    )
+>>>>>>> Stashed changes

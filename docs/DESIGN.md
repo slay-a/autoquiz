@@ -644,6 +644,7 @@ Auth: currently unenforced at route level (service key bypasses RLS). Add a
 | Method | Path              | Request body  | Success response | Error codes |
 |--------|-------------------|---------------|------------------|-------------|
 | POST   | `/quiz/generate`  | `QuizRequest` | `QuizResponse`   | 400 empty topic, 404 no content found |
+| GET    | `/quiz/my`        | —             | `SavedQuiz[]` (200) — saved quizzes for the authenticated student, newest-first | 401 unauthenticated |
 
 **`QuizRequest`:**
 ```json
@@ -677,6 +678,12 @@ Auth: currently unenforced at route level (service key bypasses RLS). Add a
 ```json
 { "topic": "string", "file_id": "string|null", "outside_sources": false }
 ```
+
+### Flashcards
+
+| Method | Path               | Request body | Success response | Error codes |
+|--------|--------------------|--------------|------------------|-------------|
+| GET    | `/flashcards/my`   | —            | `FlashcardSet[]` (200) — flashcard sets for the authenticated student, newest-first | 401 unauthenticated |
 
 ---
 

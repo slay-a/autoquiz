@@ -11,6 +11,7 @@ from app.core.error_codes import (
     VALIDATION_FAILED,
     ROLE_FORBIDDEN,
     CLASS_CODE_CONFLICT,
+    CLASS_NOT_FOUND,
 )
 from app.core.logging import log_event
 from app.api.dependencies import get_current_user
@@ -270,7 +271,7 @@ def join_class(
                 status_code=404,
                 content={
                     "error": {
-                        "code": "CLASS_NOT_FOUND",
+                        "code": CLASS_NOT_FOUND,
                         "message": "Class not found. Check the code and try again.",
                         "request_id": str(_uuid2.uuid4()),
                     }

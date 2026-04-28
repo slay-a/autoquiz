@@ -19,6 +19,8 @@
 
 ### Story 1.1 — Registration
 
+**Status: Verified**
+
 **As a** new user,
 **I want** to create an account with my name, email, password, and role,
 **so that** I can access the features appropriate to my role.
@@ -32,6 +34,8 @@
 ---
 
 ### Story 1.2 — Login
+
+**Status: Verified**
 
 **As a** returning user,
 **I want** to log in with my email and password,
@@ -47,6 +51,8 @@
 
 ### Story 1.3 — Session persistence
 
+**Status: Verified**
+
 **As a** logged-in user,
 **I want** my session to persist when I reload the page or close and reopen the browser,
 **so that** I do not have to log in repeatedly.
@@ -61,6 +67,8 @@
 
 ### Story 1.4 — Logout
 
+**Status: Verified**
+
 **As a** logged-in user,
 **I want** to log out,
 **so that** my session is cleared and the next user of this device cannot access my account.
@@ -72,6 +80,8 @@
 ---
 
 ### Story 1.5 — Role-based access control
+
+**Status: Verified**
 
 **As** the system,
 **I want** to prevent users from accessing routes intended for the other role,
@@ -89,6 +99,8 @@
 
 ### Story 2.1 — Create a class
 
+**Status: Verified**
+
 **As an** instructor,
 **I want** to create a class with a name and optional description,
 **so that** I have a space to organise materials and students.
@@ -104,6 +116,8 @@
 
 ### Story 2.2 — View class list
 
+**Status: Verified**
+
 **As an** instructor,
 **I want** to see all the classes I have created along with their member counts,
 **so that** I can navigate to the one I want to manage.
@@ -117,6 +131,8 @@
 ---
 
 ### Story 2.3 — View class detail
+
+**Status: Verified**
 
 **As an** instructor,
 **I want** to see the full detail of a class including its members, files, notes, and quizzes,
@@ -134,6 +150,8 @@
 
 ### Story 3.1 — Join a class
 
+**Status: Verified**
+
 **As a** student,
 **I want** to join a class by entering a class code,
 **so that** I can access the materials and quizzes my instructor has shared.
@@ -148,6 +166,8 @@
 ---
 
 ### Story 3.2 — View class content as a student
+
+**Status: Verified**
 
 **As a** student,
 **I want** to see the quizzes and notes my instructor has shared for each class I'm in,

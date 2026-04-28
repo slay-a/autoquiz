@@ -13,6 +13,7 @@ export default function InstructorDashboard() {
   const [showNew, setShowNew] = useState(false);
   const [newClass, setNewClass] = useState({ name: "", description: "" });
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState(null);
 
   useEffect(() => {
     fetchClasses();
@@ -64,17 +65,16 @@ export default function InstructorDashboard() {
         }),
       });
 
+      setCreateError(null);
       if (res.ok) {
-        const data = await res.json();
-        // Fetch classes again to get member_count (which will be 0 for new class)
         await fetchClasses();
         setShowNew(false);
         setNewClass({ name: "", description: "" });
       } else {
-        console.error("Failed to create class:", await res.text());
+        setCreateError("Failed to create class. Please try again.");
       }
     } catch (error) {
-      console.error("Error creating class:", error);
+      setCreateError("An unexpected error occurred. Please try again.");
     } finally {
       setCreating(false);
     }
@@ -114,11 +114,12 @@ export default function InstructorDashboard() {
             onChange={(e) => setNewClass({ ...newClass, description: e.target.value })}
             className="input"
           />
+          {createError && <p role="alert" className="text-sm text-red-500">{createError}</p>}
           <div className="flex gap-3">
             <button onClick={createClass} disabled={creating || !newClass.name.trim()} className="btn-primary">
               {creating ? <><Loader2 className="w-4 h-4 animate-spin" />Creating…</> : "Create Class"}
             </button>
-            <button onClick={() => setShowNew(false)} className="btn-secondary">Cancel</button>
+            <button onClick={() => { setShowNew(false); setCreateError(null); }} className="btn-secondary">Cancel</button>
           </div>
         </div>
       )}

@@ -137,9 +137,16 @@ def create_class_route(
         return class_data
 
     except Exception:
-        raise HTTPException(
+        import uuid as _uuid
+        return JSONResponse(
             status_code=500,
-            detail="Failed to create class. Please try again.",
+            content={
+                "error": {
+                    "code": INTERNAL_ERROR,
+                    "message": "Failed to create class. Please try again.",
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
         )
 
 
@@ -174,9 +181,16 @@ def list_classes_route(current_user: dict = Depends(get_current_user)):
         ]
 
     except Exception:
-        raise HTTPException(
+        import uuid as _uuid
+        return JSONResponse(
             status_code=500,
-            detail="Failed to fetch classes. Please try again.",
+            content={
+                "error": {
+                    "code": INTERNAL_ERROR,
+                    "message": "Failed to fetch classes. Please try again.",
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
         )
 
 
@@ -195,9 +209,16 @@ def get_class_detail_route(
     try:
         cls_detail = get_class_detail(supabase=supabase, class_id=class_id)
     except Exception:
-        raise HTTPException(
+        import uuid as _uuid
+        return JSONResponse(
             status_code=500,
-            detail="Failed to fetch class detail. Please try again.",
+            content={
+                "error": {
+                    "code": INTERNAL_ERROR,
+                    "message": "Failed to fetch class detail. Please try again.",
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
         )
 
     if cls_detail is None:

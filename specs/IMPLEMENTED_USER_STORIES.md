@@ -165,6 +165,8 @@
 
 ### Story 4.1 — LlamaIndex-based document parsing
 
+**Status: Verified**
+
 **As the system**,
 **I want** document files to be parsed using LlamaIndex readers,
 **so that** text extraction is handled by a maintained library rather than bespoke PyMuPDF/python-docx/python-pptx code.
@@ -179,6 +181,8 @@
 
 ### Story 4.2 — LlamaIndex SentenceSplitter for chunking
 
+**Status: Verified**
+
 **As the system**,
 **I want** parsed documents to be chunked using LlamaIndex's `SentenceSplitter`,
 **so that** chunk boundaries are semantically coherent rather than split on raw word counts.
@@ -192,6 +196,8 @@
 ---
 
 ### Story 4.3 — TextNode → chunks table mapping
+
+**Status: Verified**
 
 **As the system**,
 **I want** LlamaIndex `TextNode` objects to be mapped to the existing `chunks` table schema,

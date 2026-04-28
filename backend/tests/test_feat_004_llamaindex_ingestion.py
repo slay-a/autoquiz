@@ -23,6 +23,7 @@ from app.utils.parsers import (
     parse_pptx_llamaindex,
 )
 from app.services.ingestion import ingest_document
+from app.core.exceptions import UnsupportedFileTypeError, ParseError, IngestionError
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────
@@ -459,16 +460,14 @@ class TestIngestDocument:
     def test_raises_value_error_for_unsupported_file_type(
         self, mock_parsers_dict, sample_file_id
     ):
-        """AC-4.1.3: Raises ValueError with 'extract|' prefix for unsupported types."""
+        """AC-4.1.3: Raises UnsupportedFileTypeError for unsupported file types."""
         # No parser for .txt files
         mock_parsers_dict.get.return_value = None
 
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(UnsupportedFileTypeError) as exc_info:
             ingest_document(b"test", "test.txt", sample_file_id)
 
         error_msg = str(exc_info.value)
-        # AC-4.1.3: Error should have 'extract|' prefix
-        assert error_msg.startswith("extract|")
         assert "Unsupported file type" in error_msg
         assert ".txt" in error_msg
 
@@ -476,16 +475,15 @@ class TestIngestDocument:
     def test_raises_value_error_with_extract_stage_on_parse_failure(
         self, mock_parsers_dict, mock_pdf_bytes, sample_file_id
     ):
-        """Parsing errors should raise ValueError with 'extract|' stage prefix."""
+        """Parsing errors should raise ParseError (typed exception per DESIGN.md §3.1)."""
         mock_parser = Mock()
         mock_parser.side_effect = Exception("PDF corrupted")
         mock_parsers_dict.get.return_value = mock_parser
 
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(ParseError) as exc_info:
             ingest_document(mock_pdf_bytes, "test.pdf", sample_file_id)
 
         error_msg = str(exc_info.value)
-        assert error_msg.startswith("extract|")
         assert "PDF corrupted" in error_msg
 
     @patch("app.services.ingestion.LLAMAINDEX_PARSERS")
@@ -493,7 +491,7 @@ class TestIngestDocument:
     def test_raises_value_error_with_chunk_stage_on_splitter_failure(
         self, mock_splitter_class, mock_parsers_dict, mock_pdf_bytes, sample_file_id
     ):
-        """Chunking errors should raise ValueError with 'chunk|' stage prefix."""
+        """Chunking errors should raise IngestionError (typed exception per DESIGN.md §3.1)."""
         mock_parser = Mock()
         mock_doc = Document(text="Test", metadata={})
         mock_parser.return_value = [mock_doc]
@@ -503,11 +501,10 @@ class TestIngestDocument:
         mock_splitter_class.return_value = mock_splitter
         mock_splitter.get_nodes_from_documents.side_effect = Exception("Splitter failed")
 
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(IngestionError) as exc_info:
             ingest_document(mock_pdf_bytes, "test.pdf", sample_file_id)
 
         error_msg = str(exc_info.value)
-        assert error_msg.startswith("chunk|")
         assert "Splitter failed" in error_msg
 
     @patch("app.services.ingestion.LLAMAINDEX_PARSERS")

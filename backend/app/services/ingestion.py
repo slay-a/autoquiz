@@ -9,6 +9,12 @@ from llama_index.core.node_parser import SentenceSplitter
 from openai import OpenAI
 from app.core.config import settings
 from app.core.supabase import get_supabase
+from app.core.exceptions import (
+    UnsupportedFileTypeError,
+    ParseError,
+    EmbeddingError,
+    IngestionError,
+)
 from app.utils.parsers import LLAMAINDEX_PARSERS
 
 
@@ -18,18 +24,24 @@ def ingest_document(file_bytes: bytes, filename: str, file_id: str) -> list[dict
     """
     Full pipeline: parse via LlamaIndex readers → chunk via SentenceSplitter.
     Returns list of chunks ready for embedding and storage.
-    Raises ValueError with a stage label on failure.
+    Raises typed IngestionError subclasses on failure (DESIGN.md §3.1).
     """
     ext = Path(filename).suffix.lower()
     parser = LLAMAINDEX_PARSERS.get(ext)
     if not parser:
-        raise ValueError(f"extract|Unsupported file type: {ext}")
+        raise UnsupportedFileTypeError(
+            f"Unsupported file type: {ext}",
+            error_code="UNSUPPORTED_FILE_TYPE",
+        )
 
     # ── Parse: extract Documents with page metadata ──
     try:
         documents = parser(file_bytes)
     except Exception as e:
-        raise ValueError(f"extract|{e}") from e
+        raise ParseError(
+            f"Failed to parse document '{filename}': {e}",
+            error_code="PARSE_FAILED",
+        ) from e
 
     # ── Chunk: use LlamaIndex SentenceSplitter ──
     try:
@@ -39,7 +51,10 @@ def ingest_document(file_bytes: bytes, filename: str, file_id: str) -> list[dict
         )
         nodes = splitter.get_nodes_from_documents(documents)
     except Exception as e:
-        raise ValueError(f"chunk|{e}") from e
+        raise IngestionError(
+            f"Chunking failed for '{filename}': {e}",
+            error_code="CHUNK_FAILED",
+        ) from e
 
     # ── Map TextNode → chunks table schema ──
     chunks = []
@@ -92,8 +107,7 @@ def embed_chunks(chunks: list[dict]) -> list[dict]:
     text-embedding-3-small. Returns a new list of dicts with an added
     'embedding' key containing the vector.
 
-    Raises ValueError("embed|<message>") on OpenAI error so the Celery
-    task can map it to EMBED_FAILED.
+    Raises EmbeddingError on OpenAI failure (DESIGN.md §3.1).
     """
     if not chunks:
         return []
@@ -107,7 +121,10 @@ def embed_chunks(chunks: list[dict]) -> list[dict]:
         )
         embeddings = [e.embedding for e in response.data]
     except Exception as exc:
-        raise ValueError(f"embed|{exc}") from exc
+        raise EmbeddingError(
+            f"Embedding failed: {exc}",
+            error_code="EMBED_FAILED",
+        ) from exc
 
     return [
         {**chunk, "embedding": embedding}
@@ -122,8 +139,7 @@ def store_chunks(chunks_with_embeddings: list[dict]) -> None:
     Insert a list of fully-populated chunk dicts (including 'embedding' field)
     into the 'chunks' table via the Supabase client.
 
-    Raises ValueError("chunk|<message>") on DB error so the Celery task
-    can map it to CHUNK_FAILED.
+    Raises IngestionError on DB failure (DESIGN.md §3.1).
     """
     if not chunks_with_embeddings:
         return
@@ -145,4 +161,7 @@ def store_chunks(chunks_with_embeddings: list[dict]) -> None:
         supabase = get_supabase()
         supabase.table("chunks").insert(rows).execute()
     except Exception as exc:
-        raise ValueError(f"chunk|{exc}") from exc
+        raise IngestionError(
+            f"Failed to store chunks: {exc}",
+            error_code="CHUNK_FAILED",
+        ) from exc

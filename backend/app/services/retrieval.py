@@ -10,7 +10,7 @@ from pathlib import Path
 from openai import OpenAI
 from app.core.config import settings
 from app.core.supabase import get_supabase
-from app.utils.parsers import SUPPORTED_EXTENSIONS
+from app.utils.parsers import LLAMAINDEX_PARSERS
 
 _openai = OpenAI(api_key=settings.openai_api_key)
 
@@ -53,8 +53,9 @@ def hybrid_search(topic: str, file_id: str | None = None, top_k: int = 10) -> li
 
 def _sync_extract_and_search(file_id: str, topic: str, top_k: int) -> list[dict]:
     """
-    Downloads the raw file from Supabase Storage, extracts text, and returns
-    the most relevant page-chunks using simple keyword scoring.
+    Downloads the raw file from Supabase Storage, extracts text using
+    LlamaIndex parsers (LLAMAINDEX_PARSERS), and returns the most relevant
+    page-chunks using simple keyword scoring.
     No embeddings required — works immediately after upload.
     """
     supabase = get_supabase()
@@ -69,16 +70,30 @@ def _sync_extract_and_search(file_id: str, topic: str, top_k: int) -> list[dict]
     except Exception:
         return []
 
-    # Parse
+    # Parse using LlamaIndex parsers (returns Document objects)
     ext = Path(filename).suffix.lower()
-    parser = SUPPORTED_EXTENSIONS.get(ext)
+    parser = LLAMAINDEX_PARSERS.get(ext)
     if not parser:
         return []
 
     try:
-        pages = parser(file_bytes)
+        documents = parser(file_bytes)
     except Exception:
         return []
+
+    if not documents:
+        return []
+
+    # Build (page_num, text) pairs from Document objects for scoring
+    pages = []
+    for doc in documents:
+        page_label = doc.metadata.get("page_label", "1")
+        try:
+            page_num = int(page_label)
+        except (ValueError, TypeError):
+            page_num = 1
+        if doc.text and doc.text.strip():
+            pages.append((page_num, doc.text))
 
     if not pages:
         return []

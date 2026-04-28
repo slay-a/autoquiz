@@ -532,8 +532,8 @@ export default function ClassView() {
           <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Students</p>
         </div>
         <div className="card p-4 text-center">
-          <p className="text-xl font-bold text-indigo-700">{sharedQuizzes}</p>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Shared Quizzes</p>
+          <p className="text-xl font-bold text-indigo-700">{quizzes.length}</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Quizzes</p>
         </div>
         <div className="card p-4 text-center">
           <p className="text-xl font-bold text-emerald-700">{publishedNotes}</p>

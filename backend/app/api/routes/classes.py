@@ -465,11 +465,22 @@ def save_quiz_to_class(
 ):
     supabase = get_supabase()
     _require_instructor(supabase, class_id, current_user["id"])
-    return save_class_quiz(
+    quiz = save_class_quiz(
         supabase, class_id, current_user["id"],
         req.title, req.topic, req.difficulty,
         req.file_id, req.questions, req.outside_sources,
     )
+    log_event(
+        event="quiz.save.completed",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user["id"],
+        actor_role=current_user.get("role"),
+        resource_type="quiz",
+        resource_id=quiz.get("id"),
+        meta={"class_id": class_id, "topic": req.topic, "difficulty": req.difficulty},
+    )
+    return quiz
 
 
 @router.get("/{class_id}/quizzes")
@@ -489,9 +500,20 @@ def share_quiz(
     supabase = get_supabase()
     _require_instructor(supabase, class_id, current_user["id"])
     try:
-        return toggle_quiz_share(supabase, class_id, quiz_id, req.is_shared)
+        quiz = toggle_quiz_share(supabase, class_id, quiz_id, req.is_shared)
     except ValueError:
         return JSONResponse(status_code=404, content={"error": {"code": "QUIZ_NOT_FOUND", "message": "Quiz not found.", "request_id": str(_uuid.uuid4())}})
+    log_event(
+        event="quiz.share.toggled",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user["id"],
+        actor_role=current_user.get("role"),
+        resource_type="quiz",
+        resource_id=quiz_id,
+        meta={"class_id": class_id, "is_shared": req.is_shared},
+    )
+    return quiz
 
 
 @router.delete("/{class_id}/quizzes/{quiz_id}", status_code=204)

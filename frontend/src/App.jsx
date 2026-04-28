@@ -82,7 +82,6 @@ function AppInner() {
 
 function RoleRedirect() {
   const { user, profile, loading } = useAuth();
-  // Wait while loading OR while user is set but profile hasn't arrived yet
   if (loading || (user && !profile)) return null;
   if (!user || !profile) return <Navigate to="/login" replace />;
   return <Navigate to={profile.role === "instructor" ? "/instructor" : "/student"} replace />;
@@ -101,7 +100,6 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-gray-100">
       <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-        {/* Logo */}
         <NavLink to={isInstructor ? "/instructor" : "/student"} className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
@@ -109,7 +107,6 @@ function Navbar() {
           <span className="font-bold text-gray-900 tracking-tight">AutoQuiz</span>
         </NavLink>
 
-        {/* Nav links */}
         <nav className="flex items-center gap-1">
           {isInstructor ? (
             <>
@@ -124,7 +121,6 @@ function Navbar() {
           )}
         </nav>
 
-        {/* Right side */}
         <div className="flex items-center gap-3">
           <Link
             to="/profile"

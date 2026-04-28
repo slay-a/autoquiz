@@ -187,3 +187,61 @@ def get_user_files(user_id: str) -> list[dict]:
     )
 
     return result.data or []
+
+
+def update_job_status(
+    job_id: str,
+    status: str,
+    stage: str,
+    error_code: str = None,
+    error_message: str = None,
+) -> None:
+    """
+    Update a processing_jobs row status and stage.
+
+    This service function is the single point through which Celery tasks
+    write job-state changes, satisfying DESIGN.md §0 rule 8 (tasks call
+    service functions, not app.core directly).
+
+    Args:
+        job_id:        The job UUID to update.
+        status:        New status string (e.g. JobStatus.in_progress).
+        stage:         Current pipeline stage label.
+        error_code:    Optional UPPER_SNAKE_CASE code from error_codes.py.
+        error_message: Optional human-readable failure description.
+    """
+    supabase = get_supabase()
+    payload = {"status": status, "stage": stage}
+    if error_code is not None:
+        payload["error_code"] = error_code
+    if error_message is not None:
+        payload["error_message"] = error_message
+    supabase.table("processing_jobs").update(payload).eq("job_id", job_id).execute()
+
+
+def download_file_bytes(file_id: str, filename: str) -> bytes:
+    """
+    Download raw file bytes from Supabase Storage.
+
+    Centralises Storage access in the service layer so Celery tasks do not
+    import get_supabase() directly (DESIGN.md §0 rule 8).
+
+    Args:
+        file_id:  The UUID prefix path in the 'uploads' bucket.
+        filename: The original filename (stored as {file_id}/{filename}).
+
+    Returns:
+        Raw file bytes.
+
+    Raises:
+        StorageError on Supabase Storage failure.
+    """
+    from app.core.exceptions import StorageError
+    supabase = get_supabase()
+    try:
+        return supabase.storage.from_("uploads").download(f"{file_id}/{filename}")
+    except Exception as exc:
+        raise StorageError(
+            f"Failed to download file '{filename}': {exc}",
+            error_code="STORAGE_UNAVAILABLE",
+        ) from exc

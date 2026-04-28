@@ -240,6 +240,29 @@ def get_student_classes(supabase: Client, student_id: str) -> list[dict]:
     return classes
 
 
+def save_class_quiz(
+    supabase: Client, class_id: str, instructor_id: str,
+    title: str, topic: str, difficulty: str,
+    file_id: Optional[str], questions: list, outside_sources: bool
+) -> dict:
+    result = (
+        supabase.table("saved_quizzes")
+        .insert({
+            "title": title,
+            "topic": topic,
+            "difficulty": difficulty,
+            "file_id": file_id,
+            "created_by": instructor_id,
+            "class_id": class_id,
+            "is_shared": False,
+            "outside_sources": outside_sources,
+            "questions": questions,
+        })
+        .execute()
+    )
+    return result.data[0]
+
+
 def get_class_quizzes(supabase: Client, class_id: str) -> list[dict]:
     result = (
         supabase.table("saved_quizzes")

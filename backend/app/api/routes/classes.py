@@ -19,7 +19,7 @@ from app.services.class_service import (
     create_class, list_classes, get_class_detail,
     join_class_by_code, get_student_classes as svc_get_student_classes,
     get_student_content as svc_get_student_content,
-    get_class_quizzes, toggle_quiz_share, delete_class_quiz,
+    save_class_quiz, get_class_quizzes, toggle_quiz_share, delete_class_quiz,
     get_class_notes, create_class_note, update_class_note,
     toggle_note_publish, delete_class_note,
     get_class_files, delete_class_file,
@@ -381,6 +381,15 @@ def get_student_classes_route(current_user: dict = Depends(get_current_user)):
     ]
 
 
+class SaveQuizRequest(BaseModel):
+    title: str
+    topic: str
+    difficulty: str
+    file_id: Optional[str] = None
+    questions: list
+    outside_sources: bool = False
+
+
 class ShareQuizRequest(BaseModel):
     is_shared: bool
 
@@ -446,6 +455,21 @@ def _require_instructor(supabase, class_id: str, user_id: str):
 
 
 # ── Quizzes ───────────────────────────────────────────────────────
+
+
+@router.post("/{class_id}/quizzes", status_code=201)
+def save_quiz_to_class(
+    class_id: str,
+    req: SaveQuizRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    supabase = get_supabase()
+    _require_instructor(supabase, class_id, current_user["id"])
+    return save_class_quiz(
+        supabase, class_id, current_user["id"],
+        req.title, req.topic, req.difficulty,
+        req.file_id, req.questions, req.outside_sources,
+    )
 
 
 @router.get("/{class_id}/quizzes")

@@ -196,18 +196,23 @@ export default function ClassView() {
 
   useEffect(() => { fetchAll(); }, [id]);
 
+  async function getToken() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token;
+  }
+
   async function fetchAll() {
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
+      const token = await getToken();
+      const headers = { "Authorization": `Bearer ${token}` };
 
-      // Fetch class detail from FastAPI (includes class info and members)
-      const classRes = await fetch(`${API_BASE}/classes/${id}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
+      const [classRes, quizzesRes, filesRes, notesRes] = await Promise.all([
+        fetch(`${API_BASE}/classes/${id}`, { headers }),
+        fetch(`${API_BASE}/classes/${id}/quizzes`, { headers }),
+        fetch(`${API_BASE}/classes/${id}/files`, { headers }),
+        fetch(`${API_BASE}/classes/${id}/notes`, { headers }),
+      ]);
 
       if (classRes.ok) {
         const classDetail = await classRes.json();
@@ -219,39 +224,16 @@ export default function ClassView() {
           instructor_id: classDetail.instructor_id,
           created_at: classDetail.created_at,
         });
-
-        // Transform members to match the old structure (profiles nested)
-        const transformedMembers = classDetail.members.map(m => ({
+        setMembers(classDetail.members.map(m => ({
           student_id: m.student_id,
           joined_at: m.joined_at,
-          profiles: {
-            full_name: m.full_name,
-            email: m.email,
-          },
-        }));
-        setMembers(transformedMembers);
-      } else {
-        console.error("Failed to fetch class:", await classRes.text());
+          profiles: { full_name: m.full_name, email: m.email },
+        })));
       }
 
-      // Keep fetching quizzes, files, and notes from Supabase directly
-      // (these don't have FastAPI routes yet per the spec)
-      const [
-        { data: quizData },
-        { data: fileData },
-        { data: noteData },
-        { data: successJobData },
-      ] = await Promise.all([
-        supabase.from("saved_quizzes").select("*").eq("class_id", id).order("created_at", { ascending: false }),
-        supabase.from("uploaded_files").select("*").eq("class_id", id).order("created_at", { ascending: false }),
-        supabase.from("class_notes").select("*").eq("class_id", id).order("created_at", { ascending: false }),
-        supabase.from("processing_jobs").select("file_id").eq("status", "success"),
-      ]);
-
-      const successFileIds = new Set((successJobData ?? []).map(j => j.file_id));
-      setQuizzes(quizData ?? []);
-      setFiles((fileData ?? []).filter(f => successFileIds.has(f.file_id)));
-      setNotes(noteData ?? []);
+      if (quizzesRes.ok) setQuizzes(await quizzesRes.json());
+      if (filesRes.ok) setFiles(await filesRes.json());
+      if (notesRes.ok) setNotes(await notesRes.json());
     } catch (error) {
       console.error("Error fetching class data:", error);
     } finally {
@@ -266,13 +248,13 @@ export default function ClassView() {
   }
 
   async function handleUpload(file) {
-    const { data: { session } } = await supabase.auth.getSession();
+    const token = await getToken();
     const form = new FormData();
     form.append("file", file);
     form.append("class_id", id);
     const res = await fetch(`${import.meta.env.VITE_API_URL}/upload/`, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${session?.access_token}` },
+      headers: { "Authorization": `Bearer ${token}` },
       body: form,
     });
     if (!res.ok) {
@@ -293,12 +275,11 @@ export default function ClassView() {
     if (!confirm(`Remove "${file.filename}"? This deletes the file and all its indexed content.`)) return;
     setDeletingFileId(file.file_id);
     try {
-      await Promise.all([
-        supabase.storage.from("uploads").remove([`${file.file_id}/${file.filename}`]),
-        supabase.from("chunks").delete().eq("file_id", file.file_id),
-        supabase.from("processing_jobs").delete().eq("file_id", file.file_id),
-        supabase.from("uploaded_files").delete().eq("file_id", file.file_id),
-      ]);
+      const token = await getToken();
+      await fetch(`${API_BASE}/classes/${id}/files/${file.file_id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` },
+      });
       setFiles(prev => prev.filter(f => f.file_id !== file.file_id));
       if (selectedFileId === file.file_id) setSelectedFileId("");
       if (noteGenFileId === file.file_id) setNoteGenFileId("");
@@ -313,13 +294,13 @@ export default function ClassView() {
     setGeneratedQuiz(null);
     setGenError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const token = await getToken();
       const fileId = selectedFileId && selectedFileId !== "__new__" ? selectedFileId : null;
       const res = await fetch(`${import.meta.env.VITE_API_URL}/quiz/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.access_token}`
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           topic:           params.topic,
@@ -333,18 +314,19 @@ export default function ClassView() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Generation failed");
 
-      const { data: saved } = await supabase.from("saved_quizzes").insert({
-        title:           `${params.topic} — ${params.difficulty}`,
-        topic:           params.topic,
-        difficulty:      params.difficulty,
-        file_id:         fileId,
-        created_by:      user.id,
-        class_id:        id,
-        is_shared:       false,
-        outside_sources: params.outsideSources,
-        questions:       data.questions,
-      }).select().single();
-
+      const saveRes = await fetch(`${API_BASE}/classes/${id}/quizzes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          title:           `${params.topic} — ${params.difficulty}`,
+          topic:           params.topic,
+          difficulty:      params.difficulty,
+          file_id:         fileId,
+          outside_sources: params.outsideSources,
+          questions:       data.questions,
+        }),
+      });
+      const saved = await saveRes.json();
       setGeneratedQuiz(saved);
       setQuizzes(prev => [saved, ...prev]);
     } catch (err) {
@@ -356,16 +338,25 @@ export default function ClassView() {
 
   async function deleteQuiz(quizId) {
     if (!confirm("Delete this quiz?")) return;
-    await supabase.from("saved_quizzes").delete().eq("id", quizId);
+    const token = await getToken();
+    await fetch(`${API_BASE}/classes/${id}/quizzes/${quizId}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` },
+    });
     setQuizzes(prev => prev.filter(q => q.id !== quizId));
   }
 
   async function toggleQuizShare(quiz) {
-    const { data } = await supabase.from("saved_quizzes")
-      .update({ is_shared: !quiz.is_shared })
-      .eq("id", quiz.id)
-      .select().single();
-    if (data) setQuizzes(prev => prev.map(q => q.id === quiz.id ? data : q));
+    const token = await getToken();
+    const res = await fetch(`${API_BASE}/classes/${id}/quizzes/${quiz.id}/share`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ is_shared: !quiz.is_shared }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setQuizzes(prev => prev.map(q => q.id === quiz.id ? data : q));
+    }
   }
 
   // ── Notes actions ─────────────────────────────────────────────
@@ -374,13 +365,13 @@ export default function ClassView() {
     setGeneratingNotes(true);
     setNotesGenError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const token = await getToken();
       const fileId = noteGenFileId && noteGenFileId !== "__new__" ? noteGenFileId : null;
       const res = await fetch(`${import.meta.env.VITE_API_URL}/notes/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.access_token}`
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           topic:           noteGenTopic,
@@ -391,16 +382,12 @@ export default function ClassView() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Generation failed");
 
-      const { data: saved } = await supabase.from("class_notes").insert({
-        class_id:     id,
-        created_by:   user.id,
-        title:        noteGenTopic,
-        topic:        noteGenTopic,
-        file_id:      fileId,
-        content:      data,
-        is_published: false,
-      }).select().single();
-
+      const saveRes = await fetch(`${API_BASE}/classes/${id}/notes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ title: noteGenTopic, topic: noteGenTopic, content: data }),
+      });
+      const saved = await saveRes.json();
       if (saved) setNotes(prev => [saved, ...prev]);
       setNoteGenTopic("");
       setNoteGenFileId("");
@@ -414,11 +401,16 @@ export default function ClassView() {
 
   async function saveNote(noteId, { title, content }) {
     setSavingNote(true);
-    const { data } = await supabase.from("class_notes")
-      .update({ title, content })
-      .eq("id", noteId)
-      .select().single();
-    if (data) setNotes(prev => prev.map(n => n.id === noteId ? data : n));
+    const token = await getToken();
+    const res = await fetch(`${API_BASE}/classes/${id}/notes/${noteId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ title, content }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setNotes(prev => prev.map(n => n.id === noteId ? data : n));
+    }
     setSavingNote(false);
     setNoteView("list");
     setEditingNote(null);
@@ -426,18 +418,27 @@ export default function ClassView() {
 
   async function toggleNotePublish(note) {
     setPublishingNoteId(note.id);
-    const { data } = await supabase.from("class_notes")
-      .update({ is_published: !note.is_published })
-      .eq("id", note.id)
-      .select().single();
-    if (data) setNotes(prev => prev.map(n => n.id === note.id ? data : n));
+    const token = await getToken();
+    const res = await fetch(`${API_BASE}/classes/${id}/notes/${note.id}/publish`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      body: JSON.stringify({ is_published: !note.is_published }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setNotes(prev => prev.map(n => n.id === note.id ? data : n));
+    }
     setPublishingNoteId(null);
   }
 
   async function deleteNote(noteId) {
     if (!confirm("Delete this note? This cannot be undone.")) return;
     setDeletingNoteId(noteId);
-    await supabase.from("class_notes").delete().eq("id", noteId);
+    const token = await getToken();
+    await fetch(`${API_BASE}/classes/${id}/notes/${noteId}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` },
+    });
     setNotes(prev => prev.filter(n => n.id !== noteId));
     setDeletingNoteId(null);
   }
@@ -446,7 +447,11 @@ export default function ClassView() {
   async function removeMember(studentId) {
     if (!confirm("Remove this student from the class?")) return;
     setRemovingMemberId(studentId);
-    await supabase.from("class_members").delete().eq("class_id", id).eq("student_id", studentId);
+    const token = await getToken();
+    await fetch(`${API_BASE}/classes/${id}/members/${studentId}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` },
+    });
     setMembers(prev => prev.filter(m => m.student_id !== studentId));
     setRemovingMemberId(null);
   }
@@ -454,7 +459,11 @@ export default function ClassView() {
   async function deleteClass() {
     if (!confirm(`Delete class "${cls?.name}"? All quizzes, notes, and files in this class will be deleted. This cannot be undone.`)) return;
     setDeletingClass(true);
-    await supabase.from("classes").delete().eq("id", id);
+    const token = await getToken();
+    await fetch(`${API_BASE}/classes/${id}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` },
+    });
     navigate("/instructor");
   }
 

@@ -240,6 +240,145 @@ def get_student_classes(supabase: Client, student_id: str) -> list[dict]:
     return classes
 
 
+def get_class_quizzes(supabase: Client, class_id: str) -> list[dict]:
+    result = (
+        supabase.table("saved_quizzes")
+        .select("*")
+        .eq("class_id", class_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return result.data or []
+
+
+def toggle_quiz_share(supabase: Client, class_id: str, quiz_id: str, is_shared: bool) -> dict:
+    result = (
+        supabase.table("saved_quizzes")
+        .update({"is_shared": is_shared})
+        .eq("id", quiz_id)
+        .eq("class_id", class_id)
+        .execute()
+    )
+    if not result.data:
+        raise ValueError("QUIZ_NOT_FOUND")
+    return result.data[0]
+
+
+def delete_class_quiz(supabase: Client, class_id: str, quiz_id: str) -> None:
+    supabase.table("saved_quizzes").delete().eq("id", quiz_id).eq("class_id", class_id).execute()
+
+
+def get_class_notes(supabase: Client, class_id: str) -> list[dict]:
+    result = (
+        supabase.table("class_notes")
+        .select("*")
+        .eq("class_id", class_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return result.data or []
+
+
+def create_class_note(
+    supabase: Client, class_id: str, instructor_id: str,
+    title: str, topic: str, content: dict
+) -> dict:
+    result = (
+        supabase.table("class_notes")
+        .insert({
+            "class_id": class_id,
+            "created_by": instructor_id,
+            "title": title,
+            "topic": topic,
+            "content": content,
+            "is_published": False,
+        })
+        .execute()
+    )
+    return result.data[0]
+
+
+def update_class_note(
+    supabase: Client, class_id: str, note_id: str,
+    title: str, content: dict
+) -> dict:
+    result = (
+        supabase.table("class_notes")
+        .update({"title": title, "content": content})
+        .eq("id", note_id)
+        .eq("class_id", class_id)
+        .execute()
+    )
+    if not result.data:
+        raise ValueError("NOTE_NOT_FOUND")
+    return result.data[0]
+
+
+def toggle_note_publish(
+    supabase: Client, class_id: str, note_id: str, is_published: bool
+) -> dict:
+    result = (
+        supabase.table("class_notes")
+        .update({"is_published": is_published})
+        .eq("id", note_id)
+        .eq("class_id", class_id)
+        .execute()
+    )
+    if not result.data:
+        raise ValueError("NOTE_NOT_FOUND")
+    return result.data[0]
+
+
+def delete_class_note(supabase: Client, class_id: str, note_id: str) -> None:
+    supabase.table("class_notes").delete().eq("id", note_id).eq("class_id", class_id).execute()
+
+
+def get_class_files(supabase: Client, class_id: str) -> list[dict]:
+    files_result = (
+        supabase.table("uploaded_files")
+        .select("*")
+        .eq("class_id", class_id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+    files = files_result.data or []
+    jobs_result = (
+        supabase.table("processing_jobs")
+        .select("file_id")
+        .eq("status", "success")
+        .execute()
+    )
+    success_ids = {j["file_id"] for j in (jobs_result.data or [])}
+    for f in files:
+        f["processing_done"] = f["file_id"] in success_ids
+    return files
+
+
+def delete_class_file(supabase: Client, class_id: str, file_id: str) -> None:
+    file_result = (
+        supabase.table("uploaded_files")
+        .select("file_id, filename")
+        .eq("file_id", file_id)
+        .eq("class_id", class_id)
+        .execute()
+    )
+    if not file_result.data:
+        raise ValueError("FILE_NOT_FOUND")
+    f = file_result.data[0]
+    supabase.storage.from_("uploads").remove([f"{f['file_id']}/{f['filename']}"])
+    supabase.table("chunks").delete().eq("file_id", file_id).execute()
+    supabase.table("processing_jobs").delete().eq("file_id", file_id).execute()
+    supabase.table("uploaded_files").delete().eq("file_id", file_id).execute()
+
+
+def remove_class_member(supabase: Client, class_id: str, student_id: str) -> None:
+    supabase.table("class_members").delete().eq("class_id", class_id).eq("student_id", student_id).execute()
+
+
+def delete_class(supabase: Client, class_id: str) -> None:
+    supabase.table("classes").delete().eq("id", class_id).execute()
+
+
 def get_student_content(supabase: Client, student_id: str) -> dict:
     """
     Return shared quizzes and published notes for the student's joined classes.

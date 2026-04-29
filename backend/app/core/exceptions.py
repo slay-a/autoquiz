@@ -75,3 +75,17 @@ class ContextTooLargeError(GenerationError):
 
 class StorageError(AutoQuizError):
     """Raised when Supabase Storage operations fail."""
+
+
+# ── Access / ownership ─────────────────────────────────────────────────────────
+
+class JobNotFoundError(AutoQuizError):
+    """Raised when a processing job or file cannot be found."""
+
+
+class AccessDeniedError(AutoQuizError):
+    """Raised when a user attempts to access a resource they don't own."""
+
+
+class InvalidJobStateError(AutoQuizError):
+    """Raised when a job operation is invalid for the current state."""

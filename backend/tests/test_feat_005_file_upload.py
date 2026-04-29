@@ -434,7 +434,7 @@ class TestUploadEndpoint:
         response = client.post("/upload/", files=files)
 
         assert response.status_code == 400
-        assert "Unsupported file type" in response.json()["detail"]
+        assert "Unsupported file type" in response.json()["error"]["message"]
 
         # Cleanup
         app.dependency_overrides.clear()

@@ -6,22 +6,9 @@ Routes delegate to this service per DESIGN.md layer separation.
 import uuid
 from app.core.supabase import get_supabase
 from app.models.schemas import JobStatus
+from app.core.exceptions import JobNotFoundError, AccessDeniedError, InvalidJobStateError
 
-
-# Domain exceptions (DESIGN.md Layer 2 compliance — no FastAPI imports)
-class JobNotFoundError(Exception):
-    """Raised when a job cannot be found."""
-    pass
-
-
-class AccessDeniedError(Exception):
-    """Raised when a user attempts to access a job they don't own."""
-    pass
-
-
-class InvalidJobStateError(Exception):
-    """Raised when a job operation is invalid for the current state."""
-    pass
+__all__ = ["JobNotFoundError", "AccessDeniedError", "InvalidJobStateError"]
 
 
 def store_file_and_create_job(
@@ -161,6 +148,24 @@ def create_retry_job(job_id: str, user_id: str) -> dict:
         "message": "Retry queued.",
         "filename": job["filename"],
     }
+
+
+def validate_file_ownership(file_id: str, user_id: str) -> None:
+    """
+    Raise AccessDeniedError if the file does not belong to user_id,
+    or JobNotFoundError if the file_id does not exist.
+    """
+    supabase = get_supabase()
+    result = (
+        supabase.table("uploaded_files")
+        .select("uploaded_by")
+        .eq("file_id", file_id)
+        .execute()
+    )
+    if not result.data:
+        raise JobNotFoundError("File not found")
+    if result.data[0]["uploaded_by"] != user_id:
+        raise AccessDeniedError("You do not have access to this file")
 
 
 def get_user_files(user_id: str) -> list[dict]:

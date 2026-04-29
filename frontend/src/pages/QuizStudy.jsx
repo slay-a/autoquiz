@@ -16,34 +16,37 @@ export default function QuizStudy() {
 
   useEffect(() => { fetchQuiz(); }, [id]);
 
+  async function getAuthHeaders() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${session?.access_token}`,
+    };
+  }
+
   async function fetchQuiz() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("saved_quizzes")
-      .select("*")
-      .eq("id", id)
-      .or(`created_by.eq.${user.id},is_shared.eq.true`)
-      .single();
-
-    if (error || !data) {
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/quiz/${id}`, { headers });
+      if (!res.ok) { setQuiz(null); return; }
+      setQuiz(await res.json());
+    } catch {
       setQuiz(null);
-    } else {
-      setQuiz(data);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function regenerate() {
     if (!quiz) return;
     setRegenerating(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/quiz/generate`, {
+      const headers = await getAuthHeaders();
+
+      const genRes = await fetch(`${import.meta.env.VITE_API_URL || ""}/quiz/generate`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.access_token}`,
-        },
+        headers,
         body: JSON.stringify({
           topic: quiz.topic,
           num_questions: quiz.questions.length,
@@ -53,23 +56,26 @@ export default function QuizStudy() {
           file_id: quiz.file_id || null,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Regeneration failed");
+      const genData = await genRes.json();
+      if (!genRes.ok) throw new Error(genData.detail || "Regeneration failed");
 
-      // Save as a new version
-      const { data: saved } = await supabase.from("saved_quizzes").insert({
-        title: `${quiz.topic} — ${quiz.difficulty} (v2)`,
-        topic: quiz.topic,
-        difficulty: quiz.difficulty,
-        file_id: quiz.file_id,
-        created_by: user.id,
-        class_id: quiz.class_id,
-        is_shared: quiz.is_shared,
-        outside_sources: quiz.outside_sources,
-        questions: data.questions,
-      }).select().single();
+      const saveRes = await fetch(`${import.meta.env.VITE_API_URL || ""}/quiz/save`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          title: `${quiz.topic} — ${quiz.difficulty} (v2)`,
+          topic: quiz.topic,
+          difficulty: quiz.difficulty,
+          file_id: quiz.file_id || null,
+          class_id: quiz.class_id || null,
+          outside_sources: quiz.outside_sources,
+          questions: genData.questions,
+        }),
+      });
+      const saved = await saveRes.json();
+      if (!saveRes.ok) throw new Error(saved.detail || "Save failed");
 
-      if (saved) navigate(`/quiz/${saved.id}`);
+      navigate(`/quiz/${saved.id}`);
     } catch (err) {
       console.error(err);
     } finally {

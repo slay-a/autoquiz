@@ -95,6 +95,18 @@ class QuizResponse(BaseModel):
     questions: list[QuizQuestion]
 
 
+# ── Quiz Save ────────────────────────────────────────────────────────────────
+
+class SaveQuizRequest(BaseModel):
+    title: str
+    topic: str
+    difficulty: Literal["easy", "medium", "hard"]
+    questions: list[dict]
+    file_id: Optional[str] = None
+    outside_sources: bool = False
+    class_id: Optional[str] = None
+
+
 # ── Notes ────────────────────────────────────────────────────────────────────
 
 class NotesSaveRequest(BaseModel):

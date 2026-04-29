@@ -236,6 +236,8 @@
 
 ### Story 5.1 — Upload a document
 
+**Status: Verified**
+
 **As a** user (instructor or student),
 **I want** to upload a course document (PDF, DOCX, or PPTX),
 **so that** the system can generate quizzes and notes grounded in its content.
@@ -251,6 +253,8 @@
 
 ### Story 5.2 — Track processing status
 
+**Status: Verified**
+
 **As a** user,
 **I want** to see the processing status of my uploaded document,
 **so that** I know when it is ready to use for quiz generation.
@@ -265,6 +269,8 @@
 ---
 
 ### Story 5.3 — Re-access previously uploaded files for generation (Instructor)
+
+**Status: Verified**
 
 **As an** instructor,
 **I want** to select a file I have already uploaded to a class without re-uploading it,
@@ -301,6 +307,8 @@
 
 ### Story 6.1 — Generate a quiz from uploaded material
 
+**Status: Verified**
+
 **As a** student,
 **I want** to generate a quiz on a topic from a document I have uploaded,
 **so that** I can test my understanding of the course content.
@@ -316,6 +324,8 @@
 
 ### Story 6.2 — Select difficulty level
 
+**Status: Verified**
+
 **As a** student,
 **I want** to choose the difficulty of the generated quiz (easy, medium, or hard),
 **so that** the questions match my current study level.
@@ -329,6 +339,8 @@
 ---
 
 ### Story 6.3 — Generate a quiz using general knowledge
+
+**Status: Verified**
 
 **As a** student,
 **I want** to generate a quiz on a topic without uploading a document,
@@ -345,6 +357,8 @@
 
 ### Story 7.1 — Study a quiz
 
+**Status: Verified**
+
 **As a** student,
 **I want** to open a saved quiz and answer its questions,
 **so that** I can test my knowledge.
@@ -360,6 +374,8 @@
 
 ### Story 7.2 — Save a generated quiz
 
+**Status: Verified**
+
 **As a** student,
 **I want** to save a quiz I have just generated,
 **so that** I can return to it later or share it.
@@ -373,6 +389,8 @@
 ---
 
 ### Story 7.3 — Regenerate a quiz
+
+**Status: Verified**
 
 **As a** student,
 **I want** to regenerate a new version of a quiz on the same topic,
@@ -388,6 +406,8 @@
 ## Feature Group 8 — Quiz Sharing (Instructor)
 
 ### Story 8.1 — Share a quiz with a class
+
+**Status: Verified**
 
 **As an** instructor,
 **I want** to share a saved quiz with my class,

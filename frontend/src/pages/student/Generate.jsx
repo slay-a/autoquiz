@@ -111,19 +111,28 @@ export default function Generate() {
   async function saveQuiz() {
     if (!quiz) return;
     setSaving(true);
-    const { data, error } = await supabase.from("saved_quizzes").insert({
-      title: `${quiz.topic} — ${quiz.difficulty}`,
-      topic: quiz.topic,
-      difficulty: quiz.difficulty,
-      file_id: selectedFileId || uploadedFile?.file_id || null,
-      created_by: user.id,
-      is_shared: false,
-      outside_sources: lastParams?.outsideSources ?? false,
-      questions: quiz.questions,
-    }).select().single();
-
-    setSaving(false);
-    if (!error) setSavedId(data.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/quiz/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          title: `${quiz.topic} — ${quiz.difficulty}`,
+          topic: quiz.topic,
+          difficulty: quiz.difficulty,
+          file_id: selectedFileId || uploadedFile?.file_id || null,
+          outside_sources: lastParams?.outsideSources ?? false,
+          questions: quiz.questions,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) setSavedId(data.id);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function copyShare() {

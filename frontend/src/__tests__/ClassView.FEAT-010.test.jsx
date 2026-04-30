@@ -110,9 +110,9 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
       },
     });
 
-    // Default fetch mock
+    // Default fetch mock — use exact suffix matches so sub-routes don't receive class detail
     global.fetch.mockImplementation((url) => {
-      if (url.includes('/classes/class-123')) {
+      if (/\/classes\/class-123$/.test(url)) {
         return Promise.resolve({ ok: true, json: async () => mockClassDetail });
       }
       return Promise.resolve({ ok: true, json: async () => [] });
@@ -170,7 +170,7 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
       await userEvent.click(generateNoteButton);
 
       await waitFor(() => {
-        const topicInput = screen.getByPlaceholderText(/topic/i);
+        const topicInput = screen.getByLabelText(/topic/i);
         expect(topicInput).toBeInTheDocument();
         expect(topicInput.value).toBe('');
       });
@@ -214,12 +214,12 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
       await userEvent.click(generateNoteButton);
 
       await waitFor(() => {
-        const topicInput = screen.getByPlaceholderText(/topic/i);
+        const topicInput = screen.getByLabelText(/topic/i);
         expect(topicInput).toBeInTheDocument();
       });
 
       // Type whitespace into the topic field
-      const topicInput = screen.getByPlaceholderText(/topic/i);
+      const topicInput = screen.getByLabelText(/topic/i);
       await userEvent.type(topicInput, '   ');
 
       // Verify Generate Notes button remains disabled
@@ -228,47 +228,23 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
     });
 
     it('AC-10.1.3: Newly created note appears at top of list immediately', async () => {
-      let notesData = [];
+      const newNote = {
+        id: 'note-new',
+        title: 'Mitosis',
+        topic: 'Mitosis',
+        content: { summary: 'Cell division process' },
+        created_at: '2026-04-14T10:00:00Z',
+        class_id: 'class-123',
+        is_published: false,
+      };
 
-      mockSupabaseFrom.mockImplementation((table) => {
-        if (table === 'class_notes') {
-          const mockChain = {
-            select: vi.fn(() => mockChain),
-            eq: vi.fn(() => mockChain),
-            order: vi.fn(() => mockChain),
-            insert: vi.fn(() => mockChain),
-            single: vi.fn(() => {
-              // Simulate successful insert
-              const newNote = {
-                id: 'note-new',
-                title: 'Mitosis',
-                topic: 'Mitosis',
-                content: { summary: 'Cell division process' },
-                created_at: '2026-04-14T10:00:00Z',
-                class_id: 'class-123',
-                is_published: false,
-              };
-              notesData = [newNote, ...notesData];
-              return Promise.resolve({ data: newNote, error: null });
-            }),
-          };
-          mockChain.select().eq().order = vi.fn(() =>
-            Promise.resolve({ data: notesData, error: null })
-          );
-          return mockChain;
-        }
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          order: vi.fn(() => mockChain),
-        };
-        mockChain.select().eq().order = vi.fn(() => Promise.resolve({ data: [], error: null }));
-        return mockChain;
-      });
-
-      global.fetch.mockImplementation((url) => {
-        if (url.includes('/classes/class-123')) {
+      // fetch mocks: class detail, empty notes on load, notes/generate, notes POST save
+      global.fetch.mockImplementation((url, options) => {
+        if (/\/classes\/class-123$/.test(url)) {
           return Promise.resolve({ ok: true, json: async () => mockClassDetail });
+        }
+        if (url.includes('/classes/class-123/notes') && options?.method === 'POST') {
+          return Promise.resolve({ ok: true, json: async () => newNote });
         }
         if (url.includes('/notes/generate')) {
           return Promise.resolve({
@@ -293,11 +269,11 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
       await userEvent.click(generateNoteButton);
 
       await waitFor(() => {
-        const topicInput = screen.getByPlaceholderText(/topic/i);
+        const topicInput = screen.getByLabelText(/topic/i);
         expect(topicInput).toBeInTheDocument();
       });
 
-      const topicInput = screen.getByPlaceholderText(/topic/i);
+      const topicInput = screen.getByLabelText(/topic/i);
       await userEvent.type(topicInput, 'Mitosis');
 
       const generateButton = screen.getByRole('button', { name: /generate notes/i });
@@ -313,25 +289,15 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
 
   describe('Story 10.2 — Edit class notes', () => {
     it('AC-10.2.1: Edit button opens inline editor', async () => {
-      mockSupabaseFrom.mockImplementation((table) => {
-        if (table === 'class_notes') {
-          const mockChain = {
-            select: vi.fn(() => mockChain),
-            eq: vi.fn(() => mockChain),
-            order: vi.fn(() => mockChain),
-          };
-          mockChain.select().eq().order = vi.fn(() =>
-            Promise.resolve({ data: [mockPublishedNote], error: null })
-          );
-          return mockChain;
+      // fetch mock returns published note for /notes endpoint
+      global.fetch.mockImplementation((url) => {
+        if (/\/classes\/class-123$/.test(url)) {
+          return Promise.resolve({ ok: true, json: async () => mockClassDetail });
         }
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          order: vi.fn(() => mockChain),
-        };
-        mockChain.select().eq().order = vi.fn(() => Promise.resolve({ data: [], error: null }));
-        return mockChain;
+        if (url.includes('/classes/class-123/notes')) {
+          return Promise.resolve({ ok: true, json: async () => [mockPublishedNote] });
+        }
+        return Promise.resolve({ ok: true, json: async () => [] });
       });
 
       renderClassView();
@@ -365,34 +331,21 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
     });
 
     it('AC-10.2.4: Cancel button discards changes without saving', async () => {
-      const mockUpdate = vi.fn(() => ({
-        eq: vi.fn(() => ({
-          select: vi.fn(() => ({
-            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          })),
-        })),
-      }));
+      const mockFetchPut = vi.fn();
 
-      mockSupabaseFrom.mockImplementation((table) => {
-        if (table === 'class_notes') {
-          const mockChain = {
-            select: vi.fn(() => mockChain),
-            eq: vi.fn(() => mockChain),
-            order: vi.fn(() => mockChain),
-            update: mockUpdate,
-          };
-          mockChain.select().eq().order = vi.fn(() =>
-            Promise.resolve({ data: [mockPublishedNote], error: null })
-          );
-          return mockChain;
+      // fetch mock returns published note; captures PUT calls
+      global.fetch.mockImplementation((url, options) => {
+        if (/\/classes\/class-123$/.test(url)) {
+          return Promise.resolve({ ok: true, json: async () => mockClassDetail });
         }
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          order: vi.fn(() => mockChain),
-        };
-        mockChain.select().eq().order = vi.fn(() => Promise.resolve({ data: [], error: null }));
-        return mockChain;
+        if (url.includes('/classes/class-123/notes') && options?.method === 'PUT') {
+          mockFetchPut(url, options);
+          return Promise.resolve({ ok: true, json: async () => mockPublishedNote });
+        }
+        if (url.includes('/classes/class-123/notes')) {
+          return Promise.resolve({ ok: true, json: async () => [mockPublishedNote] });
+        }
+        return Promise.resolve({ ok: true, json: async () => [] });
       });
 
       renderClassView();
@@ -426,8 +379,8 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
         const cancelButton = screen.getByRole('button', { name: /cancel/i });
         await userEvent.click(cancelButton);
 
-        // Verify update was NOT called
-        expect(mockUpdate).not.toHaveBeenCalled();
+        // Verify PUT was NOT called (no save on cancel)
+        expect(mockFetchPut).not.toHaveBeenCalled();
 
         // Verify we're back to list view (original title should be visible)
         await waitFor(() => {
@@ -436,40 +389,22 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
       }
     });
 
-    it('AC-10.2.4: Save button calls supabase.update with new title and content', async () => {
-      const mockUpdate = vi.fn(() => ({
-        eq: vi.fn(() => ({
-          select: vi.fn(() => ({
-            single: vi.fn(() =>
-              Promise.resolve({
-                data: { ...mockPublishedNote, title: 'Updated Title' },
-                error: null,
-              })
-            ),
-          })),
-        })),
-      }));
+    it('AC-10.2.4: Save button calls fetch PUT with new title and content', async () => {
+      let putBody = null;
 
-      mockSupabaseFrom.mockImplementation((table) => {
-        if (table === 'class_notes') {
-          const mockChain = {
-            select: vi.fn(() => mockChain),
-            eq: vi.fn(() => mockChain),
-            order: vi.fn(() => mockChain),
-            update: mockUpdate,
-          };
-          mockChain.select().eq().order = vi.fn(() =>
-            Promise.resolve({ data: [mockPublishedNote], error: null })
-          );
-          return mockChain;
+      // fetch mock returns note for GET, captures PUT body for save assertion
+      global.fetch.mockImplementation(async (url, options) => {
+        if (/\/classes\/class-123$/.test(url)) {
+          return { ok: true, json: async () => mockClassDetail };
         }
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          order: vi.fn(() => mockChain),
-        };
-        mockChain.select().eq().order = vi.fn(() => Promise.resolve({ data: [], error: null }));
-        return mockChain;
+        if (url.includes('/classes/class-123/notes') && options?.method === 'PUT') {
+          putBody = JSON.parse(options.body);
+          return { ok: true, json: async () => ({ ...mockPublishedNote, title: putBody.title }) };
+        }
+        if (url.includes('/classes/class-123/notes')) {
+          return { ok: true, json: async () => [mockPublishedNote] };
+        }
+        return { ok: true, json: async () => [] };
       });
 
       renderClassView();
@@ -503,52 +438,33 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
         const saveButton = screen.getByRole('button', { name: /save/i });
         await userEvent.click(saveButton);
 
-        // Verify update was called with new title
+        // Verify fetch PUT was called with new title and original content
         await waitFor(() => {
-          expect(mockUpdate).toHaveBeenCalledWith({
-            title: 'Updated Title',
-            content: mockPublishedNote.content,
-          });
+          expect(putBody).not.toBeNull();
+          expect(putBody.title).toBe('Updated Title');
+          expect(putBody.content).toEqual(mockPublishedNote.content);
         });
       }
     });
   });
 
   describe('Story 10.3 — Publish and unpublish class notes', () => {
-    it('AC-10.3.1: Publish toggle flips is_published and shows spinner', async () => {
-      const mockUpdate = vi.fn(() => ({
-        eq: vi.fn(() => ({
-          select: vi.fn(() => ({
-            single: vi.fn(() =>
-              Promise.resolve({
-                data: { ...mockDraftNote, is_published: true },
-                error: null,
-              })
-            ),
-          })),
-        })),
-      }));
+    it('AC-10.3.1: Publish toggle flips is_published via fetch PATCH', async () => {
+      let patchBody = null;
 
-      mockSupabaseFrom.mockImplementation((table) => {
-        if (table === 'class_notes') {
-          const mockChain = {
-            select: vi.fn(() => mockChain),
-            eq: vi.fn(() => mockChain),
-            order: vi.fn(() => mockChain),
-            update: mockUpdate,
-          };
-          mockChain.select().eq().order = vi.fn(() =>
-            Promise.resolve({ data: [mockDraftNote], error: null })
-          );
-          return mockChain;
+      // fetch mock returns draft note; captures PATCH call for publish assertion
+      global.fetch.mockImplementation(async (url, options) => {
+        if (/\/classes\/class-123$/.test(url)) {
+          return { ok: true, json: async () => mockClassDetail };
         }
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          order: vi.fn(() => mockChain),
-        };
-        mockChain.select().eq().order = vi.fn(() => Promise.resolve({ data: [], error: null }));
-        return mockChain;
+        if (url.includes('/classes/class-123/notes') && url.includes('/publish') && options?.method === 'PATCH') {
+          patchBody = JSON.parse(options.body);
+          return { ok: true, json: async () => ({ ...mockDraftNote, is_published: true }) };
+        }
+        if (url.includes('/classes/class-123/notes')) {
+          return { ok: true, json: async () => [mockDraftNote] };
+        }
+        return { ok: true, json: async () => [] };
       });
 
       renderClassView();
@@ -562,15 +478,16 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
         expect(screen.getByText('Photosynthesis')).toBeInTheDocument();
       });
 
-      // Find the Publish button
+      // Find the Publish button (draft note shows "Publish" label)
       const publishButton = screen.getByRole('button', { name: /publish/i });
       expect(publishButton).toBeInTheDocument();
 
       await userEvent.click(publishButton);
 
-      // Verify update was called with is_published flipped
+      // Verify fetch PATCH was called with is_published: true
       await waitFor(() => {
-        expect(mockUpdate).toHaveBeenCalledWith({ is_published: true });
+        expect(patchBody).not.toBeNull();
+        expect(patchBody.is_published).toBe(true);
       });
     });
   });

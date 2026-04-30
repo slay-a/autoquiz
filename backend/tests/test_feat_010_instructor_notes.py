@@ -79,7 +79,9 @@ class TestNotesGenerateAuth:
             json={"topic": "Photosynthesis", "file_id": None, "outside_sources": False},
         )
         assert response.status_code == 401, f"Expected 401, got {response.status_code}"
-        assert "detail" in response.json()
+        body = response.json()
+        assert "error" in body, f"Expected error envelope, got: {body}"
+        assert body["error"]["code"] == "AUTH_REQUIRED"
 
     @patch("app.api.routes.notes.generate_notes")
     @patch("app.api.routes.notes.hybrid_search")

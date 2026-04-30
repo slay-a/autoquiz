@@ -352,6 +352,11 @@ def toggle_note_publish(
     return result.data[0]
 
 
+def get_class_note_by_id(supabase: Client, note_id: str) -> dict | None:
+    result = supabase.table("class_notes").select("*").eq("id", note_id).execute()
+    return result.data[0] if result.data else None
+
+
 def delete_class_note(supabase: Client, class_id: str, note_id: str) -> None:
     supabase.table("class_notes").delete().eq("id", note_id).eq("class_id", class_id).execute()
 

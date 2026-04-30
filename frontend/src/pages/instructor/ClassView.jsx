@@ -725,11 +725,13 @@ export default function ClassView() {
 
             {/* Topic */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide block">Topic / Chapter</label>
+              <label htmlFor="note-gen-topic" className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide block">Topic / Chapter</label>
               <input
+                id="note-gen-topic"
                 value={noteGenTopic}
                 onChange={e => setNoteGenTopic(e.target.value)}
                 placeholder="e.g. Photosynthesis, Chapter 3: Civil War, Derivatives..."
+                aria-label="Topic"
                 className="input"
                 onKeyDown={e => e.key === "Enter" && generateNotes()}
               />

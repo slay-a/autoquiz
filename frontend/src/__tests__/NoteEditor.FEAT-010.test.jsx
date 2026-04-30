@@ -93,34 +93,15 @@ describe('NoteEditor - FEAT-010 Unit Tests', () => {
       },
     });
 
+    // Default fetch mock: class detail + mockNote in notes list
     global.fetch.mockImplementation((url) => {
-      if (url.includes('/classes/class-123')) {
+      if (/\/classes\/class-123$/.test(url)) {
         return Promise.resolve({ ok: true, json: async () => mockClassDetail });
       }
-      return Promise.resolve({ ok: true, json: async () => [] });
-    });
-
-    mockSupabaseFrom.mockImplementation((table) => {
-      if (table === 'class_notes') {
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          order: vi.fn(() => mockChain),
-          update: vi.fn(() => mockChain),
-          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-        };
-        mockChain.select().eq().order = vi.fn(() =>
-          Promise.resolve({ data: [mockNote], error: null })
-        );
-        return mockChain;
+      if (url.includes('/classes/class-123/notes')) {
+        return Promise.resolve({ ok: true, json: async () => [mockNote] });
       }
-      const mockChain = {
-        select: vi.fn(() => mockChain),
-        eq: vi.fn(() => mockChain),
-        order: vi.fn(() => mockChain),
-      };
-      mockChain.select().eq().order = vi.fn(() => Promise.resolve({ data: [], error: null }));
-      return mockChain;
+      return Promise.resolve({ ok: true, json: async () => [] });
     });
   });
 
@@ -181,27 +162,14 @@ describe('NoteEditor - FEAT-010 Unit Tests', () => {
         },
       };
 
-      mockSupabaseFrom.mockImplementation((table) => {
-        if (table === 'class_notes') {
-          const mockChain = {
-            select: vi.fn(() => mockChain),
-            eq: vi.fn(() => mockChain),
-            order: vi.fn(() => mockChain),
-            update: vi.fn(() => mockChain),
-            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          };
-          mockChain.select().eq().order = vi.fn(() =>
-            Promise.resolve({ data: [noteWithMultipleConcepts], error: null })
-          );
-          return mockChain;
+      global.fetch.mockImplementation((url) => {
+        if (/\/classes\/class-123$/.test(url)) {
+          return Promise.resolve({ ok: true, json: async () => mockClassDetail });
         }
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          order: vi.fn(() => mockChain),
-        };
-        mockChain.select().eq().order = vi.fn(() => Promise.resolve({ data: [], error: null }));
-        return mockChain;
+        if (url.includes('/classes/class-123/notes')) {
+          return Promise.resolve({ ok: true, json: async () => [noteWithMultipleConcepts] });
+        }
+        return Promise.resolve({ ok: true, json: async () => [] });
       });
 
       renderClassView();
@@ -306,27 +274,14 @@ describe('NoteEditor - FEAT-010 Unit Tests', () => {
         },
       };
 
-      mockSupabaseFrom.mockImplementation((table) => {
-        if (table === 'class_notes') {
-          const mockChain = {
-            select: vi.fn(() => mockChain),
-            eq: vi.fn(() => mockChain),
-            order: vi.fn(() => mockChain),
-            update: vi.fn(() => mockChain),
-            single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-          };
-          mockChain.select().eq().order = vi.fn(() =>
-            Promise.resolve({ data: [noteWithMultipleMisconceptions], error: null })
-          );
-          return mockChain;
+      global.fetch.mockImplementation((url) => {
+        if (/\/classes\/class-123$/.test(url)) {
+          return Promise.resolve({ ok: true, json: async () => mockClassDetail });
         }
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          order: vi.fn(() => mockChain),
-        };
-        mockChain.select().eq().order = vi.fn(() => Promise.resolve({ data: [], error: null }));
-        return mockChain;
+        if (url.includes('/classes/class-123/notes')) {
+          return Promise.resolve({ ok: true, json: async () => [noteWithMultipleMisconceptions] });
+        }
+        return Promise.resolve({ ok: true, json: async () => [] });
       });
 
       renderClassView();

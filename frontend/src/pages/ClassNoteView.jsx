@@ -1,18 +1,30 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { useAuth } from "../contexts/AuthContext";
 import { ChevronLeft, Loader2, BookOpen, Lightbulb, AlertCircle, Target } from "lucide-react";
+
+const API_BASE = "http://localhost:8000";
 
 export default function ClassNoteView() {
   const { id } = useParams();
-  const { profile } = useAuth();
-  const [note, setNote]     = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [note, setNote]           = useState(null);
+  const [unavailable, setUnavailable] = useState(false);
+  const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
-    supabase.from("class_notes").select("*").eq("id", id).single()
-      .then(({ data }) => { setNote(data); setLoading(false); });
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const res = await fetch(`${API_BASE}/classes/class-note/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 403) {
+        setUnavailable(true);
+      } else if (res.ok) {
+        setNote(await res.json());
+      }
+      setLoading(false);
+    })();
   }, [id]);
 
   if (loading) return (
@@ -20,12 +32,8 @@ export default function ClassNoteView() {
       <Loader2 className="w-6 h-6 text-violet-400 animate-spin" />
     </div>
   );
+  if (unavailable) return <p className="text-gray-500 dark:text-slate-400">This note is not available.</p>;
   if (!note) return <p className="text-gray-500 dark:text-slate-400">Note not found.</p>;
-
-  // Security: students cannot view unpublished notes
-  if (profile?.role === 'student' && !note.is_published) {
-    return <p className="text-gray-500 dark:text-slate-400">This note is not available.</p>;
-  }
 
   const c = note.content ?? {};
 

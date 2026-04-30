@@ -3,20 +3,23 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import ClassNoteView from '../pages/ClassNoteView';
 
-// Mock AuthContext
-const mockUseAuth = vi.fn();
+// Mock AuthContext (ClassNoteView no longer reads profile from context after migration)
 vi.mock('../contexts/AuthContext', () => ({
-  useAuth: () => mockUseAuth(),
+  useAuth: () => ({ user: null, profile: null, loading: false }),
 }));
 
-// Mock supabase
-const mockSupabaseFrom = vi.fn();
-
+// Mock supabase — only auth.getSession is used after migration to fetch
+const mockGetSession = vi.fn();
 vi.mock('../lib/supabase', () => ({
   supabase: {
-    from: (...args) => mockSupabaseFrom(...args),
+    auth: {
+      getSession: () => mockGetSession(),
+    },
   },
 }));
+
+// Mock fetch globally
+global.fetch = vi.fn();
 
 function renderClassNoteView(noteId = 'note-123') {
   return render(
@@ -67,23 +70,15 @@ describe('ClassNoteView - FEAT-010 Published Note Checks', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetSession.mockResolvedValue({ data: { session: { access_token: 'mock-token' } } });
   });
 
   describe('AC-10.3.2: Unpublished notes access control', () => {
     it('renders error message when student views unpublished note', async () => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 'student-123' },
-        profile: { role: 'student' },
-        loading: false,
-      });
-
-      mockSupabaseFrom.mockImplementation(() => {
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          single: vi.fn(() => Promise.resolve({ data: mockDraftNote, error: null })),
-        };
-        return mockChain;
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        json: async () => ({ error: { code: 'ROLE_FORBIDDEN', message: 'This note is not available.' } }),
       });
 
       renderClassNoteView('note-draft');
@@ -92,25 +87,15 @@ describe('ClassNoteView - FEAT-010 Published Note Checks', () => {
         expect(screen.getByText(/this note is not available/i)).toBeInTheDocument();
       });
 
-      // Verify the note content is NOT rendered
       expect(screen.queryByText('Photosynthesis')).not.toBeInTheDocument();
       expect(screen.queryByText(/process of converting light energy/i)).not.toBeInTheDocument();
     });
 
     it('renders note content when student views published note', async () => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 'student-123' },
-        profile: { role: 'student' },
-        loading: false,
-      });
-
-      mockSupabaseFrom.mockImplementation(() => {
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          single: vi.fn(() => Promise.resolve({ data: mockPublishedNote, error: null })),
-        };
-        return mockChain;
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockPublishedNote,
       });
 
       renderClassNoteView('note-published');
@@ -119,7 +104,6 @@ describe('ClassNoteView - FEAT-010 Published Note Checks', () => {
         expect(screen.getByText('Cell Structure')).toBeInTheDocument();
       });
 
-      // Verify key content sections are rendered
       expect(screen.getByText(/overview of cell structure/i)).toBeInTheDocument();
       expect(screen.getByText('Nucleus')).toBeInTheDocument();
       expect(screen.getByText(/control center of the cell/i)).toBeInTheDocument();
@@ -128,19 +112,10 @@ describe('ClassNoteView - FEAT-010 Published Note Checks', () => {
 
   describe('AC-10.3.3: Published notes are fully accessible', () => {
     it('renders all note sections when published', async () => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 'student-123' },
-        profile: { role: 'student' },
-        loading: false,
-      });
-
-      mockSupabaseFrom.mockImplementation(() => {
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          single: vi.fn(() => Promise.resolve({ data: mockPublishedNote, error: null })),
-        };
-        return mockChain;
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockPublishedNote,
       });
 
       renderClassNoteView('note-published');
@@ -149,7 +124,6 @@ describe('ClassNoteView - FEAT-010 Published Note Checks', () => {
         expect(screen.getByText('Cell Structure')).toBeInTheDocument();
       });
 
-      // Verify all sections are rendered
       expect(screen.getByText(/overview of cell structure/i)).toBeInTheDocument();
       expect(screen.getByText('Nucleus')).toBeInTheDocument();
       expect(screen.getByText('Mitochondria')).toBeInTheDocument();
@@ -161,19 +135,11 @@ describe('ClassNoteView - FEAT-010 Published Note Checks', () => {
 
   describe('Instructor access (bypass published check)', () => {
     it('instructor can view unpublished notes', async () => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 'instructor-123' },
-        profile: { role: 'instructor' },
-        loading: false,
-      });
-
-      mockSupabaseFrom.mockImplementation(() => {
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          single: vi.fn(() => Promise.resolve({ data: mockDraftNote, error: null })),
-        };
-        return mockChain;
+      // API returns the draft note for instructors (no 403)
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockDraftNote,
       });
 
       renderClassNoteView('note-draft');
@@ -182,7 +148,6 @@ describe('ClassNoteView - FEAT-010 Published Note Checks', () => {
         expect(screen.getByText('Photosynthesis')).toBeInTheDocument();
       });
 
-      // Verify content is rendered for instructor even though is_published = false
       expect(screen.getByText(/process of converting light energy/i)).toBeInTheDocument();
       expect(screen.getByText('Chlorophyll')).toBeInTheDocument();
     });
@@ -190,19 +155,10 @@ describe('ClassNoteView - FEAT-010 Published Note Checks', () => {
 
   describe('Not found handling', () => {
     it('renders not found message when note does not exist', async () => {
-      mockUseAuth.mockReturnValue({
-        user: { id: 'student-123' },
-        profile: { role: 'student' },
-        loading: false,
-      });
-
-      mockSupabaseFrom.mockImplementation(() => {
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn(() => mockChain),
-          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-        };
-        return mockChain;
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ error: { code: 'CLASS_NOTE_NOT_FOUND', message: 'Note not found.' } }),
       });
 
       renderClassNoteView('note-nonexistent');

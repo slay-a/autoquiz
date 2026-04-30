@@ -12,6 +12,7 @@ from app.core.error_codes import (
     ROLE_FORBIDDEN,
     CLASS_CODE_CONFLICT,
     CLASS_NOT_FOUND,
+    CLASS_NOTE_NOT_FOUND,
 )
 from app.core.logging import log_event
 from app.api.dependencies import get_current_user
@@ -21,7 +22,7 @@ from app.services.class_service import (
     get_student_content as svc_get_student_content,
     save_class_quiz, get_class_quizzes, toggle_quiz_share, delete_class_quiz,
     get_class_notes, create_class_note, update_class_note,
-    toggle_note_publish, delete_class_note,
+    toggle_note_publish, delete_class_note, get_class_note_by_id,
     get_class_files, delete_class_file,
     remove_class_member, delete_class,
 )
@@ -609,6 +610,21 @@ def remove_class_file(
         delete_class_file(supabase, class_id, file_id)
     except ValueError:
         return JSONResponse(status_code=404, content={"error": {"code": "FILE_NOT_FOUND", "message": "File not found.", "request_id": str(_uuid.uuid4())}})
+
+
+# ── Class Note Lookup (student-facing) ───────────────────────────
+
+
+@router.get("/class-note/{note_id}")
+def get_class_note(note_id: str, current_user: dict = Depends(get_current_user)):
+    import uuid as _uuid
+    supabase = get_supabase()
+    note = get_class_note_by_id(supabase, note_id)
+    if not note:
+        return JSONResponse(status_code=404, content={"error": {"code": CLASS_NOTE_NOT_FOUND, "message": "Note not found.", "request_id": str(_uuid.uuid4())}})
+    if current_user.get("role") == "student" and not note.get("is_published"):
+        return JSONResponse(status_code=403, content={"error": {"code": ROLE_FORBIDDEN, "message": "This note is not available.", "request_id": str(_uuid.uuid4())}})
+    return note
 
 
 # ── Members & Class ───────────────────────────────────────────────

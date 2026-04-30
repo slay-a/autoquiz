@@ -458,6 +458,8 @@
 
 ### Story 10.1 — Create class notes
 
+**Status: Verified**
+
 **As an** instructor,
 **I want** to create structured notes for a class topic,
 **so that** I can share curated study material with my students.
@@ -470,6 +472,8 @@
 ---
 
 ### Story 10.2 — Edit class notes
+
+**Status: Verified**
 
 **As an** instructor,
 **I want** to edit the content of notes I have created for a class,
@@ -484,6 +488,8 @@
 ---
 
 ### Story 10.3 — Publish and unpublish class notes
+
+**Status: Verified**
 
 **As an** instructor,
 **I want** to control whether students can see a set of class notes,

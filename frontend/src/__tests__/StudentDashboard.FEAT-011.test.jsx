@@ -10,25 +10,21 @@ vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-// Mock supabase
-const mockGetSession = vi.fn();
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockOrder = vi.fn();
-
+// Mock supabase (auth session only — Dashboard fetches flashcards via FastAPI, not supabase.from)
 vi.mock('../lib/supabase', () => ({
   supabase: {
     auth: {
       getSession: vi.fn(),
     },
-    from: vi.fn(),
   },
 }));
 
 import { supabase } from '../lib/supabase';
 
-// Mock fetch
+// Mock fetch globally — Dashboard.jsx calls FastAPI for all data including flashcards
 global.fetch = vi.fn();
+
+const FLASHCARDS_URL = 'http://localhost:8000/flashcards/my';
 
 function renderDashboard() {
   return render(
@@ -90,57 +86,61 @@ describe('StudentDashboard - FEAT-011 Flashcards', () => {
       },
     });
 
-    // Setup chainable supabase query mocks
-    supabase.from.mockImplementation((table) => {
-      if (table === 'flashcard_sets') {
-        return {
-          select: mockSelect,
-        };
+    // Default fetch mock: route responses by URL.
+    // Dashboard.jsx calls FastAPI for all data (DESIGN.md §0 frontend rules).
+    global.fetch.mockImplementation((url) => {
+      if (url === FLASHCARDS_URL) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => mockFlashcardSets,
+        });
       }
-      if (table === 'saved_quizzes') {
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              order: vi.fn().mockResolvedValue({ data: [] }),
-            }),
-          }),
-        };
+      if (url.includes('/quiz/my')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => [],
+        });
       }
-      return {
-        select: vi.fn().mockReturnThis(),
-      };
-    });
-
-    mockSelect.mockReturnValue({
-      eq: mockEq,
-    });
-
-    mockEq.mockReturnValue({
-      order: mockOrder,
-    });
-
-    mockOrder.mockResolvedValue({
-      data: mockFlashcardSets,
-    });
-
-    // Mock fetch for classes and content
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({ quizzes: [], notes: [] }),
+      if (url.includes('/notes/my')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => [],
+        });
+      }
+      if (url.includes('/classes/student/classes')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => [],
+        });
+      }
+      if (url.includes('/classes/student/content')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ quizzes: [], notes: [] }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => [],
+      });
     });
   });
 
-  it('Flashcards tab fetches sets using .eq("created_by", user.id)', async () => {
+  it('Flashcards tab fetches flashcard sets from the FastAPI /flashcards/my endpoint', async () => {
+    // AC-spec §4b: Dashboard fetches flashcard_sets via GET /flashcards/my (FastAPI), not supabase.from()
     renderDashboard();
 
     await waitFor(() => {
-      expect(supabase.from).toHaveBeenCalledWith('flashcard_sets');
+      // Verify fetch was called with the flashcards endpoint
+      expect(global.fetch).toHaveBeenCalledWith(
+        FLASHCARDS_URL,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${mockToken}`,
+          }),
+        })
+      );
     });
-
-    // Verify the query chain
-    expect(mockSelect).toHaveBeenCalledWith('*');
-    expect(mockEq).toHaveBeenCalledWith('created_by', 'student-123');
-    expect(mockOrder).toHaveBeenCalledWith('created_at', { ascending: false });
   });
 
   it('Flashcards tab displays sets owned by the current user', async () => {
@@ -148,14 +148,14 @@ describe('StudentDashboard - FEAT-011 Flashcards', () => {
     renderDashboard();
 
     await waitFor(() => {
-      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
     });
 
     // Click the Flashcards tab
     const flashcardsTab = screen.getByRole('button', { name: /flashcards/i });
     await user.click(flashcardsTab);
 
-    // Verify both flashcard sets are displayed
+    // Verify both flashcard sets are displayed (returned by API scoped to created_by=user.id on backend)
     await waitFor(() => {
       expect(screen.getByText('Biology Flashcards')).toBeInTheDocument();
       expect(screen.getByText('Math Flashcards')).toBeInTheDocument();
@@ -170,8 +170,9 @@ describe('StudentDashboard - FEAT-011 Flashcards', () => {
     const user = userEvent.setup();
     renderDashboard();
 
+    // Wait for load to finish
     await waitFor(() => {
-      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+      expect(global.fetch).toHaveBeenCalled();
     });
 
     // Switch to Flashcards tab
@@ -201,15 +202,25 @@ describe('StudentDashboard - FEAT-011 Flashcards', () => {
   it('Flashcards tab shows empty state when no sets exist', async () => {
     const user = userEvent.setup();
 
-    // Mock empty flashcard sets
-    mockOrder.mockResolvedValue({
-      data: [],
+    // Mock API returning empty array for flashcards
+    global.fetch.mockImplementation((url) => {
+      if (url === FLASHCARDS_URL) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => [],
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => [],
+      });
     });
 
     renderDashboard();
 
+    // Wait for load to finish
     await waitFor(() => {
-      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+      expect(global.fetch).toHaveBeenCalled();
     });
 
     // Switch to Flashcards tab
@@ -222,32 +233,39 @@ describe('StudentDashboard - FEAT-011 Flashcards', () => {
     });
   });
 
-  it('Flashcards tab does NOT fetch sets created by other users', async () => {
-    // Add a set created by a different user to the mock data
-    const mixedSets = [
-      ...mockFlashcardSets,
-      {
-        id: 'set-other',
-        title: 'Other User Set',
-        created_by: 'other-user-456',
-        cards: [{ front: 'Q', back: 'A' }],
-        created_at: '2026-04-13T10:00:00Z',
-      },
-    ];
+  it('Flashcards tab only shows sets the API returns (backend scopes to created_by = user.id)', async () => {
+    // The backend /flashcards/my route filters by created_by = current_user["id"] (flashcards.py line 20).
+    // The frontend renders exactly what the API returns, so the UI cannot show cross-user sets.
+    // This test verifies the fetch is called and only the returned sets are displayed.
+    const user = userEvent.setup();
 
-    // Mock should only return sets for current user (Supabase filtering)
-    mockOrder.mockResolvedValue({
-      data: mockFlashcardSets, // Only the user's sets
+    // API returns only the user's own sets (backend filtering is enforced at the route level)
+    global.fetch.mockImplementation((url) => {
+      if (url === FLASHCARDS_URL) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => mockFlashcardSets, // Only current user's sets returned by API
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => [],
+      });
     });
 
-    const user = userEvent.setup();
     renderDashboard();
 
     await waitFor(() => {
-      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+      expect(global.fetch).toHaveBeenCalledWith(
+        FLASHCARDS_URL,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${mockToken}`,
+          }),
+        })
+      );
     });
 
-    // Switch to Flashcards tab
     const flashcardsTab = screen.getByRole('button', { name: /flashcards/i });
     await user.click(flashcardsTab);
 
@@ -255,10 +273,8 @@ describe('StudentDashboard - FEAT-011 Flashcards', () => {
       expect(screen.getByText('Biology Flashcards')).toBeInTheDocument();
     });
 
-    // Verify the other user's set is NOT displayed
+    // Verify the "other user's" set is NOT displayed
+    // (it was never returned by the API — backend enforces owner-scoping)
     expect(screen.queryByText('Other User Set')).not.toBeInTheDocument();
-
-    // Verify the query was scoped to current user
-    expect(mockEq).toHaveBeenCalledWith('created_by', 'student-123');
   });
 });

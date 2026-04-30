@@ -507,6 +507,8 @@
 
 ### Story 11.1 — Study a flashcard set
 
+**Status: Verified**
+
 **As a** student,
 **I want** to flip through a set of flashcards and rate my confidence on each one,
 **so that** I can identify which concepts I know and which need more practice.
@@ -521,6 +523,8 @@
 
 ### Story 11.2 — Restart a flashcard session
 
+**Status: Verified**
+
 **As a** student,
 **I want** to restart a flashcard session — either with all cards or only the ones I got wrong —
 **so that** I can efficiently focus my remaining study time.
@@ -533,6 +537,8 @@
 ---
 
 ### Story 11.3 — Edit a flashcard set
+
+**Status: Verified**
 
 **As a** student,
 **I want** to edit the cards in a flashcard set,

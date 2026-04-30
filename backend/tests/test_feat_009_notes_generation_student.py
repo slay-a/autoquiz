@@ -108,15 +108,22 @@ def mock_notes_response():
 
 
 def test_generate_notes_requires_auth(client):
-    """AC-9.1.2 (CRITICAL): POST /notes/generate returns HTTP 401 when no token provided."""
+    """AC-9.1.2 (CRITICAL): POST /notes/generate returns HTTP 401 when no token provided.
+    
+    The 401 response uses the standard error envelope (DESIGN.md §3.1.1):
+      {"error": {"code": "AUTH_REQUIRED", "message": "...", "request_id": "..."}}
+    NOT the FastAPI default {"detail": "..."} shape.
+    """
     # No dependency override — simulates unauthenticated request
     response = client.post(
         "/notes/generate",
         json={"topic": "Python Exceptions"},
     )
     assert response.status_code == 401
-    detail_lower = response.json()["detail"].lower()
-    assert "authorization" in detail_lower or "not authenticated" in detail_lower
+    body = response.json()
+    # Standard error envelope — per DESIGN.md §3.1.1
+    assert "error" in body, f"Expected standard envelope with 'error' key, got: {list(body.keys())}"
+    assert body["error"]["code"] == "AUTH_REQUIRED"
 
 
 def test_generate_notes_with_auth_calls_openai(client, student_user, mock_notes_response):
@@ -179,7 +186,7 @@ def test_generate_notes_structure_validation(mock_notes_response):
 def test_save_notes_inserts_with_jwt_user(client, student_user, mock_notes_response):
     """AC-9.2.1 / AC-9.2.2: POST /notes/save inserts correct row; created_by from JWT."""
     with override_user(student_user), \
-         patch("app.api.routes.notes.get_supabase") as mock_supabase:
+         patch("app.services.notes_service.get_supabase") as mock_supabase:
 
         # Mock Supabase insert
         mock_table = Mock()
@@ -223,7 +230,7 @@ def test_save_notes_ignores_created_by_in_body(client, student_user, mock_notes_
     malicious_user_id = "attacker-uuid-999"
 
     with override_user(student_user), \
-         patch("app.api.routes.notes.get_supabase") as mock_supabase:
+         patch("app.services.notes_service.get_supabase") as mock_supabase:
 
         # Mock Supabase insert
         mock_table = Mock()
@@ -259,7 +266,7 @@ def test_save_notes_ignores_created_by_in_body(client, student_user, mock_notes_
 def test_get_note_by_id_returns_404_for_nonexistent(client, student_user):
     """GET /notes/{id} — Returns 404 for non-existent ID."""
     with override_user(student_user), \
-         patch("app.api.routes.notes.get_supabase") as mock_supabase:
+         patch("app.services.notes_service.get_supabase") as mock_supabase:
 
         # Mock Supabase to return empty data
         mock_table = Mock()
@@ -269,7 +276,9 @@ def test_get_note_by_id_returns_404_for_nonexistent(client, student_user):
         response = client.get(f"/notes/{uuid.uuid4()}")
 
         assert response.status_code == 404
-        assert "not found" in response.json()["detail"].lower()
+        body = response.json()
+        assert "error" in body
+        assert "not found" in body["error"]["message"].lower()
 
 
 def test_get_note_by_id_returns_403_for_other_users_note(client, student_user, other_student_user):
@@ -277,7 +286,7 @@ def test_get_note_by_id_returns_403_for_other_users_note(client, student_user, o
     note_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.notes.get_supabase") as mock_supabase:
+         patch("app.services.notes_service.get_supabase") as mock_supabase:
 
         # Mock Supabase to return a row owned by other_student_user
         mock_table = Mock()
@@ -295,7 +304,9 @@ def test_get_note_by_id_returns_403_for_other_users_note(client, student_user, o
         response = client.get(f"/notes/{note_id}")
 
         assert response.status_code == 403
-        assert "access" in response.json()["detail"].lower()
+        body = response.json()
+        assert "error" in body
+        assert "access" in body["error"]["message"].lower() or body["error"]["code"] == "ROLE_FORBIDDEN"
 
 
 def test_get_note_by_id_returns_200_for_owned_note(client, student_user, mock_notes_response):
@@ -303,7 +314,7 @@ def test_get_note_by_id_returns_200_for_owned_note(client, student_user, mock_no
     note_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.notes.get_supabase") as mock_supabase:
+         patch("app.services.notes_service.get_supabase") as mock_supabase:
 
         # Mock Supabase to return a row owned by student_user
         mock_table = Mock()
@@ -330,7 +341,7 @@ def test_get_note_by_id_returns_200_for_owned_note(client, student_user, mock_no
 def test_get_my_notes_returns_user_notes_only(client, student_user, other_student_user):
     """GET /notes/my — Returns only current user's notes."""
     with override_user(student_user), \
-         patch("app.api.routes.notes.get_supabase") as mock_supabase:
+         patch("app.services.notes_service.get_supabase") as mock_supabase:
 
         # Mock Supabase to return notes for student_user
         mock_table = Mock()

@@ -89,3 +89,27 @@ class AccessDeniedError(AutoQuizError):
 
 class InvalidJobStateError(AutoQuizError):
     """Raised when a job operation is invalid for the current state."""
+
+
+# ── Student Notes ────────────────────────────────────────────────────────────────
+
+class NoteNotFoundError(AutoQuizError):
+    """Raised when a student_notes row cannot be found by ID."""
+
+    def __init__(self, note_id: str = "") -> None:
+        super().__init__(
+            message=f"Note '{note_id}' not found.",
+            error_code="NOTE_NOT_FOUND",
+        )
+        self.note_id = note_id
+
+
+class NoteOwnershipError(AutoQuizError):
+    """Raised when a user attempts to access a note they do not own."""
+
+    def __init__(self, note_id: str = "") -> None:
+        super().__init__(
+            message="You do not have access to this note.",
+            error_code="ROLE_FORBIDDEN",
+        )
+        self.note_id = note_id

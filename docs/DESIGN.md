@@ -590,6 +590,19 @@ Indexes: `ivfflat` on `embedding` (cosine ops, 100 lists); `gin` on `text` (full
 | `created_at`   | timestamptz |                                              |
 | `updated_at`   | timestamptz | auto-updated by `notes_updated_at` trigger   |
 
+#### `student_notes`
+| Column       | Type        | Notes                                            |
+|--------------|-------------|--------------------------------------------------|
+| `id`         | uuid (PK)   | default `gen_random_uuid()`                      |
+| `title`      | text        | not null                                         |
+| `topic`      | text        | not null                                         |
+| `file_id`    | text        | nullable; FK → `uploaded_files(file_id)` ON DELETE SET NULL |
+| `created_by` | uuid (FK)   | → `profiles(id)` ON DELETE CASCADE; not null     |
+| `content`    | jsonb       | full notes object (summary, key_concepts, …)     |
+| `created_at` | timestamptz | default `now()`                                  |
+
+RLS: `SELECT/INSERT/UPDATE/DELETE` scoped to `created_by = auth.uid()`. Do not reuse `class_notes` — that table is instructor-scoped and class-keyed.
+
 ### RLS posture
 
 RLS is **enabled on all tables** but current policies use `auth_all` (full access for any
@@ -670,13 +683,26 @@ Auth: currently unenforced at route level (service key bypasses RLS). Add a
 
 ### Notes
 
-| Method | Path               | Request body   | Success response | Error codes |
-|--------|--------------------|----------------|------------------|-------------|
-| POST   | `/notes/generate`  | `NotesRequest` | notes object     | —           |
+| Method | Path               | Request body       | Success response | Error codes |
+|--------|--------------------|--------------------|------------------|-------------|
+| POST   | `/notes/generate`  | `NotesRequest`     | notes object (200) | 401 unauthenticated |
+| POST   | `/notes/save`      | `NotesSaveRequest` | `NotesSaveResponse` (200) | 401 unauthenticated, 500 save failed |
+| GET    | `/notes/my`        | —                  | `NotesSaveResponse[]` (200) — student's saved notes, newest-first | 401 unauthenticated |
+| GET    | `/notes/{id}`      | —                  | full `student_notes` row (200) | 401 unauthenticated, 403 not owner, 404 not found |
 
 **`NotesRequest`:**
 ```json
 { "topic": "string", "file_id": "string|null", "outside_sources": false }
+```
+
+**`NotesSaveRequest`:**
+```json
+{ "topic": "string", "file_id": "string|null", "content": { } }
+```
+
+**`NotesSaveResponse`:**
+```json
+{ "id": "uuid", "title": "string", "topic": "string", "created_at": "ISO8601" }
 ```
 
 ### Flashcards
@@ -1108,6 +1134,8 @@ DESIGN.md edit.
 | `notes.generate.started`      | INFO    | success  | Service · notes_gen     | `outside_sources`                                   |
 | `notes.generate.completed`    | INFO    | success  | Service · notes_gen     | `has_file`, `prompt_tokens`                         |
 | `notes.generate.failed`       | ERROR   | failure  | Service · notes_gen     | `error_code`, `exception_type`                      |
+| `notes.save.completed`        | INFO    | success  | Route · notes           | `note_id`                                           |
+| `notes.save.failed`           | ERROR   | failure  | Route · notes           | `error_code`, `exception_type`                      |
 | `notes.publish.toggled`       | INFO    | success  | Route · notes           | `note_id`, `is_published`                           |
 | `flashcard.set.created`       | INFO    | success  | Route · flashcards      | `set_id`, `card_count`, `set_type`                  |
 | `flashcard.set.shared`        | INFO    | success  | Route · flashcards      | `set_id`, `scope` (`class` \| `public`)             |

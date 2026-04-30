@@ -1,6 +1,10 @@
 """
 Notes generation service — structured study guide for a topic.
 Uses GPT-4o with structured JSON output.
+
+Per DESIGN.md §13.8 rule 2 and §7 rule 2:
+  User-controlled values must pass through a sanitiser before entering a prompt.
+  The topic is sanitised via _sanitise_topic() which strips and truncates to 300 chars.
 """
 
 import json
@@ -9,8 +13,19 @@ from app.core.config import settings
 
 _openai = OpenAI(api_key=settings.openai_api_key)
 
+_MAX_TOPIC_LEN = 300  # characters; guard against prompt-stuffing via long topics
 
-def generate_notes(topic: str, chunks: list[dict], outside_sources: bool = False) -> dict:
+
+def _sanitise_topic(topic: str) -> str:
+    """
+    Strip leading/trailing whitespace and truncate to _MAX_TOPIC_LEN characters.
+    This prevents raw user-controlled strings from being injected into the LLM
+    prompt without any pre-processing (DESIGN.md §13.8 rule 2, §7 rule 2).
+    """
+    return topic.strip()[:_MAX_TOPIC_LEN]
+
+
+def generate_notes(topic: str, chunks: list, outside_sources: bool = False) -> dict:
     """
     Generate structured notes for a topic using OpenAI.
 
@@ -22,6 +37,8 @@ def generate_notes(topic: str, chunks: list[dict], outside_sources: bool = False
     Returns:
         Dictionary containing structured notes with summary, key_concepts, etc.
     """
+    safe_topic = _sanitise_topic(topic)
+
     context = "\n\n---\n\n".join(
         f"[p.{c.get('page_numbers', [])}]\n{c['text']}" for c in chunks
     ) if chunks else "(No uploaded material — use general knowledge.)"
@@ -32,7 +49,7 @@ def generate_notes(topic: str, chunks: list[dict], outside_sources: bool = False
         "Always respond with valid JSON only."
     )
 
-    prompt = f"""Topic: {topic}
+    prompt = f"""Topic: {safe_topic}
 
 Material:
 {context}
@@ -64,7 +81,7 @@ Generate a comprehensive study guide with this exact JSON structure:
     )
 
     notes = json.loads(response.choices[0].message.content)
-    notes["topic"] = topic
+    notes["topic"] = safe_topic
     notes["source_pages"] = sorted({p for c in chunks for p in (c.get("page_numbers") or [])})
 
     return notes

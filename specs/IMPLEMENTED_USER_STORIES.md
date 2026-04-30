@@ -425,6 +425,8 @@
 
 ### Story 9.1 — Generate study notes from uploaded material
 
+**Status: Verified**
+
 **As a** student,
 **I want** to generate structured study notes on a topic from a document I have uploaded,
 **so that** I have a concise summary to review.
@@ -438,6 +440,8 @@
 ---
 
 ### Story 9.2 — Save generated notes
+
+**Status: Verified**
 
 **As a** student,
 **I want** to save a set of notes I have generated,

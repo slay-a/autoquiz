@@ -31,3 +31,5 @@ STORAGE_UNAVAILABLE   = "STORAGE_UNAVAILABLE"
 
 # ── Log-and-continue (catch-all) ──────────────────────────────────────────
 INTERNAL_ERROR        = "INTERNAL_ERROR"
+NOTE_NOT_FOUND        = "NOTE_NOT_FOUND"
+NOTES_SAVE_FAILED     = "NOTES_SAVE_FAILED"

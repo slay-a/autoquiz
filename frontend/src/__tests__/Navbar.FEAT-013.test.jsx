@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { ThemeProvider } from '../contexts/ThemeContext';
 
 /**
  * FEAT-013 — Story 13.3: Avatar surfaces in the navbar
@@ -14,6 +15,10 @@ import { MemoryRouter } from 'react-router-dom';
  * Covered:
  *   AC-13.3.1 — avatar_url → <img> ; null → <User> icon fallback
  *   AC-13.3.2 — avatar/name region wraps <Link to="/profile"> ; Logout works
+ *
+ * Fix (FEAT-012): App.jsx now uses TopBar → ThemeToggle → useTheme, so the
+ * test wrapper must provide <ThemeProvider>. matchMedia is mocked so
+ * ThemeProvider can read OS preference safely in happy-dom.
  */
 
 // ── Stub every page module App.jsx pulls in ───────────────────────
@@ -78,17 +83,43 @@ import App from '../App';
 const AVATAR_URL =
   'https://api.dicebear.com/7.x/avataaars/svg?seed=mint';
 
+// Install a minimal matchMedia mock so ThemeProvider can query OS preference
+// without crashing in happy-dom.
+function installMatchMedia() {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: vi.fn().mockImplementation(() => ({
+      matches: false,
+      media: '(prefers-color-scheme: dark)',
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+}
+
 function renderApp(initialPath = '/student') {
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <App />
-    </MemoryRouter>
+    // ThemeProvider is required because App → TopBar → ThemeToggle → useTheme.
+    // Providing it here mirrors the real main.jsx wrapper (FEAT-012 AC-12.1.1).
+    <ThemeProvider>
+      <MemoryRouter initialEntries={[initialPath]}>
+        <App />
+      </MemoryRouter>
+    </ThemeProvider>
   );
 }
 
 describe('Navbar — FEAT-013 Story 13.3', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
+    document.documentElement.classList.remove('dark');
+    installMatchMedia();
   });
 
   // AC-13.3.1: when avatar_url is set, the navbar renders it as an <img>

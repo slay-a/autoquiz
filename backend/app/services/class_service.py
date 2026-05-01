@@ -1,9 +1,18 @@
-"""Service layer for class management operations."""
+"""
+Service layer for class management operations.
+
+Layer 2 — Business Logic / Persistence.
+All functions acquire the Supabase client internally via get_supabase().
+Routes (Layer 1) must never pass a Supabase client into these functions;
+that pattern would force Layer 1 to import Layer 3 directly, violating
+DESIGN.md §0.
+"""
 
 import random
 import string
 from typing import Optional
-from supabase import Client
+
+from app.core.supabase import get_supabase
 
 
 def generate_class_code() -> str:
@@ -12,7 +21,7 @@ def generate_class_code() -> str:
 
 
 def create_class(
-    supabase: Client, name: str, description: Optional[str], instructor_id: str
+    name: str, description: Optional[str], instructor_id: str
 ) -> dict:
     """
     Create a new class with a unique class_code.
@@ -20,7 +29,6 @@ def create_class(
     Retries up to 10 times if a unique constraint collision occurs on class_code.
 
     Args:
-        supabase: Supabase client instance
         name: Class name
         description: Optional class description
         instructor_id: UUID of the instructor (from JWT)
@@ -31,6 +39,7 @@ def create_class(
     Raises:
         Exception: If unable to create after 10 retries or other DB error
     """
+    supabase = get_supabase()
     max_retries = 10
 
     for attempt in range(max_retries):
@@ -73,7 +82,7 @@ def create_class(
     raise Exception("Failed to create class after 10 attempts")
 
 
-def list_classes(supabase: Client, instructor_id: str) -> list[dict]:
+def list_classes(instructor_id: str) -> list[dict]:
     """
     Fetch all classes for a given instructor, with member counts.
 
@@ -81,7 +90,6 @@ def list_classes(supabase: Client, instructor_id: str) -> list[dict]:
     Each class dict includes a 'member_count' key.
 
     Args:
-        supabase: Supabase client instance
         instructor_id: UUID of the instructor (from JWT)
 
     Returns:
@@ -90,6 +98,7 @@ def list_classes(supabase: Client, instructor_id: str) -> list[dict]:
     Raises:
         Exception: On DB error
     """
+    supabase = get_supabase()
     result = (
         supabase.table("classes")
         .select("*")
@@ -114,7 +123,7 @@ def list_classes(supabase: Client, instructor_id: str) -> list[dict]:
     return enriched_classes
 
 
-def get_class_detail(supabase: Client, class_id: str) -> Optional[dict]:
+def get_class_detail(class_id: str) -> Optional[dict]:
     """
     Fetch a single class record with its enrolled members.
 
@@ -123,7 +132,6 @@ def get_class_detail(supabase: Client, class_id: str) -> Optional[dict]:
         student_id, joined_at, full_name, email
 
     Args:
-        supabase: Supabase client instance
         class_id: UUID of the class to fetch
 
     Returns:
@@ -132,6 +140,7 @@ def get_class_detail(supabase: Client, class_id: str) -> Optional[dict]:
     Raises:
         Exception: On DB error
     """
+    supabase = get_supabase()
     class_result = (
         supabase.table("classes")
         .select("*")
@@ -168,7 +177,7 @@ def get_class_detail(supabase: Client, class_id: str) -> Optional[dict]:
     return {**cls, "members": members}
 
 
-def join_class_by_code(supabase: Client, class_code: str, student_id: str) -> dict:
+def join_class_by_code(class_code: str, student_id: str) -> dict:
     """
     Join a class by class_code (case-insensitive).
 
@@ -179,6 +188,7 @@ def join_class_by_code(supabase: Client, class_code: str, student_id: str) -> di
         ValueError("ALREADY_MEMBER")   — student already in class (23505 constraint)
         Exception                      — unexpected DB error
     """
+    supabase = get_supabase()
     class_result = (
         supabase.table("classes")
         .select("id, name")
@@ -209,7 +219,7 @@ def join_class_by_code(supabase: Client, class_code: str, student_id: str) -> di
     return {"class_id": cls["id"], "class_name": cls["name"]}
 
 
-def get_student_classes(supabase: Client, student_id: str) -> list[dict]:
+def get_student_classes(student_id: str) -> list[dict]:
     """
     Return a list of classes the student has joined.
 
@@ -218,6 +228,7 @@ def get_student_classes(supabase: Client, student_id: str) -> list[dict]:
     Raises:
         Exception — on DB error
     """
+    supabase = get_supabase()
     result = (
         supabase.table("class_members")
         .select("classes(id, name, description, class_code, created_at)")
@@ -241,10 +252,11 @@ def get_student_classes(supabase: Client, student_id: str) -> list[dict]:
 
 
 def save_class_quiz(
-    supabase: Client, class_id: str, instructor_id: str,
+    class_id: str, instructor_id: str,
     title: str, topic: str, difficulty: str,
     file_id: Optional[str], questions: list, outside_sources: bool
 ) -> dict:
+    supabase = get_supabase()
     result = (
         supabase.table("saved_quizzes")
         .insert({
@@ -263,7 +275,8 @@ def save_class_quiz(
     return result.data[0]
 
 
-def get_class_quizzes(supabase: Client, class_id: str) -> list[dict]:
+def get_class_quizzes(class_id: str) -> list[dict]:
+    supabase = get_supabase()
     result = (
         supabase.table("saved_quizzes")
         .select("*")
@@ -274,7 +287,8 @@ def get_class_quizzes(supabase: Client, class_id: str) -> list[dict]:
     return result.data or []
 
 
-def toggle_quiz_share(supabase: Client, class_id: str, quiz_id: str, is_shared: bool) -> dict:
+def toggle_quiz_share(class_id: str, quiz_id: str, is_shared: bool) -> dict:
+    supabase = get_supabase()
     result = (
         supabase.table("saved_quizzes")
         .update({"is_shared": is_shared})
@@ -287,11 +301,13 @@ def toggle_quiz_share(supabase: Client, class_id: str, quiz_id: str, is_shared: 
     return result.data[0]
 
 
-def delete_class_quiz(supabase: Client, class_id: str, quiz_id: str) -> None:
+def delete_class_quiz(class_id: str, quiz_id: str) -> None:
+    supabase = get_supabase()
     supabase.table("saved_quizzes").delete().eq("id", quiz_id).eq("class_id", class_id).execute()
 
 
-def get_class_notes(supabase: Client, class_id: str) -> list[dict]:
+def get_class_notes(class_id: str) -> list[dict]:
+    supabase = get_supabase()
     result = (
         supabase.table("class_notes")
         .select("*")
@@ -303,9 +319,10 @@ def get_class_notes(supabase: Client, class_id: str) -> list[dict]:
 
 
 def create_class_note(
-    supabase: Client, class_id: str, instructor_id: str,
+    class_id: str, instructor_id: str,
     title: str, topic: str, content: dict
 ) -> dict:
+    supabase = get_supabase()
     result = (
         supabase.table("class_notes")
         .insert({
@@ -322,9 +339,10 @@ def create_class_note(
 
 
 def update_class_note(
-    supabase: Client, class_id: str, note_id: str,
+    class_id: str, note_id: str,
     title: str, content: dict
 ) -> dict:
+    supabase = get_supabase()
     result = (
         supabase.table("class_notes")
         .update({"title": title, "content": content})
@@ -338,8 +356,9 @@ def update_class_note(
 
 
 def toggle_note_publish(
-    supabase: Client, class_id: str, note_id: str, is_published: bool
+    class_id: str, note_id: str, is_published: bool
 ) -> dict:
+    supabase = get_supabase()
     result = (
         supabase.table("class_notes")
         .update({"is_published": is_published})
@@ -352,16 +371,19 @@ def toggle_note_publish(
     return result.data[0]
 
 
-def get_class_note_by_id(supabase: Client, note_id: str) -> dict | None:
+def get_class_note_by_id(note_id: str) -> "dict | None":
+    supabase = get_supabase()
     result = supabase.table("class_notes").select("*").eq("id", note_id).execute()
     return result.data[0] if result.data else None
 
 
-def delete_class_note(supabase: Client, class_id: str, note_id: str) -> None:
+def delete_class_note(class_id: str, note_id: str) -> None:
+    supabase = get_supabase()
     supabase.table("class_notes").delete().eq("id", note_id).eq("class_id", class_id).execute()
 
 
-def get_class_files(supabase: Client, class_id: str) -> list[dict]:
+def get_class_files(class_id: str) -> list[dict]:
+    supabase = get_supabase()
     files_result = (
         supabase.table("uploaded_files")
         .select("*")
@@ -382,7 +404,8 @@ def get_class_files(supabase: Client, class_id: str) -> list[dict]:
     return files
 
 
-def delete_class_file(supabase: Client, class_id: str, file_id: str) -> None:
+def delete_class_file(class_id: str, file_id: str) -> None:
+    supabase = get_supabase()
     file_result = (
         supabase.table("uploaded_files")
         .select("file_id, filename")
@@ -399,15 +422,17 @@ def delete_class_file(supabase: Client, class_id: str, file_id: str) -> None:
     supabase.table("uploaded_files").delete().eq("file_id", file_id).execute()
 
 
-def remove_class_member(supabase: Client, class_id: str, student_id: str) -> None:
+def remove_class_member(class_id: str, student_id: str) -> None:
+    supabase = get_supabase()
     supabase.table("class_members").delete().eq("class_id", class_id).eq("student_id", student_id).execute()
 
 
-def delete_class(supabase: Client, class_id: str) -> None:
+def delete_class(class_id: str) -> None:
+    supabase = get_supabase()
     supabase.table("classes").delete().eq("id", class_id).execute()
 
 
-def get_student_content(supabase: Client, student_id: str) -> dict:
+def get_student_content(student_id: str) -> dict:
     """
     Return shared quizzes and published notes for the student's joined classes.
 
@@ -421,6 +446,7 @@ def get_student_content(supabase: Client, student_id: str) -> dict:
     Raises:
         Exception — on DB error
     """
+    supabase = get_supabase()
     memberships_result = (
         supabase.table("class_members")
         .select("class_id, classes(id, name)")

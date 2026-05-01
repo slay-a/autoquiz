@@ -108,7 +108,7 @@ class TestJoinClassDuplicateDetection:
         # insert chain for member insert
         mock_table.insert.return_value.execute.return_value = insert_result
 
-        with patch("app.api.routes.classes.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
+        with patch("app.services.class_service.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
             response = client.post(
                 "/classes/join",
                 json={"class_code": "MATH01"},
@@ -141,7 +141,7 @@ class TestJoinClassDuplicateDetection:
         mock_table = Mock()
         mock_table.select.return_value.ilike.return_value.execute.return_value = empty_result
 
-        with patch("app.api.routes.classes.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
+        with patch("app.services.class_service.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
             response = client.post(
                 "/classes/join",
                 json={"class_code": "NOTFOUND"},
@@ -176,7 +176,7 @@ class TestErrorEnvelope:
         mock_table = Mock()
         mock_table.select.return_value.ilike.return_value.execute.return_value = empty_result
 
-        with patch("app.api.routes.classes.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
+        with patch("app.services.class_service.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
             response = client.post(
                 "/classes/join",
                 json={"class_code": "NOTFOUND"},
@@ -211,7 +211,7 @@ class TestErrorEnvelope:
         mock_table.select.return_value.ilike.return_value.execute.return_value = class_lookup_result
         mock_table.insert.return_value.execute.return_value = insert_result
 
-        with patch("app.api.routes.classes.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
+        with patch("app.services.class_service.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
             response = client.post(
                 "/classes/join",
                 json={"class_code": "MATH01"},
@@ -278,7 +278,7 @@ class TestJoinClassEventLogging:
         mock_table.select.return_value.ilike.return_value.execute.return_value = class_lookup_result
         mock_table.insert.return_value.execute.return_value = insert_result
 
-        with patch("app.api.routes.classes.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))), \
+        with patch("app.services.class_service.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))), \
              patch("app.api.routes.classes.log_event") as mock_log:
 
             response = client.post(
@@ -458,7 +458,7 @@ class TestGetStudentClassesRoute:
         mock_table = Mock()
         mock_table.select.return_value.eq.return_value.execute.return_value = mock_result
 
-        with patch("app.api.routes.classes.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
+        with patch("app.services.class_service.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
             response = client.get("/classes/student/classes", headers=auth_headers)
 
         assert response.status_code == 200
@@ -476,7 +476,7 @@ class TestGetStudentClassesRoute:
         mock_table = Mock()
         mock_table.select.return_value.eq.return_value.execute.return_value = mock_result
 
-        with patch("app.api.routes.classes.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
+        with patch("app.services.class_service.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
             response = client.get("/classes/student/classes", headers=auth_headers)
 
         assert response.status_code == 200
@@ -543,7 +543,7 @@ class TestGetStudentContentRoute:
         mock_sb = Mock()
         mock_sb.table = make_table
 
-        with patch("app.api.routes.classes.get_supabase", return_value=mock_sb):
+        with patch("app.services.class_service.get_supabase", return_value=mock_sb):
             response = client.get("/classes/student/content", headers=auth_headers)
 
         assert response.status_code == 200
@@ -565,7 +565,7 @@ class TestGetStudentContentRoute:
         mock_table = Mock()
         mock_table.select.return_value.eq.return_value.execute.return_value = empty_result
 
-        with patch("app.api.routes.classes.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
+        with patch("app.services.class_service.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))):
             response = client.get("/classes/student/content", headers=auth_headers)
 
         assert response.status_code == 200
@@ -592,7 +592,7 @@ class TestJoinClassHappyPath:
         mock_table.select.return_value.ilike.return_value.execute.return_value = class_lookup_result
         mock_table.insert.return_value.execute.return_value = insert_result
 
-        with patch("app.api.routes.classes.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))), \
+        with patch("app.services.class_service.get_supabase", return_value=Mock(table=Mock(return_value=mock_table))), \
              patch("app.api.routes.classes.log_event"):
             response = client.post(
                 "/classes/join",

@@ -128,12 +128,12 @@ class TestCreateClass:
         mock_chain.execute.return_value = mock_result
         mock_supabase.table.return_value.insert.return_value = mock_chain
 
-        result = create_class(
-            supabase=mock_supabase,
-            name="CS 301",
-            description="Software Engineering",
-            instructor_id=instructor_user["id"],
-        )
+        with patch("app.services.class_service.get_supabase", return_value=mock_supabase):
+            result = create_class(
+                name="CS 301",
+                description="Software Engineering",
+                instructor_id=instructor_user["id"],
+            )
 
         assert result["id"] == "class-uuid-1"
         assert result["name"] == "CS 301"
@@ -175,12 +175,12 @@ class TestCreateClass:
         mock_chain.execute.side_effect = mock_execute
         mock_supabase.table.return_value.insert.return_value = mock_chain
 
-        result = create_class(
-            supabase=mock_supabase,
-            name="CS 302",
-            description=None,
-            instructor_id=instructor_user["id"],
-        )
+        with patch("app.services.class_service.get_supabase", return_value=mock_supabase):
+            result = create_class(
+                name="CS 302",
+                description=None,
+                instructor_id=instructor_user["id"],
+            )
 
         assert result["id"] == "class-uuid-2"
         assert len(attempts) == 2  # Should have retried once
@@ -193,13 +193,13 @@ class TestCreateClass:
         mock_chain.execute.side_effect = collision_error
         mock_supabase.table.return_value.insert.return_value = mock_chain
 
-        with pytest.raises(Exception) as exc_info:
-            create_class(
-                supabase=mock_supabase,
-                name="CS 303",
-                description=None,
-                instructor_id=instructor_user["id"],
-            )
+        with patch("app.services.class_service.get_supabase", return_value=mock_supabase):
+            with pytest.raises(Exception) as exc_info:
+                create_class(
+                    name="CS 303",
+                    description=None,
+                    instructor_id=instructor_user["id"],
+                )
 
         assert "Failed to generate unique class code after 10 attempts" in str(exc_info.value)
 
@@ -211,13 +211,13 @@ class TestCreateClass:
         mock_chain.execute.side_effect = other_error
         mock_supabase.table.return_value.insert.return_value = mock_chain
 
-        with pytest.raises(Exception) as exc_info:
-            create_class(
-                supabase=mock_supabase,
-                name="CS 304",
-                description=None,
-                instructor_id=instructor_user["id"],
-            )
+        with patch("app.services.class_service.get_supabase", return_value=mock_supabase):
+            with pytest.raises(Exception) as exc_info:
+                create_class(
+                    name="CS 304",
+                    description=None,
+                    instructor_id=instructor_user["id"],
+                )
 
         # Should fail on first attempt (not retry)
         assert "Connection timeout" in str(exc_info.value)
@@ -260,7 +260,8 @@ class TestListClassesService:
 
         mock_supabase.table.side_effect = mock_table_method
 
-        result = list_classes(supabase=mock_supabase, instructor_id=instructor_user["id"])
+        with patch("app.services.class_service.get_supabase", return_value=mock_supabase):
+            result = list_classes(instructor_id=instructor_user["id"])
 
         assert len(result) == 1
         assert result[0]["id"] == "class-1"
@@ -285,7 +286,8 @@ class TestListClassesService:
 
         mock_supabase.table.side_effect = mock_table_method
 
-        list_classes(supabase=mock_supabase, instructor_id=instructor_user["id"])
+        with patch("app.services.class_service.get_supabase", return_value=mock_supabase):
+            list_classes(instructor_id=instructor_user["id"])
 
         assert ("instructor_id", instructor_user["id"]) in eq_calls
 
@@ -331,7 +333,8 @@ class TestGetClassDetailService:
 
         mock_supabase.table.side_effect = mock_table_method
 
-        result = get_class_detail(supabase=mock_supabase, class_id="class-svc-1")
+        with patch("app.services.class_service.get_supabase", return_value=mock_supabase):
+            result = get_class_detail(class_id="class-svc-1")
 
         assert result is not None
         assert result["id"] == "class-svc-1"
@@ -351,7 +354,8 @@ class TestGetClassDetailService:
         mock_chain.execute.return_value = class_result
         mock_supabase.table.return_value.select.return_value = mock_chain
 
-        result = get_class_detail(supabase=mock_supabase, class_id="nonexistent")
+        with patch("app.services.class_service.get_supabase", return_value=mock_supabase):
+            result = get_class_detail(class_id="nonexistent")
 
         assert result is None
 
@@ -362,7 +366,7 @@ class TestGetClassDetailService:
 class TestCreateClassRoute:
     """Tests for POST /classes route."""
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_happy_path_returns_201_with_class_data(self, mock_get_supabase, client, auth_token, instructor_user):
         """AC-2.1.2: POST /classes returns 201 with class data including class_code."""
         mock_supabase = Mock()
@@ -418,7 +422,7 @@ class TestCreateClassRoute:
         assert response.status_code == 400
         assert "Class name is required" in response.json()["detail"]
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_instructor_id_from_jwt_not_request_body(self, mock_get_supabase, client, auth_token, instructor_user):
         """Verify instructor_id is extracted from JWT, not accepted from request body."""
         mock_supabase = Mock()

@@ -118,7 +118,7 @@ class TestB1ServiceDelegation:
             "currently DB queries are inline in the route handler (B-1)"
         )
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_list_classes_route_does_not_call_supabase_directly(
         self, mock_get_supabase, client, auth_token, instructor_user
     ):
@@ -202,7 +202,7 @@ class TestB5LogEvent:
     from "Route · classes". No logging exists in classes.py.
     """
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_create_class_emits_class_created_log_event(
         self, mock_get_supabase, client, auth_token, instructor_user
     ):
@@ -318,7 +318,7 @@ class TestB3ErrorExposure:
     These tests verify that 500 responses do NOT leak internal error text.
     """
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_create_class_500_does_not_expose_exception_message(
         self, mock_get_supabase, client, auth_token
     ):
@@ -358,7 +358,7 @@ class TestB3ErrorExposure:
             "B-3: Raw exception message leaked in 500 response"
         )
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_list_classes_500_does_not_expose_exception_message(
         self, mock_get_supabase, client, auth_token
     ):

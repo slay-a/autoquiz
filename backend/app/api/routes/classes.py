@@ -5,7 +5,6 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
 
-from app.core.supabase import get_supabase
 from app.core.error_codes import (
     INTERNAL_ERROR,
     VALIDATION_FAILED,
@@ -115,15 +114,13 @@ def create_class_route(
 
     instructor_id is extracted from the JWT — never from the request body.
     Emits class.created log event on success (DESIGN.md §14.3).
+    Layer boundary: delegates all DB work to class_service (Layer 2).
     """
     if not req.name or not req.name.strip():
         raise HTTPException(status_code=400, detail="Class name is required")
 
-    supabase = get_supabase()
-
     try:
         class_data = create_class(
-            supabase=supabase,
             name=req.name.strip(),
             description=req.description.strip() if req.description else None,
             instructor_id=current_user["id"],
@@ -163,13 +160,10 @@ def list_classes_route(current_user: dict = Depends(get_current_user)):
 
     Returns classes in descending order by created_at (newest first).
     Includes member count for each class.
-    Delegates to class_service.list_classes() — no DB calls in this layer.
+    Delegates to class_service.list_classes() — no DB calls in this layer (DESIGN.md §0).
     """
-    supabase = get_supabase()
-
     try:
         classes = list_classes(
-            supabase=supabase,
             instructor_id=current_user["id"],
         )
 
@@ -208,12 +202,10 @@ def get_class_detail_route(
     Get class detail including enrolled students.
 
     Enforces ownership: only the instructor who created the class may access it.
-    Delegates to class_service.get_class_detail() — no DB calls in this layer.
+    Delegates to class_service.get_class_detail() — no DB calls in this layer (DESIGN.md §0).
     """
-    supabase = get_supabase()
-
     try:
-        cls_detail = get_class_detail(supabase=supabase, class_id=class_id)
+        cls_detail = get_class_detail(class_id=class_id)
     except Exception:
         import uuid as _uuid
         return JSONResponse(
@@ -266,7 +258,7 @@ def join_class(
 
     student_id is extracted from the JWT — never from the request body.
     Returns 404 if class not found, 409 if already a member.
-    Delegates to class_service.join_class_by_code() — no inline DB calls.
+    Delegates to class_service.join_class_by_code() — no inline DB calls (DESIGN.md §0).
     Emits class.member.joined log event on success (DESIGN.md §14.3).
     """
     import uuid as _uuid
@@ -282,11 +274,8 @@ def join_class(
             },
         )
 
-    supabase = get_supabase()
-
     try:
         result = join_class_by_code(
-            supabase=supabase,
             class_code=req.class_code.strip(),
             student_id=current_user["id"],
         )
@@ -351,11 +340,9 @@ def get_student_classes_route(current_user: dict = Depends(get_current_user)):
     Delegates to class_service.get_student_classes() — no inline DB calls (DESIGN.md §0).
     """
     import uuid as _uuid
-    supabase = get_supabase()
 
     try:
         classes = svc_get_student_classes(
-            supabase=supabase,
             student_id=current_user["id"],
         )
     except ValueError as exc:
@@ -419,11 +406,9 @@ def get_student_content_route(current_user: dict = Depends(get_current_user)):
     Delegates to class_service.get_student_content() — no inline DB calls (DESIGN.md §0).
     """
     import uuid as _uuid
-    supabase = get_supabase()
 
     try:
         content = svc_get_student_content(
-            supabase=supabase,
             student_id=current_user["id"],
         )
     except ValueError as exc:
@@ -444,10 +429,9 @@ def get_student_content_route(current_user: dict = Depends(get_current_user)):
     )
 
 
-def _require_instructor(supabase, class_id: str, user_id: str):
+def _require_instructor(class_id: str, user_id: str):
     """Verify the current user owns the class. Returns class detail or raises."""
-    import uuid as _uuid
-    cls = get_class_detail(supabase=supabase, class_id=class_id)
+    cls = get_class_detail(class_id=class_id)
     if cls is None:
         raise HTTPException(status_code=404, detail="Class not found")
     if cls["instructor_id"] != user_id:
@@ -464,10 +448,9 @@ def save_quiz_to_class(
     req: SaveQuizRequest,
     current_user: dict = Depends(get_current_user),
 ):
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
+    _require_instructor(class_id, current_user["id"])
     quiz = save_class_quiz(
-        supabase, class_id, current_user["id"],
+        class_id, current_user["id"],
         req.title, req.topic, req.difficulty,
         req.file_id, req.questions, req.outside_sources,
     )
@@ -486,9 +469,8 @@ def save_quiz_to_class(
 
 @router.get("/{class_id}/quizzes")
 def list_class_quizzes(class_id: str, current_user: dict = Depends(get_current_user)):
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
-    return get_class_quizzes(supabase, class_id)
+    _require_instructor(class_id, current_user["id"])
+    return get_class_quizzes(class_id)
 
 
 @router.patch("/{class_id}/quizzes/{quiz_id}/share")
@@ -498,10 +480,9 @@ def share_quiz(
     current_user: dict = Depends(get_current_user),
 ):
     import uuid as _uuid
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
+    _require_instructor(class_id, current_user["id"])
     try:
-        quiz = toggle_quiz_share(supabase, class_id, quiz_id, req.is_shared)
+        quiz = toggle_quiz_share(class_id, quiz_id, req.is_shared)
     except ValueError:
         return JSONResponse(status_code=404, content={"error": {"code": "QUIZ_NOT_FOUND", "message": "Quiz not found.", "request_id": str(_uuid.uuid4())}})
     log_event(
@@ -522,9 +503,8 @@ def remove_quiz(
     class_id: str, quiz_id: str,
     current_user: dict = Depends(get_current_user),
 ):
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
-    delete_class_quiz(supabase, class_id, quiz_id)
+    _require_instructor(class_id, current_user["id"])
+    delete_class_quiz(class_id, quiz_id)
 
 
 # ── Notes ─────────────────────────────────────────────────────────
@@ -532,9 +512,8 @@ def remove_quiz(
 
 @router.get("/{class_id}/notes")
 def list_class_notes(class_id: str, current_user: dict = Depends(get_current_user)):
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
-    return get_class_notes(supabase, class_id)
+    _require_instructor(class_id, current_user["id"])
+    return get_class_notes(class_id)
 
 
 @router.post("/{class_id}/notes", status_code=201)
@@ -543,9 +522,8 @@ def save_class_note(
     req: SaveNoteRequest,
     current_user: dict = Depends(get_current_user),
 ):
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
-    return create_class_note(supabase, class_id, current_user["id"], req.title, req.topic, req.content)
+    _require_instructor(class_id, current_user["id"])
+    return create_class_note(class_id, current_user["id"], req.title, req.topic, req.content)
 
 
 @router.put("/{class_id}/notes/{note_id}")
@@ -555,10 +533,9 @@ def edit_class_note(
     current_user: dict = Depends(get_current_user),
 ):
     import uuid as _uuid
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
+    _require_instructor(class_id, current_user["id"])
     try:
-        return update_class_note(supabase, class_id, note_id, req.title, req.content)
+        return update_class_note(class_id, note_id, req.title, req.content)
     except ValueError:
         return JSONResponse(status_code=404, content={"error": {"code": "NOTE_NOT_FOUND", "message": "Note not found.", "request_id": str(_uuid.uuid4())}})
 
@@ -570,10 +547,9 @@ def publish_class_note(
     current_user: dict = Depends(get_current_user),
 ):
     import uuid as _uuid
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
+    _require_instructor(class_id, current_user["id"])
     try:
-        return toggle_note_publish(supabase, class_id, note_id, req.is_published)
+        return toggle_note_publish(class_id, note_id, req.is_published)
     except ValueError:
         return JSONResponse(status_code=404, content={"error": {"code": "NOTE_NOT_FOUND", "message": "Note not found.", "request_id": str(_uuid.uuid4())}})
 
@@ -583,9 +559,8 @@ def remove_class_note(
     class_id: str, note_id: str,
     current_user: dict = Depends(get_current_user),
 ):
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
-    delete_class_note(supabase, class_id, note_id)
+    _require_instructor(class_id, current_user["id"])
+    delete_class_note(class_id, note_id)
 
 
 # ── Files ─────────────────────────────────────────────────────────
@@ -593,9 +568,8 @@ def remove_class_note(
 
 @router.get("/{class_id}/files")
 def list_class_files(class_id: str, current_user: dict = Depends(get_current_user)):
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
-    return get_class_files(supabase, class_id)
+    _require_instructor(class_id, current_user["id"])
+    return get_class_files(class_id)
 
 
 @router.delete("/{class_id}/files/{file_id}", status_code=204)
@@ -604,10 +578,9 @@ def remove_class_file(
     current_user: dict = Depends(get_current_user),
 ):
     import uuid as _uuid
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
+    _require_instructor(class_id, current_user["id"])
     try:
-        delete_class_file(supabase, class_id, file_id)
+        delete_class_file(class_id, file_id)
     except ValueError:
         return JSONResponse(status_code=404, content={"error": {"code": "FILE_NOT_FOUND", "message": "File not found.", "request_id": str(_uuid.uuid4())}})
 
@@ -618,8 +591,7 @@ def remove_class_file(
 @router.get("/class-note/{note_id}")
 def get_class_note(note_id: str, current_user: dict = Depends(get_current_user)):
     import uuid as _uuid
-    supabase = get_supabase()
-    note = get_class_note_by_id(supabase, note_id)
+    note = get_class_note_by_id(note_id)
     if not note:
         return JSONResponse(status_code=404, content={"error": {"code": CLASS_NOTE_NOT_FOUND, "message": "Note not found.", "request_id": str(_uuid.uuid4())}})
     if current_user.get("role") == "student" and not note.get("is_published"):
@@ -635,13 +607,11 @@ def remove_member(
     class_id: str, student_id: str,
     current_user: dict = Depends(get_current_user),
 ):
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
-    remove_class_member(supabase, class_id, student_id)
+    _require_instructor(class_id, current_user["id"])
+    remove_class_member(class_id, student_id)
 
 
 @router.delete("/{class_id}", status_code=204)
 def remove_class(class_id: str, current_user: dict = Depends(get_current_user)):
-    supabase = get_supabase()
-    _require_instructor(supabase, class_id, current_user["id"])
-    delete_class(supabase, class_id)
+    _require_instructor(class_id, current_user["id"])
+    delete_class(class_id)

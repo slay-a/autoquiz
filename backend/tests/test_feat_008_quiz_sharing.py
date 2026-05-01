@@ -73,7 +73,7 @@ def mock_supabase():
 class TestStudentContentRoute:
     """Tests for GET /classes/student/content route (AC-8.1.3)."""
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_enrolled_student_receives_only_shared_quizzes(
         self, mock_get_supabase, client, student_user
     ):
@@ -168,7 +168,7 @@ class TestStudentContentRoute:
         finally:
             app.dependency_overrides.clear()
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_enrolled_student_does_not_receive_unshared_quizzes(
         self, mock_get_supabase, client, student_user
     ):
@@ -244,7 +244,7 @@ class TestStudentContentRoute:
         finally:
             app.dependency_overrides.clear()
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_unenrolled_student_receives_no_quizzes(
         self, mock_get_supabase, client, other_student_user
     ):
@@ -292,7 +292,7 @@ class TestStudentContentRoute:
         finally:
             app.dependency_overrides.clear()
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_student_from_another_class_cannot_receive_quizzes_from_first_class(
         self, mock_get_supabase, client, other_student_user
     ):
@@ -384,7 +384,7 @@ class TestStudentContentRoute:
         finally:
             app.dependency_overrides.clear()
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_returns_multiple_shared_quizzes_from_multiple_classes(
         self, mock_get_supabase, client, student_user
     ):
@@ -483,7 +483,7 @@ class TestStudentContentRoute:
         finally:
             app.dependency_overrides.clear()
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_no_token_returns_401(self, mock_get_supabase, client):
         """All routes return 401 when no token provided."""
         response = client.get("/classes/student/content")

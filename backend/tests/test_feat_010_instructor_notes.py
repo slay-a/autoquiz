@@ -137,7 +137,7 @@ class TestNotesGenerateAuth:
 class TestStudentContentNoteFiltering:
     """Tests for GET /classes/student/content note filtering (AC-10.3.2, AC-10.3.3)."""
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_draft_notes_are_hidden_from_enrolled_student(
         self, mock_get_supabase, client, student_user
     ):
@@ -229,7 +229,7 @@ class TestStudentContentNoteFiltering:
         finally:
             app.dependency_overrides.clear()
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_notes_from_non_joined_classes_are_hidden(
         self, mock_get_supabase, client, student_user
     ):
@@ -318,7 +318,7 @@ class TestStudentContentNoteFiltering:
         finally:
             app.dependency_overrides.clear()
 
-    @patch("app.api.routes.classes.get_supabase")
+    @patch("app.services.class_service.get_supabase")
     def test_published_notes_appear_for_enrolled_student(
         self, mock_get_supabase, client, student_user
     ):

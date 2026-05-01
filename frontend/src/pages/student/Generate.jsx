@@ -89,7 +89,7 @@ export default function Generate() {
           topic: params.topic,
           num_questions: params.numQuestions,
           difficulty: params.difficulty,
-          question_types: ["mcq", "true_false", "short_answer"],
+          question_types: ["mcq", "true_false"],
           outside_sources: params.outsideSources,
           file_id: selectedFileId || uploadedFile?.file_id || null,
         }),

@@ -50,16 +50,6 @@ const DEMO_QUIZ = {
       page_numbers: [12],
     },
     {
-      question_id: "q4",
-      type: "short_answer",
-      question: "What does the acronym SMART stand for in the context of writing good requirements?",
-      options: null,
-      answer: "Specific, Measurable, Achievable, Relevant, Time-bound",
-      explanation: "SMART criteria help ensure requirements are precise and verifiable rather than vague or ambiguous.",
-      source_chunk_ids: ["chunk-004"],
-      page_numbers: [15, 16],
-    },
-    {
       question_id: "q5",
       type: "mcq",
       question: "Which requirements elicitation technique involves observing users in their actual work environment?",
@@ -95,7 +85,7 @@ export default function StudentQuiz() {
           topic,
           num_questions: numQuestions,
           difficulty,
-          question_types: ["mcq", "true_false", "short_answer"],
+          question_types: ["mcq", "true_false"],
         }),
       });
 

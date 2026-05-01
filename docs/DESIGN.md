@@ -474,6 +474,7 @@ All tables are in the Supabase Postgres instance. Source of truth: `backend/supa
 | `full_name`  | text        |                                            |
 | `role`       | text        | `CHECK (role IN ('instructor', 'student'))` |
 | `created_at` | timestamptz |                                            |
+| `avatar_url` | text        | nullable; DiceBear preset URL (added FEAT-013) |
 
 Auto-populated by `handle_new_user()` trigger on `auth.users` insert.
 
@@ -1142,7 +1143,7 @@ DESIGN.md edit.
 | `class.created`               | INFO    | success  | Route · classes         | `class_id`                                          |
 | `class.member.joined`         | INFO    | success  | Route · classes         | `class_id`                                          |
 | `class.member.removed`        | INFO    | success  | Route · classes         | `class_id`, `removed_by_instructor`                 |
-| `profile.updated`             | INFO    | success  | Route · profiles        | `fields_changed` (list)                             |
+| `profile.updated`             | INFO    | success  | Frontend · Profile page (console, GAP-8; no backend route in FEAT-013) | `fields_changed` (list)          |
 
 Adding a new event is a DESIGN.md change first, code change second. The
 design-validator flags any emitted event not in this table as **MAJOR**.
@@ -1150,7 +1151,7 @@ design-validator flags any emitted event not in this table as **MAJOR**.
 ### 14.4 Layer Ownership of Events
 
 - **Layer 1 (routes):** entry/exit of user-initiated actions
-  (`upload.file.accepted`, `quiz.save.completed`, `profile.updated`).
+  (`upload.file.accepted`, `quiz.save.completed`). Note: `profile.updated` fires from the frontend console (FEAT-013 has no backend route; see §14.3).
 - **Layer 2 (services):** events surrounding external calls (LLM, retrieval)
   with `duration_ms` populated.
 - **Celery tasks:** `*.started` / `*.completed` / `*.failed` at the task boundary.

@@ -578,6 +578,8 @@
 
 ### Story 13.1 — View and edit profile
 
+**Status: Verified**
+
 **As a** student or instructor,
 **I want** to open a profile page that shows my current account details and lets me change my display name and avatar,
 **so that** my identity in the app reflects how I want to be seen.
@@ -592,6 +594,8 @@
 
 ### Story 13.2 — Save profile changes
 
+**Status: Verified**
+
 **As a** student or instructor,
 **I want** to save my chosen avatar and display name,
 **so that** the changes persist across sessions and devices.
@@ -605,6 +609,8 @@
 ---
 
 ### Story 13.3 — Avatar surfaces in the navbar
+
+**Status: Verified**
 
 **As a** student or instructor,
 **I want** to see my avatar in the navbar and click it to reach the profile page,

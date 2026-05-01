@@ -556,6 +556,8 @@
 
 ### Story 12.1 — Toggle dark mode
 
+**Status: Verified**
+
 **As a** user (instructor or student),
 **I want** to switch the app between light and dark colour themes,
 **so that** I can reduce eye strain in low-light environments and match my system preferences.

@@ -1,34 +1,34 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, BookOpen, Trophy, Layers } from "lucide-react";
+import { CheckCircle2, XCircle, Trophy, Layers, Send } from "lucide-react";
 
-const TYPE_LABELS = { mcq: "Multiple Choice", true_false: "True / False", short_answer: "Short Answer" };
+const TYPE_LABELS = { mcq: "Multiple Choice", true_false: "True / False" };
 const DIFF_BADGE  = { easy: "bg-emerald-50 text-emerald-700", medium: "bg-amber-50 text-amber-700", hard: "bg-red-50 text-red-700" };
 
 export default function QuizView({ quiz, onMakeFlashcards }) {
-  const [answers, setAnswers]   = useState({});
-  const [revealed, setRevealed] = useState({});
+  const [answers, setAnswers]     = useState({});
+  const [submitted, setSubmitted] = useState(false);
   const [showScore, setShowScore] = useState(false);
 
-  const questions = quiz.questions ?? [];
+  const questions = (quiz.questions ?? []).filter(
+    (q) => q.type === "mcq" || q.type === "true_false"
+  );
 
   function select(qid, val) {
-    if (revealed[qid]) return;
+    if (submitted) return;
     setAnswers((p) => ({ ...p, [qid]: val }));
   }
 
-  function reveal(qid) {
-    setRevealed((p) => ({ ...p, [qid]: true }));
+  function submit() {
+    setSubmitted(true);
+    setShowScore(true);
   }
 
-  const totalRevealed = Object.keys(revealed).length;
-  const correct = questions.filter((q) =>
-    revealed[q.question_id] &&
-    (answers[q.question_id] ?? "").toLowerCase().trim() === q.answer.toLowerCase().trim()
+  const answeredCount = questions.filter((q) => answers[q.question_id] != null).length;
+  const correct = questions.filter(
+    (q) => submitted && (answers[q.question_id] ?? "").toLowerCase().trim() === q.answer.toLowerCase().trim()
   ).length;
-
-  const wrongQuestions = questions.filter((q) =>
-    revealed[q.question_id] &&
-    (answers[q.question_id] ?? "").toLowerCase().trim() !== q.answer.toLowerCase().trim()
+  const wrongQuestions = questions.filter(
+    (q) => submitted && (answers[q.question_id] ?? "").toLowerCase().trim() !== q.answer.toLowerCase().trim()
   );
 
   return (
@@ -37,19 +37,22 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
       <div className="card px-6 py-4 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="font-semibold text-gray-900 dark:text-slate-100">{quiz.topic}</h2>
-          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{questions.length} questions</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
+            {questions.length} questions
+            {!submitted && ` · ${answeredCount}/${questions.length} answered`}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <span className={`badge capitalize ${DIFF_BADGE[quiz.difficulty] ?? DIFF_BADGE.medium}`}>
             {quiz.difficulty}
           </span>
-          {totalRevealed > 0 && (
+          {submitted && (
             <button onClick={() => setShowScore((p) => !p)}
               className="badge bg-violet-50 text-violet-700 cursor-pointer hover:bg-violet-100 transition-colors">
-              <Trophy className="w-3 h-3" /> {correct}/{totalRevealed}
+              <Trophy className="w-3 h-3" /> {correct}/{questions.length}
             </button>
           )}
-          {wrongQuestions.length > 0 && onMakeFlashcards && (
+          {submitted && wrongQuestions.length > 0 && onMakeFlashcards && (
             <button
               onClick={() => onMakeFlashcards(wrongQuestions, "wrong")}
               className="badge bg-indigo-50 text-indigo-700 cursor-pointer hover:bg-indigo-100 transition-colors"
@@ -61,7 +64,7 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
       </div>
 
       {/* Score banner */}
-      {showScore && totalRevealed === questions.length && (
+      {submitted && showScore && (
         <div className="card px-6 py-5 bg-gradient-to-r from-violet-500 to-indigo-600 text-white animate-slide-up">
           <div className="flex items-center gap-3">
             <Trophy className="w-8 h-8 opacity-90" />
@@ -78,7 +81,7 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
           {wrongQuestions.length > 0 && onMakeFlashcards && (
             <button
               onClick={() => onMakeFlashcards(wrongQuestions, "wrong")}
-              className="mt-3 flex items-center gap-2 bg-white dark:bg-slate-800/20 hover:bg-white dark:bg-slate-800/30 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
+              className="mt-3 flex items-center gap-2 bg-white/20 hover:bg-white/30 dark:bg-slate-900/30 dark:hover:bg-slate-900/40 px-4 py-2 rounded-xl text-sm font-semibold transition-colors"
             >
               <Layers className="w-4 h-4" /> Convert {wrongQuestions.length} wrong answers to flashcards
             </button>
@@ -93,21 +96,38 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
           q={q}
           index={i}
           chosen={answers[q.question_id]}
-          isRevealed={!!revealed[q.question_id]}
+          submitted={submitted}
           onSelect={(val) => select(q.question_id, val)}
-          onReveal={() => reveal(q.question_id)}
         />
       ))}
+
+      {/* Submit */}
+      {!submitted && questions.length > 0 && (
+        <div className="card px-6 py-4 flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-xs text-gray-500 dark:text-slate-400">
+            {answeredCount < questions.length
+              ? `${questions.length - answeredCount} question${questions.length - answeredCount === 1 ? "" : "s"} unanswered`
+              : "All questions answered"}
+          </p>
+          <button
+            onClick={submit}
+            disabled={answeredCount === 0}
+            className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Send className="w-4 h-4" /> Submit Quiz
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-function QuestionCard({ q, index, chosen, isRevealed, onSelect, onReveal }) {
-  const isCorrect = isRevealed && chosen?.toLowerCase().trim() === q.answer.toLowerCase().trim();
+function QuestionCard({ q, index, chosen, submitted, onSelect }) {
+  const isCorrect = submitted && chosen?.toLowerCase().trim() === q.answer.toLowerCase().trim();
 
   return (
     <div className={`card overflow-hidden transition-all duration-200
-      ${isRevealed ? (isCorrect ? "ring-1 ring-emerald-200" : "ring-1 ring-red-100") : ""}`}>
+      ${submitted ? (isCorrect ? "ring-1 ring-emerald-200" : "ring-1 ring-red-100") : ""}`}>
       <div className="px-6 pt-5 pb-4">
         <div className="flex items-start gap-3">
           <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-violet-100 text-violet-600 text-xs font-bold flex items-center justify-center">
@@ -126,11 +146,11 @@ function QuestionCard({ q, index, chosen, isRevealed, onSelect, onReveal }) {
               <div className="space-y-2">
                 {q.options.map((opt) => {
                   const isChosen = chosen === opt.label;
-                  const isCorrectOpt = isRevealed && opt.label === q.answer;
+                  const isCorrectOpt = submitted && opt.label === q.answer;
                   return (
-                    <button key={opt.label} onClick={() => onSelect(opt.label)} disabled={isRevealed}
+                    <button key={opt.label} onClick={() => onSelect(opt.label)} disabled={submitted}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border text-sm text-left transition-all
-                        ${isRevealed
+                        ${submitted
                           ? isCorrectOpt ? "bg-emerald-50 border-emerald-300 text-emerald-800"
                           : isChosen ? "bg-red-50 border-red-200 text-red-700"
                           : "bg-gray-50 dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-400 dark:text-slate-500"
@@ -138,14 +158,14 @@ function QuestionCard({ q, index, chosen, isRevealed, onSelect, onReveal }) {
                           : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:border-violet-200 hover:bg-violet-50/30"
                         }`}>
                       <span className={`w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-bold
-                        ${isRevealed ? isCorrectOpt ? "bg-emerald-200 text-emerald-800"
+                        ${submitted ? isCorrectOpt ? "bg-emerald-200 text-emerald-800"
                           : isChosen ? "bg-red-200 text-red-700" : "bg-gray-200 text-gray-500 dark:text-slate-400"
                           : isChosen ? "bg-violet-200 text-violet-700" : "bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400"}`}>
                         {opt.label}
                       </span>
                       {opt.text}
-                      {isRevealed && isCorrectOpt && <CheckCircle2 className="w-4 h-4 text-emerald-500 ml-auto" />}
-                      {isRevealed && isChosen && !isCorrectOpt && <XCircle className="w-4 h-4 text-red-400 ml-auto" />}
+                      {submitted && isCorrectOpt && <CheckCircle2 className="w-4 h-4 text-emerald-500 ml-auto" />}
+                      {submitted && isChosen && !isCorrectOpt && <XCircle className="w-4 h-4 text-red-400 ml-auto" />}
                     </button>
                   );
                 })}
@@ -157,11 +177,11 @@ function QuestionCard({ q, index, chosen, isRevealed, onSelect, onReveal }) {
               <div className="flex gap-2">
                 {["True", "False"].map((val) => {
                   const isChosen = chosen === val;
-                  const isCorrectOpt = isRevealed && val === q.answer;
+                  const isCorrectOpt = submitted && val === q.answer;
                   return (
-                    <button key={val} onClick={() => onSelect(val)} disabled={isRevealed}
+                    <button key={val} onClick={() => onSelect(val)} disabled={submitted}
                       className={`flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all
-                        ${isRevealed ? isCorrectOpt ? "bg-emerald-50 border-emerald-300 text-emerald-700"
+                        ${submitted ? isCorrectOpt ? "bg-emerald-50 border-emerald-300 text-emerald-700"
                           : isChosen ? "bg-red-50 border-red-200 text-red-600"
                           : "bg-gray-50 dark:bg-slate-800 border-gray-100 dark:border-slate-700 text-gray-400 dark:text-slate-500"
                           : isChosen ? "bg-violet-50 border-violet-300 text-violet-700"
@@ -172,25 +192,11 @@ function QuestionCard({ q, index, chosen, isRevealed, onSelect, onReveal }) {
                 })}
               </div>
             )}
-
-            {/* Short answer */}
-            {q.type === "short_answer" && !isRevealed && (
-              <input type="text" placeholder="Type your answer…"
-                value={chosen ?? ""} onChange={(e) => onSelect(e.target.value)} className="input" />
-            )}
           </div>
         </div>
       </div>
 
-      {!isRevealed && (
-        <div className="px-6 pb-5">
-          <button onClick={onReveal} className="btn-secondary text-xs w-full">
-            <BookOpen className="w-3.5 h-3.5" /> Reveal Answer
-          </button>
-        </div>
-      )}
-
-      {isRevealed && (
+      {submitted && (
         <div className={`mx-6 mb-5 rounded-xl px-4 py-3.5 space-y-1.5
           ${isCorrect ? "bg-emerald-50 border border-emerald-200" : "bg-amber-50 border border-amber-200"}`}>
           <div className="flex items-center gap-2">

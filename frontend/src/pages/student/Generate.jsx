@@ -157,25 +157,38 @@ export default function Generate() {
       ? `${quiz.topic} — Missed Cards`
       : `${quiz.topic} Flashcards`;
 
-    // Dedup: delete existing set of same type for same quiz if it exists
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session?.access_token}`,
+    };
+    const apiBase = import.meta.env.VITE_API_URL || "";
+
+    // Dedup: delete existing sets of same type for same quiz via FastAPI
     if (savedId && (setType === "all" || setType === "wrong")) {
-      await supabase.from("flashcard_sets")
-        .delete()
-        .eq("quiz_id", savedId)
-        .eq("set_type", setType)
-        .eq("created_by", user.id);
+      const params = new URLSearchParams({ quiz_id: savedId, set_type: setType });
+      await fetch(`${apiBase}/flashcards/by-type?${params}`, {
+        method: "DELETE",
+        headers,
+      });
     }
 
-    const { data } = await supabase.from("flashcard_sets").insert({
-      title: setTitle,
-      quiz_id: savedId || null,
-      created_by: user.id,
-      is_shared: false,
-      set_type: setType,
-      cards,
-    }).select().single();
+    const res = await fetch(`${apiBase}/flashcards/`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        title: setTitle,
+        quiz_id: savedId || null,
+        is_shared: false,
+        set_type: setType,
+        cards,
+      }),
+    });
 
-    if (data) navigate(`/flashcards/${data.id}`);
+    if (res.ok) {
+      const data = await res.json();
+      navigate(`/flashcards/${data.id}`);
+    }
   }
 
   return (

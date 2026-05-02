@@ -22,17 +22,20 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock supabase
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockSingle = vi.fn();
+// Mock supabase — auth only (getSession for token retrieval)
+const mockGetSession = vi.fn().mockResolvedValue({
+  data: { session: { access_token: 'test-token' } },
+});
 vi.mock('../lib/supabase', () => ({
   supabase: {
-    from: vi.fn(() => ({
-      select: mockSelect,
-    })),
+    auth: { getSession: () => mockGetSession() },
+    // supabase.from must NOT be called for flashcard_sets (DESIGN.md §0)
+    from: vi.fn((table) => { throw new Error(`LAYER VIOLATION: supabase.from("${table}") from FlashcardStudy`); }),
   },
 }));
+
+// Mock global fetch
+global.fetch = vi.fn();
 
 function renderFlashcardStudy() {
   return render(
@@ -69,22 +72,17 @@ describe('FlashcardStudy - FEAT-011', () => {
 
     mockUseParams.mockReturnValue({ id: 'set-1' });
 
-    // Default successful response
-    mockSelect.mockReturnValue({
-      eq: mockEq,
-    });
-    mockEq.mockReturnValue({
-      single: mockSingle,
-    });
-    mockSingle.mockResolvedValue({
-      data: mockFlashcardSet,
+    // Default successful fetch response
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => mockFlashcardSet,
     });
   });
 
   // ── Story 11.1: Study a flashcard set ───────────────────────────
 
   it('AC-11.1.1: renders "not found" message when set does not exist', async () => {
-    mockSingle.mockResolvedValue({ data: null });
+    global.fetch.mockResolvedValueOnce({ ok: false, json: async () => ({}) });
 
     renderFlashcardStudy();
 
@@ -94,8 +92,9 @@ describe('FlashcardStudy - FEAT-011', () => {
   });
 
   it('AC-11.1.1: renders "empty" message when cards array is empty', async () => {
-    mockSingle.mockResolvedValue({
-      data: { ...mockFlashcardSet, cards: [] },
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ ...mockFlashcardSet, cards: [] }),
     });
 
     renderFlashcardStudy();
@@ -114,10 +113,6 @@ describe('FlashcardStudy - FEAT-011', () => {
 
     // Front label should be visible
     expect(screen.getByText('Question')).toBeInTheDocument();
-
-    // Note: Both front and back are in the DOM (for CSS 3D flip),
-    // but back is hidden via CSS (backfaceVisibility).
-    // We verify the front content is visible, which confirms the unflipped state.
     expect(screen.getByText('What is a cell?')).toBeVisible();
   });
 
@@ -420,5 +415,25 @@ describe('FlashcardStudy - FEAT-011', () => {
     const editLink = screen.getByRole('link', { name: /edit set/i });
     expect(editLink).toBeInTheDocument();
     expect(editLink).toHaveAttribute('href', '/flashcards/set-1/edit');
+  });
+
+  // ── Layer boundary test (DESIGN.md §0) ───────────────────────────
+
+  it('DESIGN.md §0: fetches flashcard set via FastAPI (GET /flashcards/:id), not supabase.from', async () => {
+    renderFlashcardStudy();
+
+    await waitFor(() => {
+      expect(screen.getByText('What is a cell?')).toBeInTheDocument();
+    });
+
+    // Verify fetch was called with the FastAPI endpoint
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringMatching(/\/flashcards\/set-1/),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: expect.stringMatching(/^Bearer /),
+        }),
+      })
+    );
   });
 });

@@ -22,20 +22,42 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock supabase
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockSingle = vi.fn();
-const mockUpdate = vi.fn();
-const mockDelete = vi.fn();
-
+// Mock supabase — auth only (DESIGN.md §0 layer boundary)
+const mockGetSession = vi.fn().mockResolvedValue({
+  data: { session: { access_token: 'test-token' } },
+});
 vi.mock('../lib/supabase', () => ({
   supabase: {
-    from: vi.fn(),
+    auth: { getSession: () => mockGetSession() },
+    from: vi.fn((table) => { throw new Error(`LAYER VIOLATION: supabase.from("${table}") from FlashcardEditor`); }),
   },
 }));
 
-import { supabase } from '../lib/supabase';
+vi.mock('../lib/sharing', () => ({
+  genShareCode: () => 'ABC123',
+  copyToClipboard: vi.fn(),
+  shareUrl: (type, id) => `https://example.com/${type}/${id}`,
+}));
+
+// Mock global fetch
+global.fetch = vi.fn();
+
+const mockUser = {
+  id: 'user-1',
+  email: 'student@test.com',
+};
+
+const mockFlashcardSet = {
+  id: 'set-1',
+  title: 'Biology 101 - Cell Structure',
+  created_by: 'user-1',
+  cards: [
+    { front: 'What is a cell?', back: 'The basic unit of life', explanation: 'All living things are made of cells' },
+    { front: 'What is DNA?', back: 'Genetic material', explanation: 'Deoxyribonucleic acid' },
+  ],
+  is_public: false,
+  share_code: null,
+};
 
 function renderFlashcardEditor() {
   return render(
@@ -46,23 +68,6 @@ function renderFlashcardEditor() {
 }
 
 describe('FlashcardEditor - FEAT-011', () => {
-  const mockUser = {
-    id: 'user-1',
-    email: 'student@test.com',
-  };
-
-  const mockFlashcardSet = {
-    id: 'set-1',
-    title: 'Biology 101 - Cell Structure',
-    created_by: 'user-1',
-    cards: [
-      { front: 'What is a cell?', back: 'The basic unit of life', explanation: 'All living things are made of cells' },
-      { front: 'What is DNA?', back: 'Genetic material', explanation: 'Deoxyribonucleic acid' },
-    ],
-    is_public: false,
-    share_code: null,
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -73,39 +78,10 @@ describe('FlashcardEditor - FEAT-011', () => {
 
     mockUseParams.mockReturnValue({ id: 'set-1' });
 
-    // Default: from() returns chainable query builder
-    supabase.from.mockImplementation((table) => {
-      if (table === 'flashcard_sets') {
-        return {
-          select: mockSelect,
-          update: mockUpdate,
-          delete: mockDelete,
-        };
-      }
-      return {
-        select: vi.fn().mockReturnThis(),
-      };
-    });
-
-    // Default: successful select
-    mockSelect.mockReturnValue({
-      eq: mockEq,
-    });
-    mockEq.mockReturnValue({
-      single: mockSingle,
-    });
-    mockSingle.mockResolvedValue({
-      data: mockFlashcardSet,
-    });
-
-    // Default: successful update
-    mockUpdate.mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ data: mockFlashcardSet, error: null }),
-    });
-
-    // Default: successful delete
-    mockDelete.mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+    // Default: successful GET fetch
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => mockFlashcardSet,
     });
   });
 
@@ -146,7 +122,6 @@ describe('FlashcardEditor - FEAT-011', () => {
     });
 
     // Find and click the edit button (Edit3 icon) for the first card
-    // The card displays front and back text, and has edit and delete buttons
     const cards = screen.getAllByText('What is a cell?');
     const firstCard = cards[0].closest('.card');
     const editButton = firstCard.querySelector('button'); // First button is edit
@@ -263,8 +238,14 @@ describe('FlashcardEditor - FEAT-011', () => {
     expect(addCardButton).not.toBeDisabled();
   });
 
-  it('AC-11.3.4: saving calls supabase update with updated cards array and title', async () => {
+  it('AC-11.3.4: saving calls PUT /flashcards/:id with updated title and cards', async () => {
     const user = userEvent.setup();
+
+    // First call: GET set; second call: PUT save
+    global.fetch
+      .mockResolvedValueOnce({ ok: true, json: async () => mockFlashcardSet })
+      .mockResolvedValueOnce({ ok: true, json: async () => mockFlashcardSet });
+
     renderFlashcardEditor();
 
     await waitFor(() => {
@@ -280,21 +261,25 @@ describe('FlashcardEditor - FEAT-011', () => {
     const saveButton = screen.getAllByRole('button', { name: /save/i })[0];
     await user.click(saveButton);
 
-    // Verify supabase update was called
+    // Verify PUT was called
     await waitFor(() => {
-      expect(mockUpdate).toHaveBeenCalled();
-    });
-
-    // Verify the update call had the correct parameters
-    const updateCall = mockUpdate.mock.calls[0];
-    expect(updateCall[0]).toEqual({
-      title: 'Updated Biology Set',
-      cards: mockFlashcardSet.cards,
+      const putCall = global.fetch.mock.calls.find(
+        ([url, opts]) => opts?.method === 'PUT' && String(url).includes('/flashcards/set-1')
+      );
+      expect(putCall).toBeTruthy();
+      const body = JSON.parse(putCall[1].body);
+      expect(body.title).toBe('Updated Biology Set');
+      expect(Array.isArray(body.cards)).toBe(true);
     });
   });
 
   it('AC-11.3.4: after save, navigates to /flashcards/:id', async () => {
     const user = userEvent.setup();
+
+    global.fetch
+      .mockResolvedValueOnce({ ok: true, json: async () => mockFlashcardSet })
+      .mockResolvedValueOnce({ ok: true, json: async () => mockFlashcardSet });
+
     renderFlashcardEditor();
 
     await waitFor(() => {
@@ -312,12 +297,9 @@ describe('FlashcardEditor - FEAT-011', () => {
   });
 
   it('AC-11.3.5: when set is owned by a different user, renders ownership error message', async () => {
-    // Set created_by to a different user
-    mockSingle.mockResolvedValue({
-      data: {
-        ...mockFlashcardSet,
-        created_by: 'different-user',
-      },
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ ...mockFlashcardSet, created_by: 'different-user' }),
     });
 
     renderFlashcardEditor();
@@ -344,5 +326,25 @@ describe('FlashcardEditor - FEAT-011', () => {
 
     // No error message
     expect(screen.queryByText(/you don't have permission/i)).not.toBeInTheDocument();
+  });
+
+  // ── Layer boundary test (DESIGN.md §0) ───────────────────────────
+
+  it('DESIGN.md §0: fetches flashcard set via FastAPI (GET /flashcards/:id), not supabase.from', async () => {
+    renderFlashcardEditor();
+
+    await waitFor(() => {
+      expect(screen.getByText('What is a cell?')).toBeInTheDocument();
+    });
+
+    // Verify fetch was called with the FastAPI endpoint
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringMatching(/\/flashcards\/set-1/),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: expect.stringMatching(/^Bearer /),
+        }),
+      })
+    );
   });
 });

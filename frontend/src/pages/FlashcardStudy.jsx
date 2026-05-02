@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { ChevronLeft, ChevronRight, RotateCcw, CheckCircle2, XCircle, MinusCircle, Trophy, Loader2, Edit3 } from "lucide-react";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 export default function FlashcardStudy() {
   const { id } = useParams();
   const [set, setSet] = useState(null);
@@ -15,11 +17,23 @@ export default function FlashcardStudy() {
 
   useEffect(() => { fetchSet(); }, [id]);
 
+  async function getAuthHeaders() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return { Authorization: `Bearer ${session?.access_token}` };
+  }
+
   async function fetchSet() {
-    const { data } = await supabase.from("flashcard_sets").select("*").eq("id", id).single();
-    setSet(data);
-    setCards(data?.cards ?? []);
-    setLoading(false);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API_BASE}/flashcards/${id}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setSet(data);
+        setCards(data?.cards ?? []);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleResult(result) {
@@ -35,7 +49,7 @@ export default function FlashcardStudy() {
   function restart(onlyMissed = false) {
     if (onlyMissed) {
       const missed = cards.filter((_, i) => results[i] === "nope");
-      setCards(missed.length > 0 ? missed : cards);
+      setCards(missed.length > 0 ? missed : set?.cards ?? []);
     } else {
       setCards(set?.cards ?? []);
     }

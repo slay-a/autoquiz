@@ -91,16 +91,23 @@ export default function QuizStudy() {
       source_page: q.page_numbers,
     }));
 
-    const { data } = await supabase.from("flashcard_sets").insert({
-      title: `${quiz.topic} Flashcards`,
-      quiz_id: quiz.id,
-      created_by: user.id,
-      class_id: quiz.class_id || null,
-      is_shared: false,
-      cards,
-    }).select().single();
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/flashcards/`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        title: `${quiz.topic} Flashcards`,
+        quiz_id: quiz.id,
+        class_id: quiz.class_id || null,
+        is_shared: false,
+        cards,
+      }),
+    });
 
-    if (data) navigate(`/flashcards/${data.id}`);
+    if (res.ok) {
+      const data = await res.json();
+      navigate(`/flashcards/${data.id}`);
+    }
   }
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 text-violet-400 animate-spin" /></div>;

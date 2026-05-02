@@ -8,6 +8,8 @@ import {
   Copy, Globe, Lock, Loader2, GripVertical, Save
 } from "lucide-react";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 export default function FlashcardEditor() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -28,36 +30,64 @@ export default function FlashcardEditor() {
 
   useEffect(() => { fetchSet(); }, [id]);
 
+  async function getAuthHeaders() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session?.access_token}`,
+    };
+  }
+
   async function fetchSet() {
-    const { data } = await supabase.from("flashcard_sets").select("*").eq("id", id).single();
-    if (data) {
-      setSet(data);
-      setCards(data.cards ?? []);
-      setTitle(data.title);
-      setIsOwner(data.created_by === user?.id);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API_BASE}/flashcards/${id}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setSet(data);
+        setCards(data.cards ?? []);
+        setTitle(data.title);
+        setIsOwner(data.created_by === user?.id);
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function save() {
     setSaving(true);
-    await supabase.from("flashcard_sets")
-      .update({ title, cards })
-      .eq("id", id);
-    setSaving(false);
-    navigate(`/flashcards/${id}`);
+    try {
+      const headers = await getAuthHeaders();
+      await fetch(`${API_BASE}/flashcards/${id}`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({ title, cards }),
+      });
+      navigate(`/flashcards/${id}`);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function deleteSet() {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
     setDeleting(true);
     setDeleteError(null);
-    const { error } = await supabase.from("flashcard_sets").delete().eq("id", id);
-    if (error) {
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API_BASE}/flashcards/${id}`, {
+        method: "DELETE",
+        headers,
+      });
+      if (!res.ok) {
+        setDeleteError("Delete failed — please try again.");
+        setDeleting(false);
+      } else {
+        navigate("/student");
+      }
+    } catch {
       setDeleteError("Delete failed — please try again.");
       setDeleting(false);
-    } else {
-      navigate("/student");
     }
   }
 
@@ -89,10 +119,16 @@ export default function FlashcardEditor() {
     let share_code = set.share_code;
     if (newVal && !share_code) share_code = genShareCode();
 
-    await supabase.from("flashcard_sets")
-      .update({ is_public: newVal, share_code })
-      .eq("id", id);
-    setSet((s) => ({ ...s, is_public: newVal, share_code }));
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_BASE}/flashcards/${id}/share`, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ is_public: newVal, share_code }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setSet((s) => ({ ...s, is_public: data.is_public, share_code: data.share_code }));
+    }
   }
 
   async function copyShare() {

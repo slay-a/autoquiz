@@ -1,9 +1,11 @@
 from fastapi import FastAPI, Request
+from fastapi import HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.api.routes import upload, retrieve, quiz, notes, classes, flashcards
 from app.api.dependencies import _EnvelopeException
-from app.core.error_codes import INTERNAL_ERROR
+from app.core.error_codes import INTERNAL_ERROR, VALIDATION_FAILED
 import uuid as _uuid
 import logging as _logging
 
@@ -30,6 +32,53 @@ app.add_middleware(
 async def envelope_exception_handler(request: Request, exc: _EnvelopeException):
     """Return the pre-built JSONResponse carried inside _EnvelopeException."""
     return exc.response
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """
+    Wrap every HTTPException in the standard error envelope (DESIGN.md §3.1.1).
+
+    This catches any stray 'raise HTTPException(...)' that bypasses the explicit
+    JSON-response pattern used in routes, as well as FastAPI's own routing errors
+    (405 Method Not Allowed, etc.) so {"detail": "..."} is never returned.
+    """
+    _logging.getLogger("autoquiz").warning(
+        "HTTPException %s in request %s %s: %s",
+        exc.status_code, request.method, request.url.path, exc.detail,
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": {
+                "code": INTERNAL_ERROR if exc.status_code >= 500 else VALIDATION_FAILED,
+                "message": str(exc.detail) if exc.detail else "An error occurred.",
+                "request_id": str(_uuid.uuid4()),
+            }
+        },
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_error_handler(request: Request, exc: RequestValidationError):
+    """
+    Handle Pydantic/FastAPI 422 request validation errors.
+
+    Per DESIGN.md §3.1.1: "FastAPI's default 422 validation response is the one
+    permitted exception — its detail array shape is preserved unchanged so Pydantic
+    tooling keeps working." We preserve the detail array inside the standard envelope.
+    """
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": {
+                "code": VALIDATION_FAILED,
+                "message": "One or more fields are invalid. Please check and try again.",
+                "details": exc.errors(),
+                "request_id": str(_uuid.uuid4()),
+            }
+        },
+    )
 
 
 @app.exception_handler(Exception)

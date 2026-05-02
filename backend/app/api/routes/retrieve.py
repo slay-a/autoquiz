@@ -1,8 +1,11 @@
 """E2 — Topic search and retrieval endpoints."""
 
-from fastapi import APIRouter, HTTPException
+import uuid as _uuid
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from app.models.schemas import RetrieveRequest, RetrieveResponse, ChunkResult
 from app.services.retrieval import hybrid_search
+from app.core.error_codes import EMPTY_TOPIC
 
 router = APIRouter(prefix="/retrieve", tags=["retrieve"])
 
@@ -10,7 +13,16 @@ router = APIRouter(prefix="/retrieve", tags=["retrieve"])
 @router.post("/", response_model=RetrieveResponse)
 async def retrieve_chunks(request: RetrieveRequest):
     if not request.topic.strip():
-        raise HTTPException(400, "Topic cannot be empty")
+        return JSONResponse(
+            status_code=400,
+            content={
+                "error": {
+                    "code": EMPTY_TOPIC,
+                    "message": "Please enter a topic before generating.",
+                    "request_id": str(_uuid.uuid4()),
+                }
+            },
+        )
 
     results = hybrid_search(
         topic=request.topic,

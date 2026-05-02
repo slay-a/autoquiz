@@ -409,7 +409,8 @@ class TestCreateClassRoute:
         )
 
         assert response.status_code == 400
-        assert "Class name is required" in response.json()["detail"]
+        # Standard error envelope (DESIGN.md §3.1.1): {"error": {"code": ..., "message": ...}}
+        assert "Class name is required" in response.json()["error"]["message"]
 
     def test_whitespace_only_name_returns_400(self, client, auth_token):
         """AC-2.1.1: Submit button disabled when name is whitespace-only (backend validation)."""
@@ -420,7 +421,8 @@ class TestCreateClassRoute:
         )
 
         assert response.status_code == 400
-        assert "Class name is required" in response.json()["detail"]
+        # Standard error envelope (DESIGN.md §3.1.1): {"error": {"code": ..., "message": ...}}
+        assert "Class name is required" in response.json()["error"]["message"]
 
     @patch("app.services.class_service.get_supabase")
     def test_instructor_id_from_jwt_not_request_body(self, mock_get_supabase, client, auth_token, instructor_user):
@@ -649,7 +651,8 @@ class TestGetClassDetailRoute:
         )
 
         assert response.status_code == 404
-        assert "Class not found" in response.json()["detail"]
+        # Standard error envelope (DESIGN.md §3.1.1): {"error": {"code": ..., "message": ...}}
+        assert "Class not found" in response.json()["error"]["message"]
 
     @patch("app.api.routes.classes.get_class_detail")
     def test_returns_403_for_non_owner(self, mock_detail_service, client, auth_token):

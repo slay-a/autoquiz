@@ -1,7 +1,8 @@
 """Class management routes — create, list, and view classes."""
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
+import uuid as _uuid
 from pydantic import BaseModel
 from typing import Optional
 
@@ -14,7 +15,7 @@ from app.core.error_codes import (
     CLASS_NOTE_NOT_FOUND,
 )
 from app.core.logging import log_event
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, _EnvelopeException
 from app.services.class_service import (
     create_class, list_classes, get_class_detail,
     join_class_by_code, get_student_classes as svc_get_student_classes,
@@ -28,6 +29,19 @@ from app.services.class_service import (
 
 
 router = APIRouter(prefix="/classes", tags=["classes"])
+
+def _err(status: int, code: str, message: str) -> JSONResponse:
+    """Build a standard error envelope per DESIGN.md §3.1.1."""
+    return JSONResponse(
+        status_code=status,
+        content={
+            "error": {
+                "code": code,
+                "message": message,
+                "request_id": str(_uuid.uuid4()),
+            }
+        },
+    )
 
 
 # ── Request/Response Schemas ──────────────────────────────────────
@@ -117,7 +131,7 @@ def create_class_route(
     Layer boundary: delegates all DB work to class_service (Layer 2).
     """
     if not req.name or not req.name.strip():
-        raise HTTPException(status_code=400, detail="Class name is required")
+        return _err(400, VALIDATION_FAILED, "Class name is required.")
 
     try:
         class_data = create_class(
@@ -220,14 +234,11 @@ def get_class_detail_route(
         )
 
     if cls_detail is None:
-        raise HTTPException(status_code=404, detail="Class not found")
+        return _err(404, CLASS_NOT_FOUND, "Class not found.")
 
     # Ownership check: only the owning instructor may access this class (DESIGN.md §13.1.1)
     if cls_detail["instructor_id"] != current_user["id"]:
-        raise HTTPException(
-            status_code=403,
-            detail="You don't have permission to access this class.",
-        )
+        return _err(403, ROLE_FORBIDDEN, "You don't have permission to access this class.")
 
     return ClassDetail(
         id=cls_detail["id"],
@@ -261,7 +272,6 @@ def join_class(
     Delegates to class_service.join_class_by_code() — no inline DB calls (DESIGN.md §0).
     Emits class.member.joined log event on success (DESIGN.md §14.3).
     """
-    import uuid as _uuid
     if not req.class_code or not req.class_code.strip():
         return JSONResponse(
             status_code=400,
@@ -339,7 +349,6 @@ def get_student_classes_route(current_user: dict = Depends(get_current_user)):
     Get list of classes the current student has joined.
     Delegates to class_service.get_student_classes() — no inline DB calls (DESIGN.md §0).
     """
-    import uuid as _uuid
 
     try:
         classes = svc_get_student_classes(
@@ -405,7 +414,6 @@ def get_student_content_route(current_user: dict = Depends(get_current_user)):
     Applies is_shared=true and is_published=true filters at the service/query level.
     Delegates to class_service.get_student_content() — no inline DB calls (DESIGN.md §0).
     """
-    import uuid as _uuid
 
     try:
         content = svc_get_student_content(
@@ -433,9 +441,9 @@ def _require_instructor(class_id: str, user_id: str):
     """Verify the current user owns the class. Returns class detail or raises."""
     cls = get_class_detail(class_id=class_id)
     if cls is None:
-        raise HTTPException(status_code=404, detail="Class not found")
+        raise _EnvelopeException(_err(404, CLASS_NOT_FOUND, "Class not found."))
     if cls["instructor_id"] != user_id:
-        raise HTTPException(status_code=403, detail="Not authorised")
+        raise _EnvelopeException(_err(403, ROLE_FORBIDDEN, "Not authorised."))
     return cls
 
 
@@ -479,7 +487,6 @@ def share_quiz(
     req: ShareQuizRequest,
     current_user: dict = Depends(get_current_user),
 ):
-    import uuid as _uuid
     _require_instructor(class_id, current_user["id"])
     try:
         quiz = toggle_quiz_share(class_id, quiz_id, req.is_shared)
@@ -532,7 +539,6 @@ def edit_class_note(
     req: UpdateNoteRequest,
     current_user: dict = Depends(get_current_user),
 ):
-    import uuid as _uuid
     _require_instructor(class_id, current_user["id"])
     try:
         return update_class_note(class_id, note_id, req.title, req.content)
@@ -546,7 +552,6 @@ def publish_class_note(
     req: PublishNoteRequest,
     current_user: dict = Depends(get_current_user),
 ):
-    import uuid as _uuid
     _require_instructor(class_id, current_user["id"])
     try:
         return toggle_note_publish(class_id, note_id, req.is_published)
@@ -577,7 +582,6 @@ def remove_class_file(
     class_id: str, file_id: str,
     current_user: dict = Depends(get_current_user),
 ):
-    import uuid as _uuid
     _require_instructor(class_id, current_user["id"])
     try:
         delete_class_file(class_id, file_id)
@@ -590,7 +594,6 @@ def remove_class_file(
 
 @router.get("/class-note/{note_id}")
 def get_class_note(note_id: str, current_user: dict = Depends(get_current_user)):
-    import uuid as _uuid
     note = get_class_note_by_id(note_id)
     if not note:
         return JSONResponse(status_code=404, content={"error": {"code": CLASS_NOTE_NOT_FOUND, "message": "Note not found.", "request_id": str(_uuid.uuid4())}})

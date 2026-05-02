@@ -682,6 +682,10 @@ Auth: currently unenforced at route level (service key bypasses RLS). Add a
 }
 ```
 
+**Notes:**
+- Quiz submission and scoring are **client-side**. There is no `/quiz/:id/submit` or `/quiz/:id/grade` route. The frontend renders all questions, locks them atomically on a single Submit Quiz click, and computes `correct/total` over MCQ + true/false answers only.
+- `short_answer` questions are **study-only**: the model answer and explanation are revealed on submit, but the question is not auto-graded. The student self-assesses via an "I got this right / wrong" toggle on each card; that toggle feeds the wrong-pool used by the flashcard conversion CTA but does not change the displayed score.
+
 ### Notes
 
 | Method | Path               | Request body       | Success response | Error codes |

@@ -22,10 +22,11 @@ This feature is already implemented. This spec exists to onboard the feature int
 
 **Acceptance Criteria:**
 - [x] AC-7.1.1: The quiz study page (`/quiz/:id`) loads the quiz from `saved_quizzes` by ID. If the ID does not exist, the page shows an appropriate message.
-- [x] AC-7.1.2: MCQ questions display all answer options labelled A, B, C, D. The student can select one option.
-- [x] AC-7.1.3: After submitting an answer, the correct answer and explanation are revealed. The student cannot change their answer after submission.
-- [x] AC-7.1.4: True/false questions present exactly two options: `True` and `False`.
-- [x] AC-7.1.5: Short answer questions display an input field for the student's response and reveal the model answer on submission.
+- [x] AC-7.1.2: MCQ questions display all answer options labelled A, B, C, D. The student can select one option per question while the quiz is in progress.
+- [x] AC-7.1.3: True/false questions present exactly two options: `True` and `False`.
+- [x] AC-7.1.4: Short-answer questions display an input field. They are not auto-graded — see Story 7.4 for self-assessment semantics.
+- [x] AC-7.1.5: A single `Submit Quiz` button is presented after the last question. It is enabled once at least one question has been answered, and submitting it locks all answer inputs simultaneously, reveals the model answer + explanation for every question, and surfaces the score banner described in Story 7.4.
+- [x] AC-7.1.6: Before submission, the page displays a running counter of `answered/total` questions.
 
 ---
 
@@ -53,6 +54,35 @@ This feature is already implemented. This spec exists to onboard the feature int
 - [x] AC-7.3.1: The quiz study page provides a Regenerate button. Clicking it sends a new `POST /quiz/generate` request using the same `topic`, `num_questions`, `difficulty`, `question_types`, `outside_sources`, and `file_id` as the original quiz.
 - [x] AC-7.3.2: On success, the regenerated quiz is saved as a new row in `saved_quizzes` with `title` suffixed `(v2)`.
 - [x] AC-7.3.3: The page navigates to the new quiz's URL (`/quiz/:new_id`) after saving.
+
+---
+
+### Story 7.4 — See score and self-assess after submission
+
+**As a** student,
+**I want** to see how I scored on auto-graded questions and to self-assess my short-answer responses,
+**so that** I know what I got right, what I missed, and which questions to convert into flashcards for further review.
+
+**Acceptance Criteria:**
+- [ ] AC-7.4.1: On submission, a violet score banner displays `correct/total_graded` over auto-graded questions only (MCQ + true/false). The banner copy varies by score band: 100% → "Perfect!", ≥80% → "Great job!", ≥50% → "Keep studying!", below 50% → "Review and try again".
+- [ ] AC-7.4.2: A trophy badge in the page header shows the same `correct/total_graded` ratio and toggles the score banner visibility on click.
+- [ ] AC-7.4.3: When at least one short-answer question is present, the banner footer notes that those questions are for self-review and not counted in the score.
+- [ ] AC-7.4.4: After submission, each short-answer card exposes an "I got this right" / "I got this wrong" toggle. The toggle is the only way a short-answer question is added to the wrong-pool for flashcard conversion (see Story 7.5).
+- [ ] AC-7.4.5: All scoring is computed client-side. No `/quiz/:id/submit` or `/quiz/:id/grade` endpoint exists.
+
+---
+
+### Story 7.5 — Convert wrong answers to flashcards
+
+**As a** student,
+**I want** to turn the questions I got wrong into a flashcard set,
+**so that** I can drill on my weak spots without re-taking the whole quiz.
+
+**Acceptance Criteria:**
+- [ ] AC-7.5.1: After submission, when at least one MCQ/TF question is wrong OR at least one short-answer question is self-marked wrong, a "Convert N wrong answers to flashcards" CTA appears both in the score banner and as a header badge.
+- [ ] AC-7.5.2: Clicking the CTA creates a row in `flashcard_sets` linked to the source quiz (`quiz_id`) with one card per wrong question (`front` = question, `back` = model answer, `explanation` = explanation).
+- [ ] AC-7.5.3: After creation, the page navigates to `/flashcards/:new_id`.
+- [ ] AC-7.5.4: The CTA is hidden when there are no wrong questions to convert.
 
 ---
 
@@ -90,8 +120,9 @@ This feature is already implemented. This spec exists to onboard the feature int
   - `frontend/src/pages/student/Generate.jsx` — Save button after generation; confirmation indicator state
   - `frontend/src/pages/student/Quiz.jsx` (or `/quiz/:id`) — question rendering per type, answer submission, reveal logic, Regenerate button, navigation to new quiz URL
   - `frontend/src/pages/student/Dashboard.jsx` — saved quizzes appear under quizzes tab
-- **Answer lock:** after a student submits an answer, the selection input is disabled — enforced purely in frontend state (no server round-trip required)
-- **State scope:** local component state (current answers, submitted flags, loading); no new context
+- **Answer lock:** the entire quiz locks atomically when the single `Submit Quiz` button is pressed; per-question selection cannot change after that point. Enforced purely in frontend state (no server round-trip required).
+- **Scoring:** computed client-side from MCQ + true/false answers only. Short-answer self-assessment toggles modify only the wrong-pool used by the flashcard CTA, never the displayed score.
+- **State scope:** local component state (current answers, submitted flags, self-assess toggles, loading); no new context
 - **No secrets in client-side code:** confirmed
 
 ### 4d. RAG pipeline impact
@@ -114,9 +145,9 @@ This feature is already implemented. This spec exists to onboard the feature int
 
 - Editing or deleting a saved quiz
 - Incrementing version suffix beyond `(v2)` (e.g., v3, v4) in this iteration
-- Scoring or grading — the page reveals the correct answer but does not compute a score
+- Auto-grading of short-answer questions (deferred — see Story 7.4 self-assessment)
+- Server-side scoring or persisted attempt history (scoring is client-side, not stored)
 - Sharing a quiz with a class (FEAT-008 Quiz Sharing)
-- Flashcard generation from quiz questions
 - Progress tracking across multiple attempts at the same quiz
 
 ---
@@ -128,6 +159,7 @@ This feature is already implemented. This spec exists to onboard the feature int
 | 1 | Is the quiz load route (`GET /quiz/{id}`) gated so that a student can only load quizzes they own or that are `is_shared = true`? | pipeline | Req-validator must check for this access control — absence is a MAJOR gap |
 | 2 | Is the `(v2)` suffix applied before or after the save call, and is it client-side or server-side? | pipeline | Design-validator should verify AC-7.3.2 against the regenerate flow implementation |
 | 3 | Does the student dashboard quizzes tab fetch all `saved_quizzes` for the user, or only a subset? | pipeline | Req-validator should verify AC-7.2.4 — newly saved quiz must appear without reload |
+| 4 | Why is short-answer self-assessed rather than auto-graded? | product | LLM grading was rejected on cost; exact-match was rejected as too brittle; self-assessment fits the review-tool positioning and matches active-learning practice. |
 
 ---
 

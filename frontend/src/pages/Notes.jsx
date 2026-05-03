@@ -212,29 +212,29 @@ function NotesView({ notes, saved, onSave }) {
   return (
     <div className="space-y-5 animate-slide-up">
       {/* Scope badge */}
-      <div className="card p-5 bg-gradient-to-br from-violet-50 to-indigo-50 border-violet-100">
+      <div className="card p-5 bg-gradient-to-br from-violet-50 to-indigo-50 border-violet-100 dark:from-slate-800 dark:to-slate-800/80 dark:border-slate-700">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center">
             <Target className="w-5 h-5 text-violet-600" />
           </div>
           <div>
-            <p className="font-semibold text-violet-900">Topic Scope</p>
-            <p className="text-xs text-violet-500">{notes.topic}</p>
+            <p className="font-semibold text-violet-900 dark:text-violet-200">Topic Scope</p>
+            <p className="text-xs text-violet-500 dark:text-violet-400">{notes.topic}</p>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-white dark:bg-slate-800/70 rounded-xl p-3 text-center">
-            <p className="text-2xl font-bold text-violet-700">{scope.main_concepts_count ?? "?"}</p>
+            <p className="text-2xl font-bold text-violet-700 dark:text-violet-300">{scope.main_concepts_count ?? "?"}</p>
             <p className="text-xs text-violet-500 mt-0.5">Key Concepts</p>
           </div>
           <div className="bg-white dark:bg-slate-800/70 rounded-xl p-3 text-center">
-            <p className="text-2xl font-bold text-indigo-700">
+            <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
               {scope.estimated_questions ? `${scope.estimated_questions.min}–${scope.estimated_questions.max}` : "?"}
             </p>
             <p className="text-xs text-indigo-500 mt-0.5">Possible Questions</p>
           </div>
           <div className="bg-white dark:bg-slate-800/70 rounded-xl p-3 text-center">
-            <p className="text-2xl font-bold text-violet-700">{scope.subtopics?.length ?? "?"}</p>
+            <p className="text-2xl font-bold text-violet-700 dark:text-violet-300">{scope.subtopics?.length ?? "?"}</p>
             <p className="text-xs text-violet-500 mt-0.5">Subtopics</p>
           </div>
         </div>

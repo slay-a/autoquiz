@@ -155,15 +155,15 @@ export default function FlashcardStudy() {
           </div>
 
           {/* Back */}
-          <div className="absolute inset-0 card p-8 flex flex-col items-center justify-center text-center bg-violet-50 border-violet-200"
+          <div className="absolute inset-0 card p-8 flex flex-col items-center justify-center text-center bg-violet-50 border-violet-200 dark:bg-slate-800 dark:border-violet-700"
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>
-            <p className="text-xs font-semibold text-violet-500 uppercase tracking-wide mb-4">Answer</p>
-            <p className="text-xl font-bold text-violet-900 leading-relaxed">{card.back}</p>
+            <p className="text-xs font-semibold text-violet-500 dark:text-violet-400 uppercase tracking-wide mb-4">Answer</p>
+            <p className="text-xl font-bold text-violet-900 dark:text-violet-100 leading-relaxed">{card.back}</p>
             {card.explanation && (
-              <p className="text-sm text-violet-600 mt-3 leading-relaxed">{card.explanation}</p>
+              <p className="text-sm text-violet-600 dark:text-violet-300 mt-3 leading-relaxed">{card.explanation}</p>
             )}
             {card.source_page?.length > 0 && (
-              <p className="text-xs text-violet-400 mt-3">p. {card.source_page.join(", ")}</p>
+              <p className="text-xs text-violet-400 dark:text-violet-500 mt-3">p. {card.source_page.join(", ")}</p>
             )}
           </div>
         </div>

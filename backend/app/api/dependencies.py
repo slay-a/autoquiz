@@ -8,6 +8,7 @@ from fastapi import Header, Request
 from fastapi.responses import JSONResponse
 
 from app.core.error_codes import AUTH_REQUIRED
+from app.core.supabase import get_supabase
 
 
 def _auth_error(message: str) -> JSONResponse:
@@ -41,14 +42,16 @@ def get_current_user(
     """
     Extract and validate the current user from the JWT in the Authorization header.
 
+    Verification strategy (DESIGN.md §13.3.1):
+        Call supabase.auth.get_user(token) — this delegates token verification to
+        Supabase GoTrue server-side. Any token with an invalid or forged signature
+        is rejected by GoTrue and surfaces here as an exception, which we convert
+        to a 401 AUTH_REQUIRED response.
+
     Returns a dict with user info: {"id": "uuid", "email": "...", "role": "..."}
 
-    Raises a 401 JSONResponse (standard envelope) if the token is missing or invalid.
-
-    NOTE: This is a placeholder implementation. In production, verify the JWT
-    signature using Supabase's JWT secret:
-        jwt.decode(token, supabase_jwt_secret, algorithms=["HS256"])
-    GAP-2 is acknowledged in DESIGN.md §12.
+    Raises a 401 JSONResponse (standard envelope) if the token is missing, malformed,
+    or fails GoTrue signature verification.
     """
     if not authorization:
         raise _EnvelopeException(
@@ -63,14 +66,21 @@ def get_current_user(
     token = authorization[len("Bearer "):]
 
     try:
-        # Decode without signature verification (GAP-2 acknowledged).
-        payload = jwt.decode(token, options={"verify_signature": False})
+        supabase = get_supabase()
+        response = supabase.auth.get_user(token)
 
-        user_id = payload.get("sub")
-        email = payload.get("email")
+        if response is None or response.user is None:
+            raise _EnvelopeException(
+                _auth_error("Please sign in to continue.")
+            )
+
+        user = response.user
+        user_id = user.id
+        email = user.email
         role = (
-            payload.get("user_metadata", {}).get("role")
-            or payload.get("role")
+            (user.user_metadata or {}).get("role")
+            if user.user_metadata
+            else None
         )
 
         if not user_id:
@@ -83,6 +93,11 @@ def get_current_user(
     except _EnvelopeException:
         raise
     except jwt.DecodeError:
+        raise _EnvelopeException(
+            _auth_error("Please sign in to continue.")
+        )
+    except Exception:
+        # GoTrue rejected the token (invalid signature, expired, etc.)
         raise _EnvelopeException(
             _auth_error("Please sign in to continue.")
         )

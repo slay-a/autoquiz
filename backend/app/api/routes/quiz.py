@@ -36,6 +36,14 @@ async def generate_quiz_endpoint(
     request: QuizRequest,
     current_user: dict = Depends(get_current_user),
 ):
+    # Role guard: quiz generation is student-only (spec §3, DESIGN.md §4)
+    if current_user.get("role") == "instructor":
+        return _err(
+            403,
+            ROLE_FORBIDDEN,
+            "Quiz generation is not available for instructor accounts.",
+        )
+
     if not request.topic.strip():
         return _err(400, EMPTY_TOPIC, "Topic cannot be empty.")
 

@@ -164,7 +164,7 @@ def test_generate_quiz_empty_topic_returns_400(client, student_user):
             json={"topic": ""},
         )
         assert response.status_code == 400
-        assert "empty" in response.json()["detail"].lower()
+        assert "empty" in response.json()["error"]["message"].lower()
 
 
 def test_generate_quiz_whitespace_topic_returns_400(client, student_user):
@@ -175,7 +175,7 @@ def test_generate_quiz_whitespace_topic_returns_400(client, student_user):
             json={"topic": "   \n\t  "},
         )
         assert response.status_code == 400
-        assert "empty" in response.json()["detail"].lower()
+        assert "empty" in response.json()["error"]["message"].lower()
 
 
 def test_generate_quiz_with_file_id_calls_hybrid_search(
@@ -185,7 +185,7 @@ def test_generate_quiz_with_file_id_calls_hybrid_search(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase, \
+         patch("app.services.quiz_service.get_supabase") as mock_supabase, \
          patch("app.api.routes.quiz.hybrid_search", return_value=mock_chunks) as mock_search, \
          patch("app.services.quiz_gen._openai") as mock_openai:
 
@@ -224,7 +224,7 @@ def test_generate_quiz_no_chunks_without_outside_sources_returns_404(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase, \
+         patch("app.services.quiz_service.get_supabase") as mock_supabase, \
          patch("app.api.routes.quiz.hybrid_search", return_value=[]):
 
         # Mock Supabase file ownership check
@@ -244,7 +244,7 @@ def test_generate_quiz_no_chunks_without_outside_sources_returns_404(
         )
 
         assert response.status_code == 404
-        assert "could not find content" in response.json()["detail"].lower()
+        assert "could not find content" in response.json()["error"]["message"].lower()
 
 
 def test_generate_quiz_response_structure(
@@ -254,7 +254,7 @@ def test_generate_quiz_response_structure(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase, \
+         patch("app.services.quiz_service.get_supabase") as mock_supabase, \
          patch("app.api.routes.quiz.hybrid_search", return_value=mock_chunks), \
          patch("app.services.quiz_gen._openai") as mock_openai:
 
@@ -313,7 +313,7 @@ def test_generate_quiz_num_questions_parameter(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase, \
+         patch("app.services.quiz_service.get_supabase") as mock_supabase, \
          patch("app.api.routes.quiz.hybrid_search", return_value=mock_chunks), \
          patch("app.services.quiz_gen._openai") as mock_openai:
 
@@ -350,7 +350,7 @@ def test_generate_quiz_default_num_questions(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase, \
+         patch("app.services.quiz_service.get_supabase") as mock_supabase, \
          patch("app.api.routes.quiz.hybrid_search", return_value=mock_chunks), \
          patch("app.services.quiz_gen._openai") as mock_openai:
 
@@ -402,7 +402,7 @@ def test_generate_quiz_default_difficulty(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase, \
+         patch("app.services.quiz_service.get_supabase") as mock_supabase, \
          patch("app.api.routes.quiz.hybrid_search", return_value=mock_chunks), \
          patch("app.services.quiz_gen._openai") as mock_openai:
 
@@ -438,7 +438,7 @@ def test_generate_quiz_difficulty_in_prompt(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase, \
+         patch("app.services.quiz_service.get_supabase") as mock_supabase, \
          patch("app.api.routes.quiz.hybrid_search", return_value=mock_chunks), \
          patch("app.services.quiz_gen._openai") as mock_openai:
 
@@ -483,7 +483,7 @@ def test_generate_quiz_difficulty_in_response(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase, \
+         patch("app.services.quiz_service.get_supabase") as mock_supabase, \
          patch("app.api.routes.quiz.hybrid_search", return_value=mock_chunks), \
          patch("app.services.quiz_gen._openai") as mock_openai:
 
@@ -550,7 +550,7 @@ def test_generate_quiz_outside_sources_with_file_id_uses_both(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase, \
+         patch("app.services.quiz_service.get_supabase") as mock_supabase, \
          patch("app.api.routes.quiz.hybrid_search", return_value=mock_chunks), \
          patch("app.services.quiz_gen._openai") as mock_openai:
 
@@ -632,7 +632,7 @@ def test_generate_quiz_instructor_role_returns_403(client, instructor_user):
             json={"topic": "machine learning"},
         )
         assert response.status_code == 403
-        assert "instructor" in response.json()["detail"].lower()
+        assert "instructor" in response.json()["error"]["message"].lower()
 
 
 def test_generate_quiz_other_user_file_returns_403(
@@ -642,7 +642,7 @@ def test_generate_quiz_other_user_file_returns_403(
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase:
+         patch("app.services.quiz_service.get_supabase") as mock_supabase:
 
         # Mock Supabase file ownership check - file belongs to other_student_user
         mock_table = Mock()
@@ -660,7 +660,7 @@ def test_generate_quiz_other_user_file_returns_403(
         )
 
         assert response.status_code == 403
-        assert "access" in response.json()["detail"].lower()
+        assert "access" in response.json()["error"]["message"].lower()
 
 
 def test_generate_quiz_file_not_found_returns_404(client, student_user):
@@ -668,7 +668,7 @@ def test_generate_quiz_file_not_found_returns_404(client, student_user):
     file_id = str(uuid.uuid4())
 
     with override_user(student_user), \
-         patch("app.api.routes.quiz.get_supabase") as mock_supabase:
+         patch("app.services.quiz_service.get_supabase") as mock_supabase:
 
         # Mock Supabase file ownership check - no file found
         mock_table = Mock()
@@ -686,7 +686,7 @@ def test_generate_quiz_file_not_found_returns_404(client, student_user):
         )
 
         assert response.status_code == 404
-        assert "not found" in response.json()["detail"].lower()
+        assert "not found" in response.json()["error"]["message"].lower()
 
 
 # ── Unit Tests — quiz_gen.py ──────────────────────────────────────────

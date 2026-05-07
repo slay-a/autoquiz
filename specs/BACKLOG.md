@@ -32,7 +32,7 @@
 | FEAT-008 | Quiz Sharing (Instructor) | P0 | ready | `specs/feat-008-quiz-sharing.md` | FEAT-007 |
 | FEAT-009 | Notes Generation (Student) | P1 | ready | `specs/feat-009-notes-generation-student.md` | FEAT-006 |
 | FEAT-010 | Instructor Notes System | P0 | ready | `specs/feat-010-instructor-notes.md` | FEAT-008 |
-| FEAT-011 | Flashcard Study | P1 | ready | `specs/feat-011-flashcard-study.md` | FEAT-007 |
+| FEAT-011 | Flashcard Study | P1 | done | `specs/feat-011-flashcard-study.md` | FEAT-007 |
 | FEAT-012 | Theme Preferences (Dark Mode) | P2 | ready | `specs/feat-012-theme-preferences.md` | FEAT-001 |
 | FEAT-013 | User Profile (Avatar & Display Name) | P2 | ready | `specs/feat-013-user-profile.md` | FEAT-001 |
 | FEAT-014 | §14.3 Event Catalog Completeness (Audit #38) | P1 | done | `specs/feat-014-event-catalog-completeness.md` | — |

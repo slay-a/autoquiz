@@ -82,10 +82,17 @@ This feature is already implemented. This spec exists to onboard it into the pip
 
 ### 4b. Backend architecture
 
-- **No FastAPI routes for flashcard study or editing:** All operations go directly through the Supabase JS client in the frontend components.
-- **Dashboard fetch:** `frontend/src/pages/student/Dashboard.jsx` fetches `flashcard_sets` where `created_by = user.id`, ordered by `created_at` descending. This is a client-side Supabase query, not a FastAPI route.
+- **FastAPI routes exist at `/flashcards/*`** (migrated from direct Supabase access to satisfy DESIGN.md §0; issue #21):
+  - `GET /flashcards/my` — Dashboard fetch (sets owned by current user)
+  - `POST /flashcards/` — Create a new flashcard set
+  - `DELETE /flashcards/by-type` — Delete sets by type (used by Generate.jsx deduplication)
+  - `GET /flashcards/:id` — Load a set for study
+  - `PUT /flashcards/:id` — Save edits (title + cards array)
+  - `DELETE /flashcards/:id` — Delete a set
+  - `PATCH /flashcards/:id/share` — Toggle share/public state
+- **Ownership enforcement** is applied on all write routes (`created_by = current_user`).
 - **No LLM involvement** in this feature — flashcard sets are pre-populated (generation is a separate concern). The study and edit flows are pure data retrieval and update.
-- **Async / sync?** All Supabase client calls are async; no background tasks.
+- **Async / sync?** All FastAPI route handlers are async; no background tasks.
 
 ### 4c. Frontend architecture
 

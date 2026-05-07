@@ -51,7 +51,7 @@ export default function QuizStudy() {
           topic: quiz.topic,
           num_questions: quiz.questions.length,
           difficulty: quiz.difficulty,
-          question_types: ["mcq", "true_false"],
+          question_types: [...new Set(quiz.questions.map(q => q.type))],
           outside_sources: quiz.outside_sources,
           file_id: quiz.file_id || null,
         }),

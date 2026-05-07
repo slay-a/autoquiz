@@ -1,21 +1,35 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, Trophy, Layers, Send } from "lucide-react";
+import { CheckCircle2, XCircle, Trophy, Layers, Send, ThumbsUp, ThumbsDown } from "lucide-react";
 
-const TYPE_LABELS = { mcq: "Multiple Choice", true_false: "True / False" };
+const TYPE_LABELS = { mcq: "Multiple Choice", true_false: "True / False", short_answer: "Short Answer" };
 const DIFF_BADGE  = { easy: "bg-emerald-50 text-emerald-700", medium: "bg-amber-50 text-amber-700", hard: "bg-red-50 text-red-700" };
 
 export default function QuizView({ quiz, onMakeFlashcards }) {
-  const [answers, setAnswers]     = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const [showScore, setShowScore] = useState(false);
+  // answers: { [question_id]: string }
+  const [answers, setAnswers]         = useState({});
+  // saAssess: { [question_id]: "right" | "wrong" | null }
+  const [saAssess, setSaAssess]       = useState({});
+  const [submitted, setSubmitted]     = useState(false);
+  const [showScore, setShowScore]     = useState(false);
 
-  const questions = (quiz.questions ?? []).filter(
-    (q) => q.type === "mcq" || q.type === "true_false"
-  );
+  const questions    = quiz.questions ?? [];
+  const gradedQ      = questions.filter((q) => q.type === "mcq" || q.type === "true_false");
+  const saQuestions  = questions.filter((q) => q.type === "short_answer");
+  const hasSA        = saQuestions.length > 0;
 
-  function select(qid, val) {
+  function selectChoice(qid, val) {
     if (submitted) return;
     setAnswers((p) => ({ ...p, [qid]: val }));
+  }
+
+  function handleSAInput(qid, val) {
+    if (submitted) return;
+    setAnswers((p) => ({ ...p, [qid]: val }));
+  }
+
+  function setAssess(qid, verdict) {
+    if (!submitted) return;
+    setSaAssess((p) => ({ ...p, [qid]: verdict }));
   }
 
   function submit() {
@@ -23,13 +37,34 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
     setShowScore(true);
   }
 
-  const answeredCount = questions.filter((q) => answers[q.question_id] != null).length;
-  const correct = questions.filter(
+  const answeredCount = questions.filter((q) => {
+    const a = answers[q.question_id];
+    if (q.type === "short_answer") return a != null && String(a).trim() !== "";
+    return a != null;
+  }).length;
+
+  // Scoring is MCQ + TF only
+  const correct = gradedQ.filter(
     (q) => submitted && (answers[q.question_id] ?? "").toLowerCase().trim() === q.answer.toLowerCase().trim()
   ).length;
-  const wrongQuestions = questions.filter(
+
+  // Wrong pool: MCQ/TF auto-wrong + SA self-marked wrong
+  const mcqTfWrong = gradedQ.filter(
     (q) => submitted && (answers[q.question_id] ?? "").toLowerCase().trim() !== q.answer.toLowerCase().trim()
   );
+  const saWrong = saQuestions.filter(
+    (q) => submitted && saAssess[q.question_id] === "wrong"
+  );
+  const wrongQuestions = [...mcqTfWrong, ...saWrong];
+
+  const totalGraded = gradedQ.length;
+
+  // Score band copy
+  const scoreMsg =
+    correct === totalGraded   ? "Perfect!"
+    : correct >= totalGraded * 0.8 ? "Great job!"
+    : correct >= totalGraded * 0.5 ? "Keep studying!"
+    : "Review and try again";
 
   return (
     <div className="space-y-4 animate-slide-up">
@@ -49,7 +84,7 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
           {submitted && (
             <button onClick={() => setShowScore((p) => !p)}
               className="badge bg-violet-50 text-violet-700 cursor-pointer hover:bg-violet-100 transition-colors">
-              <Trophy className="w-3 h-3" /> {correct}/{questions.length}
+              <Trophy className="w-3 h-3" /> {correct}/{totalGraded}
             </button>
           )}
           {submitted && wrongQuestions.length > 0 && onMakeFlashcards && (
@@ -69,15 +104,15 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
           <div className="flex items-center gap-3">
             <Trophy className="w-8 h-8 opacity-90" />
             <div>
-              <p className="font-bold text-lg">You scored {correct}/{questions.length}</p>
-              <p className="text-sm text-violet-100">
-                {correct === questions.length ? "Perfect! 🎉"
-                  : correct >= questions.length * 0.8 ? "Great job! 🌟"
-                  : correct >= questions.length * 0.5 ? "Keep studying! 📚"
-                  : "Review and try again 💪"}
-              </p>
+              <p className="font-bold text-lg">You scored {correct}/{totalGraded}</p>
+              <p className="text-sm text-violet-100">{scoreMsg}</p>
             </div>
           </div>
+          {hasSA && (
+            <p className="mt-2 text-xs text-violet-200">
+              Short-answer questions are for self-review and not counted in the score.
+            </p>
+          )}
           {wrongQuestions.length > 0 && onMakeFlashcards && (
             <button
               onClick={() => onMakeFlashcards(wrongQuestions, "wrong")}
@@ -96,8 +131,11 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
           q={q}
           index={i}
           chosen={answers[q.question_id]}
+          saAssessment={saAssess[q.question_id]}
           submitted={submitted}
-          onSelect={(val) => select(q.question_id, val)}
+          onSelect={(val) => selectChoice(q.question_id, val)}
+          onSAInput={(val) => handleSAInput(q.question_id, val)}
+          onAssess={(verdict) => setAssess(q.question_id, verdict)}
         />
       ))}
 
@@ -122,12 +160,13 @@ export default function QuizView({ quiz, onMakeFlashcards }) {
   );
 }
 
-function QuestionCard({ q, index, chosen, submitted, onSelect }) {
-  const isCorrect = submitted && chosen?.toLowerCase().trim() === q.answer.toLowerCase().trim();
+function QuestionCard({ q, index, chosen, saAssessment, submitted, onSelect, onSAInput, onAssess }) {
+  const isGraded  = q.type === "mcq" || q.type === "true_false";
+  const isCorrect = isGraded && submitted && (chosen ?? "").toLowerCase().trim() === q.answer.toLowerCase().trim();
 
   return (
     <div className={`card overflow-hidden transition-all duration-200
-      ${submitted ? (isCorrect ? "ring-1 ring-emerald-200" : "ring-1 ring-red-100") : ""}`}>
+      ${submitted && isGraded ? (isCorrect ? "ring-1 ring-emerald-200" : "ring-1 ring-red-100") : ""}`}>
       <div className="px-6 pt-5 pb-4">
         <div className="flex items-start gap-3">
           <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-violet-100 text-violet-600 text-xs font-bold flex items-center justify-center">
@@ -137,7 +176,7 @@ function QuestionCard({ q, index, chosen, submitted, onSelect }) {
             <div className="flex items-start justify-between gap-3">
               <p className="text-sm font-medium text-gray-800 dark:text-slate-100 leading-relaxed">{q.question}</p>
               <span className="flex-shrink-0 text-xs font-medium text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full whitespace-nowrap">
-                {TYPE_LABELS[q.type]}
+                {TYPE_LABELS[q.type] ?? q.type}
               </span>
             </div>
 
@@ -192,22 +231,66 @@ function QuestionCard({ q, index, chosen, submitted, onSelect }) {
                 })}
               </div>
             )}
+
+            {/* Short Answer */}
+            {q.type === "short_answer" && (
+              <div className="space-y-2">
+                {!submitted ? (
+                  <input
+                    type="text"
+                    placeholder="Type your answer…"
+                    value={chosen ?? ""}
+                    onChange={(e) => onSAInput(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-gray-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-300"
+                  />
+                ) : (
+                  /* Self-assess toggle */
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      onClick={() => onAssess("right")}
+                      aria-label="I got this right"
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-xs font-semibold transition-all
+                        ${saAssessment === "right"
+                          ? "bg-emerald-50 border-emerald-300 text-emerald-700"
+                          : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:border-emerald-200"}`}
+                    >
+                      <ThumbsUp className="w-3.5 h-3.5" /> I got this right
+                    </button>
+                    <button
+                      onClick={() => onAssess("wrong")}
+                      aria-label="I got this wrong"
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-xs font-semibold transition-all
+                        ${saAssessment === "wrong"
+                          ? "bg-red-50 border-red-200 text-red-600"
+                          : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:border-red-200"}`}
+                    >
+                      <ThumbsDown className="w-3.5 h-3.5" /> I got this wrong
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
+      {/* Post-submission reveal */}
       {submitted && (
         <div className={`mx-6 mb-5 rounded-xl px-4 py-3.5 space-y-1.5
-          ${isCorrect ? "bg-emerald-50 border border-emerald-200" : "bg-amber-50 border border-amber-200"}`}>
+          ${isGraded
+            ? isCorrect ? "bg-emerald-50 border border-emerald-200" : "bg-amber-50 border border-amber-200"
+            : "bg-blue-50 border border-blue-200"}`}>
           <div className="flex items-center gap-2">
-            {isCorrect
-              ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-              : <XCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />}
-            <p className={`text-sm font-semibold ${isCorrect ? "text-emerald-800" : "text-amber-800"}`}>
+            {isGraded
+              ? isCorrect
+                ? <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                : <XCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+              : <CheckCircle2 className="w-4 h-4 text-blue-400 flex-shrink-0" />}
+            <p className={`text-sm font-semibold ${isGraded ? (isCorrect ? "text-emerald-800" : "text-amber-800") : "text-blue-800"}`}>
               Answer: {q.answer}
             </p>
           </div>
-          <p className={`text-xs leading-relaxed pl-6 ${isCorrect ? "text-emerald-700" : "text-amber-700"}`}>
+          <p className={`text-xs leading-relaxed pl-6 ${isGraded ? (isCorrect ? "text-emerald-700" : "text-amber-700") : "text-blue-700"}`}>
             {q.explanation}
           </p>
           {q.page_numbers?.length > 0 && (

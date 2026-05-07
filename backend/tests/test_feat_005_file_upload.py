@@ -1058,7 +1058,7 @@ class TestStory54GetUserFiles:
 
         # Verify query filters by uploaded_by and status='success'
         mock_select.select.assert_called_once()
-        assert "processing_jobs!inner" in mock_select.select.call_args[0][0]
+        assert "file_id, filename, created_at" in mock_select.select.call_args[0][0]
 
         app.dependency_overrides.clear()
 
@@ -1092,8 +1092,9 @@ class TestStory54GetUserFiles:
         data = response.json()
         assert len(data) == 0
 
-        # Verify filter was applied
-        mock_eq2.eq.assert_called_with("processing_jobs.status", "success")
+        # Verify filter was applied — direct query on processing_jobs (no join)
+        mock_eq1.eq.assert_called_with("uploaded_by", student_user["id"])
+        mock_eq2.eq.assert_called_with("status", "success")
 
         app.dependency_overrides.clear()
 

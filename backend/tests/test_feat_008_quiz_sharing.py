@@ -489,4 +489,6 @@ class TestStudentContentRoute:
         response = client.get("/classes/student/content")
 
         assert response.status_code == 401
-        assert "Missing authorization header" in response.json()["detail"]
+        body = response.json()
+        assert body["error"]["code"] == "AUTH_REQUIRED"
+        assert "message" in body["error"]

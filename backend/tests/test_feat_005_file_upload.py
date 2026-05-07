@@ -423,7 +423,13 @@ class TestCreateRetryJob:
 class TestUploadEndpoint:
     """Integration tests for POST /upload/."""
 
-    @patch("celery_worker.process_document")
+    @pytest.fixture(autouse=True)
+    def clear_dependency_overrides(self):
+        """Guarantee app.dependency_overrides is cleared after every test in this class."""
+        yield
+        app.dependency_overrides.clear()
+
+    @patch("app.api.routes.upload.process_document")
     @patch("app.services.upload.get_supabase")
     def test_rejects_unsupported_file_extension(self, mock_get_supabase, mock_process_document, client, instructor_user):
         """AC-5.1.1: Backend rejects non-.pdf/.docx/.pptx files with 400."""
@@ -439,7 +445,7 @@ class TestUploadEndpoint:
         # Cleanup
         app.dependency_overrides.clear()
 
-    @patch("celery_worker.process_document")
+    @patch("app.api.routes.upload.process_document")
     @patch("app.services.upload.get_supabase")
     def test_accepts_pdf_file(self, mock_get_supabase, mock_process_document, client, instructor_user):
         """AC-5.1.1: Backend accepts .pdf files."""
@@ -470,7 +476,7 @@ class TestUploadEndpoint:
 
         app.dependency_overrides.clear()
 
-    @patch("celery_worker.process_document")
+    @patch("app.api.routes.upload.process_document")
     @patch("app.services.upload.get_supabase")
     def test_accepts_docx_file(self, mock_get_supabase, mock_process_document, client, instructor_user):
         """AC-5.1.1: Backend accepts .docx files."""
@@ -497,7 +503,7 @@ class TestUploadEndpoint:
 
         app.dependency_overrides.clear()
 
-    @patch("celery_worker.process_document")
+    @patch("app.api.routes.upload.process_document")
     @patch("app.services.upload.get_supabase")
     def test_accepts_pptx_file(self, mock_get_supabase, mock_process_document, client, instructor_user):
         """AC-5.1.1: Backend accepts .pptx files."""
@@ -524,7 +530,7 @@ class TestUploadEndpoint:
 
         app.dependency_overrides.clear()
 
-    @patch("celery_worker.process_document")
+    @patch("app.api.routes.upload.process_document")
     @patch("app.services.upload.get_supabase")
     def test_rejects_file_exceeding_50mb(self, mock_get_supabase, mock_process_document, client, instructor_user):
         """AC-5.1.2: Backend returns HTTP 413 for files > 50MB."""
@@ -538,11 +544,11 @@ class TestUploadEndpoint:
         response = client.post("/upload/", files=files)
 
         assert response.status_code == 413
-        assert "50MB limit" in response.json()["detail"]
+        assert "50MB limit" in response.json()["error"]["message"]
 
         app.dependency_overrides.clear()
 
-    @patch("celery_worker.process_document")
+    @patch("app.api.routes.upload.process_document")
     @patch("app.services.upload.get_supabase")
     def test_successful_upload_dispatches_celery_task(self, mock_get_supabase, mock_process_document, client, instructor_user):
         """Verifies Celery task is dispatched after successful upload."""
@@ -809,7 +815,7 @@ class TestGetJobStatusEndpoint:
 class TestRetryJobEndpoint:
     """Integration tests for POST /upload/retry/{job_id}."""
 
-    @patch("celery_worker.process_document")
+    @patch("app.api.routes.upload.process_document")
     @patch("app.services.upload.get_supabase")
     def test_creates_retry_job_for_failed_job(self, mock_get_supabase, mock_process_document, client, instructor_user):
         """Creates a new retry job for a failed job."""
@@ -887,7 +893,7 @@ class TestRetryJobEndpoint:
         response = client.post("/upload/retry/job-123")
 
         assert response.status_code == 400
-        assert "failed jobs" in response.json()["detail"].lower()
+        assert "failed jobs" in response.json()["error"]["message"].lower()
 
         app.dependency_overrides.clear()
 
@@ -899,7 +905,7 @@ class TestStory53ClassScopedFileUpload:
     """Tests for Story 5.3 — Instructor class-scoped file uploads."""
 
     @patch("app.services.upload.get_supabase")
-    @patch("celery_worker.process_document")
+    @patch("app.api.routes.upload.process_document")
     def test_upload_with_class_id_inserts_class_id(self, mock_process_document, mock_get_supabase, client, instructor_user):
         """AC-5.3.4: File upload accepts class_id and inserts it into uploaded_files."""
         app.dependency_overrides[get_current_user] = lambda: instructor_user
@@ -956,7 +962,7 @@ class TestStory53ClassScopedFileUpload:
         app.dependency_overrides.clear()
 
     @patch("app.services.upload.get_supabase")
-    @patch("celery_worker.process_document")
+    @patch("app.api.routes.upload.process_document")
     def test_upload_without_class_id_works(self, mock_process_document, mock_get_supabase, client, student_user):
         """Verify that class_id is optional — uploads without it succeed."""
         app.dependency_overrides[get_current_user] = lambda: student_user

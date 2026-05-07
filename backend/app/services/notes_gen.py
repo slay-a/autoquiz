@@ -8,8 +8,10 @@ Per DESIGN.md §13.8 rule 2 and §7 rule 2:
 """
 
 import json
+import time
 from openai import OpenAI
 from app.core.config import settings
+from app.core.logging import log_event
 
 _openai = OpenAI(api_key=settings.openai_api_key)
 
@@ -70,18 +72,48 @@ Generate a comprehensive study guide with this exact JSON structure:
   "study_tips": ["tip 1", "tip 2", ...]
 }}"""
 
-    response = _openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": prompt},
-        ],
-        response_format={"type": "json_object"},
-        temperature=0.3,
+    log_event(
+        "notes.generate.started",
+        level="INFO",
+        outcome="success",
+        meta={"outside_sources": outside_sources},
     )
+
+    _start = time.monotonic()
+    try:
+        response = _openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.3,
+        )
+    except Exception as exc:
+        duration = int((time.monotonic() - _start) * 1000)
+        log_event(
+            "notes.generate.failed",
+            level="ERROR",
+            outcome="failure",
+            duration_ms=duration,
+            meta={"error_code": "LLM_CALL_FAILED", "exception_type": type(exc).__name__},
+        )
+        raise
+
+    duration = int((time.monotonic() - _start) * 1000)
+    prompt_tokens = getattr(getattr(response, "usage", None), "prompt_tokens", None) or 0
 
     notes = json.loads(response.choices[0].message.content)
     notes["topic"] = safe_topic
     notes["source_pages"] = sorted({p for c in chunks for p in (c.get("page_numbers") or [])})
+
+    log_event(
+        "notes.generate.completed",
+        level="INFO",
+        outcome="success",
+        duration_ms=duration,
+        meta={"has_file": bool(chunks), "prompt_tokens": prompt_tokens},
+    )
 
     return notes

@@ -6,11 +6,13 @@ and do simple keyword-based relevance scoring — no embeddings needed.
 """
 
 import re
+import time
 from pathlib import Path
 from openai import OpenAI
 from app.core.config import settings
 from app.core.supabase import get_supabase
 from app.utils.parsers import LLAMAINDEX_PARSERS
+from app.core.logging import log_event
 
 _openai = OpenAI(api_key=settings.openai_api_key)
 
@@ -28,6 +30,7 @@ def embed_query(text: str) -> list[float]:
 
 def hybrid_search(topic: str, file_id: str | None = None, top_k: int = 10) -> list[dict]:
     supabase = get_supabase()
+    _start = time.monotonic()
 
     # ── Vector search (only works if file has been embedded) ─────────────────
     embedding = embed_query(topic)
@@ -42,12 +45,35 @@ def hybrid_search(topic: str, file_id: str | None = None, top_k: int = 10) -> li
         results.append({**row, "score": row.get("similarity", 0.0)})
 
     if results:
-        return sorted(results, key=lambda x: x["score"], reverse=True)[:top_k]
+        final = sorted(results, key=lambda x: x["score"], reverse=True)[:top_k]
+        log_event(
+            "retrieval.search.completed",
+            level="INFO",
+            outcome="success",
+            duration_ms=int((time.monotonic() - _start) * 1000),
+            meta={"top_k": top_k, "chunks_returned": len(final), "fallback_keyword": False},
+        )
+        return final
 
     # ── Fallback: file not yet embedded — extract text directly ───────────────
     if file_id:
-        return _sync_extract_and_search(file_id, topic, top_k)
+        fallback_results = _sync_extract_and_search(file_id, topic, top_k)
+        log_event(
+            "retrieval.search.completed",
+            level="INFO",
+            outcome="success",
+            duration_ms=int((time.monotonic() - _start) * 1000),
+            meta={"top_k": top_k, "chunks_returned": len(fallback_results), "fallback_keyword": True},
+        )
+        return fallback_results
 
+    log_event(
+        "retrieval.search.completed",
+        level="INFO",
+        outcome="success",
+        duration_ms=int((time.monotonic() - _start) * 1000),
+        meta={"top_k": top_k, "chunks_returned": 0, "fallback_keyword": False},
+    )
     return []
 
 

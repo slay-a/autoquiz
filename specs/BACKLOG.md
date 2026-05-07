@@ -35,6 +35,7 @@
 | FEAT-011 | Flashcard Study | P1 | ready | `specs/feat-011-flashcard-study.md` | FEAT-007 |
 | FEAT-012 | Theme Preferences (Dark Mode) | P2 | ready | `specs/feat-012-theme-preferences.md` | FEAT-001 |
 | FEAT-013 | User Profile (Avatar & Display Name) | P2 | ready | `specs/feat-013-user-profile.md` | FEAT-001 |
+| FEAT-014 | §14.3 Event Catalog Completeness (Audit #38) | P1 | done | `specs/feat-014-event-catalog-completeness.md` | — |
 
 > Add rows here as features are identified. Move status to `ready` only after the spec
 > file is complete and the handoff checklist in that file is checked off.
@@ -157,6 +158,13 @@
 **ACs summary:** `/profile` reachable to authenticated students and instructors only; preview shows current avatar, full_name, email, role; display-name input pre-filled, required, 1–80 chars, Save disabled while empty/saving; avatar picker shows 8 DiceBear presets, click highlights and updates preview without saving; submit calls `supabase.from("profiles").update({ full_name, avatar_url }).eq("id", user.id)` writing only those two columns; success shows confirmation then reloads page; failure renders inline error; navbar right side renders `avatar_url` `<img>` (or `User` icon fallback when null) wrapped in `<Link to="/profile">`; updated avatar reflected in navbar after save.
 **Dependencies:** FEAT-001
 **Implementation status:** already in codebase — single MAJOR check needed: confirm `profiles` RLS scopes UPDATE to `auth.uid() = id`. Adds `avatar_url text` nullable column to `profiles`. No FastAPI routes added; no LLM/RAG impact.
+
+### FEAT-014 — §14.3 Event Catalog Completeness (Audit #38)
+
+**Stories:** 14.1 Upload route emits file-acceptance events, 14.2 Retrieval service emits search-completion event, 14.3 Notes-gen service emits lifecycle events, 14.4 Notes route emits publish-toggle event, 14.5 Flashcards route emits set-lifecycle events, 14.6 Classes route emits member-removal event, 14.7 Resolve un-cataloged `quiz.load.completed`, 14.8 Frontend emits auth-lifecycle and profile events.
+**ACs summary:** `upload.py` calls `log_event("upload.file.accepted/rejected", ...)` with correct meta; `retrieval.py` calls `log_event("retrieval.search.completed", ...)` with `duration_ms`; `notes_gen.py` calls started/completed/failed trio with `duration_ms` on completed/failed; `notes.py` calls `log_event("notes.publish.toggled", ...)` after DB write; `flashcards.py` calls created/shared with correct meta; `classes.py` calls `log_event("class.member.removed", ...)` after deletion; `quiz.load.completed` either added to DESIGN.md §14.3 or removed; frontend `logEvent` shim writing to `console.info` wired in AuthContext and Profile page with no PII in any field.
+**Dependencies:** none (all target files already exist)
+**Implementation status:** emission gaps confirmed open per issue #38 filed 2026-05-01.
 
 ---
 

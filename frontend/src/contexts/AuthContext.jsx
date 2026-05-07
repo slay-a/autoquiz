@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { logEvent } from "../utils/logEvent.js";
 
 const AuthContext = createContext(null);
 const PROFILE_KEY = "aq_profile";
@@ -105,6 +106,7 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === "SIGNED_OUT") {
+          logEvent("auth.session.ended", {});
           setUser(null);
           setProfile(null);
           clearProfileCache();
@@ -118,7 +120,13 @@ export function AuthProvider({ children }) {
           // skip — otherwise we'd hand downstream consumers a new `user`
           // object reference on every focus, re-triggering their effects
           // (e.g. StudentDashboard refetch) and potentially hanging the UI.
-          setUser((prev) => (prev?.id === session.user.id ? prev : session.user));
+          setUser((prev) => {
+            if (prev?.id !== session.user.id) {
+              // Genuinely new sign-in — emit auth lifecycle event (§14.3, no PII)
+              logEvent("auth.session.started", {});
+            }
+            return prev?.id === session.user.id ? prev : session.user;
+          });
 
           // Only flip loading + refetch profile if this is a genuinely new user.
           setProfile((prevProfile) => {

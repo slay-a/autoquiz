@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { User, Save, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
+import { logEvent } from "../utils/logEvent.js";
 
 // A handful of preset avatars. DiceBear is a free avatar service — each seed
 // produces a unique cartoon face, no signup or API key needed.
@@ -45,6 +46,9 @@ export default function Profile() {
       setError(updateError.message);
       return;
     }
+
+    // Emit profile.updated event per DESIGN.md §14.3 (no PII — no email/name in meta)
+    logEvent("profile.updated", { fields_changed: ["full_name", "avatar_url"] });
 
     // Refresh cached profile so the navbar picks up the new name/avatar
     // on the next render. Easiest way: reload — it's a one-off action.

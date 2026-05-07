@@ -140,6 +140,10 @@ def get_quiz_endpoint(
         event="quiz.load.completed",
         level="INFO",
         outcome="success",
-        meta={"quiz_id": quiz_id, "user_id": current_user["id"]},
+        actor_id=current_user["id"],
+        actor_role=current_user.get("role"),
+        resource_type="quiz",
+        resource_id=quiz_id,
+        meta={"quiz_id": quiz_id, "question_count": len(quiz.get("questions", []) if isinstance(quiz, dict) else [])},
     )
     return quiz

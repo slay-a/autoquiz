@@ -554,9 +554,20 @@ def publish_class_note(
 ):
     _require_instructor(class_id, current_user["id"])
     try:
-        return toggle_note_publish(class_id, note_id, req.is_published)
+        result = toggle_note_publish(class_id, note_id, req.is_published)
     except ValueError:
         return JSONResponse(status_code=404, content={"error": {"code": "NOTE_NOT_FOUND", "message": "Note not found.", "request_id": str(_uuid.uuid4())}})
+    log_event(
+        event="notes.publish.toggled",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user["id"],
+        actor_role=current_user.get("role"),
+        resource_type="note",
+        resource_id=note_id,
+        meta={"note_id": note_id, "is_published": req.is_published},
+    )
+    return result
 
 
 @router.delete("/{class_id}/notes/{note_id}", status_code=204)
@@ -612,6 +623,16 @@ def remove_member(
 ):
     _require_instructor(class_id, current_user["id"])
     remove_class_member(class_id, student_id)
+    log_event(
+        event="class.member.removed",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user["id"],
+        actor_role=current_user.get("role"),
+        resource_type="class",
+        resource_id=class_id,
+        meta={"class_id": class_id, "removed_by_instructor": True},
+    )
 
 
 @router.delete("/{class_id}", status_code=204)

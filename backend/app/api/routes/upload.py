@@ -25,6 +25,7 @@ from app.core.error_codes import (
     INTERNAL_ERROR,
 )
 from celery_worker import process_document
+from app.core.logging import log_event
 
 router = APIRouter(prefix="/upload", tags=["upload"])
 
@@ -48,6 +49,15 @@ async def upload_file(
 ):
     ext = "." + file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
     if ext not in ALLOWED_EXTENSIONS:
+        log_event(
+            "upload.file.rejected",
+            level="WARNING",
+            outcome="failure",
+            actor_id=current_user.get("id"),
+            actor_role=current_user.get("role"),
+            resource_type="file",
+            meta={"reason": "ext", "size_bytes": 0},
+        )
         return _err(400, UNSUPPORTED_FILE_TYPE, f"Unsupported file type: {ext}. Allowed: {ALLOWED_EXTENSIONS}")
 
     contents = bytearray()
@@ -57,6 +67,15 @@ async def upload_file(
             break
         contents.extend(chunk)
         if len(contents) > MAX_BYTES:
+            log_event(
+                "upload.file.rejected",
+                level="WARNING",
+                outcome="failure",
+                actor_id=current_user.get("id"),
+                actor_role=current_user.get("role"),
+                resource_type="file",
+                meta={"reason": "size", "size_bytes": len(contents)},
+            )
             return _err(413, UPLOAD_TOO_LARGE, f"File exceeds {settings.max_upload_size_mb}MB limit")
 
     result = store_file_and_create_job(
@@ -65,6 +84,17 @@ async def upload_file(
         content_type=file.content_type or "application/octet-stream",
         uploaded_by=current_user["id"],
         class_id=class_id,
+    )
+
+    log_event(
+        "upload.file.accepted",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user.get("id"),
+        actor_role=current_user.get("role"),
+        resource_type="file",
+        resource_id=result["file_id"],
+        meta={"mime_type": file.content_type or "application/octet-stream", "size_bytes": len(contents)},
     )
 
     process_document.delay(

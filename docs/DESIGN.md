@@ -1135,6 +1135,7 @@ DESIGN.md edit.
 | `quiz.generate.completed`     | INFO    | success  | Service · quiz_gen      | `questions_returned`, `prompt_tokens`, `completion_tokens` |
 | `quiz.generate.failed`        | ERROR   | failure  | Service · quiz_gen      | `error_code`, `exception_type`                      |
 | `quiz.save.completed`         | INFO    | success  | Route · quiz            | `quiz_id`, `is_shared`                              |
+| `quiz.load.completed`         | INFO    | success  | Route · quiz            | `quiz_id`, `question_count`                         |
 | `quiz.share.toggled`          | INFO    | success  | Route · quiz            | `quiz_id`, `is_shared`                              |
 | `notes.generate.started`      | INFO    | success  | Service · notes_gen     | `outside_sources`                                   |
 | `notes.generate.completed`    | INFO    | success  | Service · notes_gen     | `has_file`, `prompt_tokens`                         |

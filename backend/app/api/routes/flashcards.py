@@ -16,6 +16,7 @@ from pydantic import BaseModel
 
 from app.core.supabase import get_supabase
 from app.api.dependencies import get_current_user
+from app.core.logging import log_event
 
 router = APIRouter(prefix="/flashcards", tags=["flashcards"])
 
@@ -93,7 +94,22 @@ def create_flashcard_set(
     result = supabase.table("flashcard_sets").insert(payload).select().single().execute()
     if not result.data:
         return _err(500, "INTERNAL_ERROR", "Failed to create flashcard set.")
-    return result.data
+    row = result.data
+    log_event(
+        "flashcard.set.created",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user.get("id"),
+        actor_role=current_user.get("role"),
+        resource_type="flashcard_set",
+        resource_id=row.get("id"),
+        meta={
+            "set_id": row.get("id"),
+            "card_count": len(body.cards) if body.cards else 0,
+            "set_type": body.set_type or "custom",
+        },
+    )
+    return row
 
 
 @router.delete("/by-type")
@@ -248,5 +264,16 @@ def share_flashcard_set(
         .select()
         .single()
         .execute()
+    )
+    scope = "public" if body.is_public else "class"
+    log_event(
+        "flashcard.set.shared",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user.get("id"),
+        actor_role=current_user.get("role"),
+        resource_type="flashcard_set",
+        resource_id=set_id,
+        meta={"set_id": set_id, "scope": scope},
     )
     return result.data or {}

@@ -20,6 +20,10 @@ dist/
 .env.local
 .env.*.local
 
+# Allow example env files to be tracked
+!.env.example
+!.env.local.example
+
 # Supabase
 supabase/.branches
 supabase/.temp
@@ -33,6 +37,9 @@ tmp/
 .vscode/
 .idea/
 *.swp
+
+# Claude Code
+.claude/worktrees/
 
 # OS
 .DS_Store

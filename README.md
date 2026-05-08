@@ -1,5 +1,7 @@
 # AutoQuiz
 
+[![CI](https://github.com/slay-a/autoquiz/actions/workflows/ci.yml/badge.svg)](https://github.com/slay-a/autoquiz/actions/workflows/ci.yml)
+
 AI-powered study platform — upload course material, generate quizzes and study notes, share with students.
 
 ## Features

@@ -195,6 +195,19 @@ npm run dev
 
 App runs at `http://localhost:5173`.
 
+### One-command dev (all four services)
+
+After the per-service prerequisites above are satisfied (venv, node_modules,
+`.env` files, Docker), you can launch redis + backend + celery + vite from
+a single terminal:
+
+```bash
+./scripts/dev.sh
+```
+
+Output is interleaved with `[api]`, `[celery]`, `[web]`, `[redis]` prefixes.
+`Ctrl-C` once stops everything.
+
 ## Running Tests
 
 ```bash

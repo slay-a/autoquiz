@@ -20,6 +20,20 @@ export default defineConfig({
       "/health": "http://localhost:8000",
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Pin third-party deps that rarely change into their own chunks so
+          // app-code edits don't bust their CDN cache and re-trip the
+          // 500 kB chunk-size warning.
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "supabase":     ["@supabase/supabase-js"],
+          "icons":        ["lucide-react"],
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: "happy-dom",

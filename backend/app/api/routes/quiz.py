@@ -15,6 +15,7 @@ from app.services.quiz_service import (
 )
 from app.core.exceptions import JobNotFoundError, AccessDeniedError
 from app.api.dependencies import get_current_user
+from app.api.rate_limit import enforce_llm_rate_limit
 from app.core.logging import log_event
 from app.core.error_codes import (
     EMPTY_TOPIC, FILE_NOT_FOUND, ROLE_FORBIDDEN, NO_CONTENT_FOUND,
@@ -34,7 +35,7 @@ def _err(status: int, code: str, message: str) -> JSONResponse:
 @router.post("/generate", response_model=QuizResponse)
 async def generate_quiz_endpoint(
     request: QuizRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(enforce_llm_rate_limit),
 ):
     # Role guard: quiz generation is student-only (spec §3, DESIGN.md §4)
     if current_user.get("role") == "instructor":

@@ -11,6 +11,18 @@ import jwt
 from unittest.mock import MagicMock, patch
 import pytest
 
+from app.api.rate_limit import llm_rate_limiter
+
+
+@pytest.fixture(autouse=True)
+def _reset_llm_rate_limiter():
+    """The LLM rate limiter is process-local; reset it between tests so
+    cumulative /quiz/generate or /notes/generate calls across the suite
+    don't trip the limit and turn unrelated tests into 429s."""
+    llm_rate_limiter.reset()
+    yield
+    llm_rate_limiter.reset()
+
 
 # ---------------------------------------------------------------------------
 # Auth mock fixture

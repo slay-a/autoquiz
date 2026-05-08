@@ -20,6 +20,7 @@ CLASS_NOT_FOUND       = "CLASS_NOT_FOUND"
 INVALID_JOB_STATE     = "INVALID_JOB_STATE"
 NO_CONTENT_FOUND      = "NO_CONTENT_FOUND"
 CONTEXT_TOO_LARGE     = "CONTEXT_TOO_LARGE"
+RATE_LIMITED          = "RATE_LIMITED"
 
 # ── Fail-loud (developer-visible) ─────────────────────────────────────────
 PARSE_FAILED          = "PARSE_FAILED"

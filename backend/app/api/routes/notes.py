@@ -16,6 +16,7 @@ from app.services.retrieval import hybrid_search
 from app.services.notes_gen import generate_notes
 from app.services.notes_service import save_student_note, get_student_note, list_student_notes
 from app.api.dependencies import get_current_user
+from app.api.rate_limit import enforce_llm_rate_limit
 from app.core.logging import log_event
 from app.core.exceptions import NoteNotFoundError, NoteOwnershipError
 from app.core.error_codes import NOTE_NOT_FOUND, ROLE_FORBIDDEN, NOTES_SAVE_FAILED, INTERNAL_ERROR
@@ -49,7 +50,7 @@ class NotesRequest(BaseModel):
 async def generate_notes_endpoint(
     req: NotesRequest,
     request: Request,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(enforce_llm_rate_limit),
 ):
     """
     Generate structured study notes for a topic.

@@ -272,3 +272,20 @@ Per-feature acceptance criteria and verification status live in
 [`specs/IMPLEMENTED_USER_STORIES.md`](specs/IMPLEMENTED_USER_STORIES.md).
 The architectural source of truth is [`docs/DESIGN.md`](docs/DESIGN.md);
 the test-case index is [`docs/TESTCASES.md`](docs/TESTCASES.md).
+
+## Course Submission Checklist
+
+| Deliverable | Where it goes | Source in this repo |
+|---|---|---|
+| Final presentation (PPTX) — purpose, what the app does, repo URL, individual contributions, embedded demo video | Canvas | — (built from the *Team & Contributions* section above) |
+| Architectural document | Google Sheets (linked in the assignment) | [`docs/DESIGN.md`](docs/DESIGN.md) |
+| GitHub repository URL | PPTX cover slide + Google Sheets row | This repository |
+| User stories + acceptance criteria | Reviewed in GitHub | [`specs/IMPLEMENTED_USER_STORIES.md`](specs/IMPLEMENTED_USER_STORIES.md) |
+| Test case sheet | Reviewed in GitHub | [`docs/TESTCASES.md`](docs/TESTCASES.md) |
+| Backend tests | Reviewed in GitHub (CI gated) | [`backend/tests/`](backend/tests/) — `pytest -q` |
+| Frontend tests | Reviewed in GitHub (CI gated) | [`frontend/src/__tests__/`](frontend/src/__tests__) — `npm test` |
+| Multi-agent TDD pipeline config | Reviewed in GitHub | [`.claude/agents/`](.claude/agents) |
+
+> Each commit is authored under the contributor's own GitHub identity so
+> per-student contributions can be filtered with
+> `git log --author="<name>"` or `git shortlog -sne --all`.

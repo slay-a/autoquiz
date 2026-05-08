@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
+import { logEvent } from "../../utils/logEvent";
 import Upload from "../../components/Upload";
 import TopicSearch from "../../components/TopicSearch";
 import {
@@ -235,7 +236,7 @@ export default function ClassView() {
       if (filesRes.ok) setFiles(await filesRes.json());
       if (notesRes.ok) setNotes(await notesRes.json());
     } catch (error) {
-      console.error("Error fetching class data:", error);
+      logEvent("class.fetch_failed", { level: "ERROR", outcome: "failure", reason: error?.message });
     } finally {
       setLoading(false);
     }

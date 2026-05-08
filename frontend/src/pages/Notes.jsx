@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { logEvent } from "../utils/logEvent";
 import Upload from "../components/Upload";
 import {
   BookOpen, Lightbulb, Target, AlertTriangle,
@@ -34,7 +35,7 @@ export default function Notes() {
           setPreviousFiles(data);
         }
       } catch (e) {
-        console.error("Failed to fetch previous files:", e);
+        logEvent("notes.files.fetch_failed", { level: "ERROR", outcome: "failure", reason: e?.message });
       }
     }
     fetchPreviousFiles();
@@ -114,7 +115,7 @@ export default function Notes() {
       if (!res.ok) throw new Error("Failed to save notes");
       setSaved(true);
     } catch (e) {
-      console.error("Error saving notes:", e.message);
+      logEvent("notes.save_failed", { level: "ERROR", outcome: "failure", reason: e?.message });
     }
   }
 

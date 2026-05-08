@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { logEvent } from "../utils/logEvent";
 import QuizView from "../components/QuizView";
 import { Loader2, ChevronLeft, RefreshCw, Layers, Save } from "lucide-react";
 
@@ -77,7 +78,7 @@ export default function QuizStudy() {
 
       navigate(`/quiz/${saved.id}`);
     } catch (err) {
-      console.error(err);
+      logEvent("quiz.regenerate_failed", { level: "ERROR", outcome: "failure", reason: err?.message });
     } finally {
       setRegenerating(false);
     }

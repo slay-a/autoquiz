@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
+import { logEvent } from "../../utils/logEvent";
 import Upload from "../../components/Upload";
 import TopicSearch from "../../components/TopicSearch";
 import QuizView from "../../components/QuizView";
@@ -36,7 +37,7 @@ export default function Generate() {
           setPreviousFiles(data);
         }
       } catch (e) {
-        console.error("Failed to fetch previous files:", e);
+        logEvent("upload.files.fetch_failed", { level: "ERROR", outcome: "failure", reason: e?.message });
       }
     }
     fetchPreviousFiles();

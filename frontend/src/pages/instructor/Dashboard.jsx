@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
+import { logEvent } from "../../utils/logEvent";
 import { Plus, Users, BookOpen, Copy, Check, ChevronRight, GraduationCap, Loader2 } from "lucide-react";
 
 const API_BASE = "http://localhost:8000";
@@ -35,11 +36,11 @@ export default function InstructorDashboard() {
         const data = await res.json();
         setClasses(data ?? []);
       } else {
-        console.error("Failed to fetch classes:", await res.text());
+        logEvent("classes.fetch_failed", { level: "ERROR", outcome: "failure", status: res.status });
         setClasses([]);
       }
     } catch (error) {
-      console.error("Error fetching classes:", error);
+      logEvent("classes.fetch_failed", { level: "ERROR", outcome: "failure", reason: error?.message });
       setClasses([]);
     } finally {
       setLoading(false);

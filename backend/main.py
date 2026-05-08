@@ -113,4 +113,9 @@ app.include_router(flashcards.router)
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    """Liveness probe — used by docker-compose, k8s, and CI smoke tests."""
+    return {
+        "status": "ok",
+        "service": app.title,
+        "version": app.version,
+    }

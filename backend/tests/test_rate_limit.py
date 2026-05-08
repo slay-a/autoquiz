@@ -19,7 +19,11 @@ from app.api.rate_limit import RateLimiter, llm_rate_limiter
 from app.core.error_codes import RATE_LIMITED
 from main import app
 
-client = TestClient(app)
+# raise_server_exceptions=False: the integration tests below intentionally let
+# the first /quiz/generate call reach the LLM, where it may 5xx without an
+# OPENAI_API_KEY (e.g. in CI). We only assert the status is not 429; the global
+# exception handler turns the LLM error into a 500 envelope, which is fine.
+client = TestClient(app, raise_server_exceptions=False)
 
 
 def _token_for(user_id: str, role: str = "student") -> str:

@@ -624,15 +624,18 @@ def test_generate_quiz_unauthenticated_returns_401(client):
     assert response.status_code == 401
 
 
-def test_generate_quiz_instructor_role_returns_403(client, instructor_user):
-    """Instructor role returns HTTP 403."""
-    with override_user(instructor_user):
+def test_generate_quiz_instructor_role_allowed(client, instructor_user, mock_gpt4o_response):
+    """Instructor role is allowed to generate quizzes (role guard removed)."""
+    with override_user(instructor_user), \
+         patch("app.services.quiz_gen._openai") as mock_openai:
+        mock_completion = Mock()
+        mock_completion.choices = [Mock(message=Mock(content=json.dumps(mock_gpt4o_response)))]
+        mock_openai.chat.completions.create.return_value = mock_completion
         response = client.post(
             "/quiz/generate",
             json={"topic": "machine learning"},
         )
-        assert response.status_code == 403
-        assert "instructor" in response.json()["error"]["message"].lower()
+        assert response.status_code == 200
 
 
 def test_generate_quiz_other_user_file_returns_403(

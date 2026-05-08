@@ -203,11 +203,20 @@ def join_class_by_code(class_code: str, student_id: str) -> dict:
 
     from postgrest.exceptions import APIError as _APIError
     try:
-        supabase.table("class_members") \
-            .insert({"class_id": cls["id"], "student_id": student_id}) \
+        insert_result = (
+            supabase.table("class_members")
+            .insert({"class_id": cls["id"], "student_id": student_id})
             .execute()
+        )
+        # supabase-py may return constraint violations as result.error instead of raising
+        error = getattr(insert_result, "error", None)
+        if error:
+            code = error.get("code", "") if isinstance(error, dict) else str(error)
+            if "23505" in str(code):
+                raise ValueError("ALREADY_MEMBER")
+            raise Exception(f"DB insert error: {error}")
     except _APIError as exc:
-        if exc.args and "23505" in str(exc.args[0]):
+        if "23505" in str(exc.args[0] if exc.args else ""):
             raise ValueError("ALREADY_MEMBER")
         raise
 

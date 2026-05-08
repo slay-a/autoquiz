@@ -23,6 +23,7 @@ dist/
 # Allow example env files to be tracked
 !.env.example
 !.env.local.example
+!.env.test
 
 # Supabase
 supabase/.branches

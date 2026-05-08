@@ -424,3 +424,60 @@ describe('B5 (MAJOR AC-7.5.1) — wrong pool includes self-assessed SA wrongs', 
     });
   });
 });
+
+/* ── AC-7.1.3 — submit reveals correct answer + explanation; options lock ── */
+
+describe('AC-7.1.3 — after submission, correct answer + explanation are revealed and options lock', () => {
+  const MCQ_ONLY_QUIZ = {
+    topic: 'Biology',
+    difficulty: 'medium',
+    questions: [MCQ_Q],
+  };
+
+  it('reveals "Answer: <correct>" text after Submit Quiz', async () => {
+    render(<QuizView quiz={MCQ_ONLY_QUIZ} onMakeFlashcards={vi.fn()} />);
+
+    // Pre-submit: no answer reveal
+    expect(screen.queryByText(/^Answer:/)).not.toBeInTheDocument();
+
+    // Choose any option and submit
+    fireEvent.click(screen.getByText('Nucleus').closest('button'));
+    fireEvent.click(screen.getByRole('button', { name: /submit quiz/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Answer: B/)).toBeInTheDocument();
+    });
+  });
+
+  it('reveals the explanation text after Submit Quiz', async () => {
+    render(<QuizView quiz={MCQ_ONLY_QUIZ} onMakeFlashcards={vi.fn()} />);
+
+    // Pre-submit: explanation not visible
+    expect(screen.queryByText(MCQ_Q.explanation)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Mitochondria').closest('button'));
+    fireEvent.click(screen.getByRole('button', { name: /submit quiz/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(MCQ_Q.explanation)).toBeInTheDocument();
+    });
+  });
+
+  it('option buttons become non-interactive (disabled) after submission', async () => {
+    render(<QuizView quiz={MCQ_ONLY_QUIZ} onMakeFlashcards={vi.fn()} />);
+
+    fireEvent.click(screen.getByText('Nucleus').closest('button'));
+    fireEvent.click(screen.getByRole('button', { name: /submit quiz/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Answer: B/)).toBeInTheDocument();
+    });
+
+    // All four MCQ option buttons must be disabled post-submit
+    for (const optText of ['Nucleus', 'Mitochondria', 'Ribosome', 'Golgi apparatus']) {
+      const btn = screen.getByText(optText).closest('button');
+      expect(btn).toBeDisabled();
+    }
+  });
+
+});

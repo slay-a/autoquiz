@@ -499,4 +499,70 @@ describe('StudentDashboard - FEAT-003', () => {
       expect(screen.getByText('Published Note')).toBeInTheDocument();
     });
   });
+
+  // ── AC-7.2.4: Saved quiz appears on student dashboard quizzes tab ──
+  // The dashboard fetches /quiz/my on mount; default tab is "quizzes" so
+  // any seeded quiz must render with its title and a Study link to /quiz/:id.
+
+  it('AC-7.2.4: a saved quiz from /quiz/my renders on the My Quizzes tab with a Study link to /quiz/:id', async () => {
+    const savedQuiz = {
+      id: 'sq-7-2-4',
+      title: 'Mitochondria — medium',
+      topic: 'Mitochondria',
+      difficulty: 'medium',
+      questions: [{ question_id: 'q1', type: 'mcq' }, { question_id: 'q2', type: 'mcq' }],
+    };
+
+    global.fetch.mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/quiz/my')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => [savedQuiz],
+          text: async () => '',
+        });
+      }
+      if (typeof url === 'string' && url.includes('/classes/student/content')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ quizzes: [], notes: [] }),
+          text: async () => '',
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => [], text: async () => '' });
+    });
+
+    renderDashboard();
+
+    // Wait for the loading spinner to clear
+    await waitFor(() => {
+      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+    });
+
+    // The default tab is "quizzes" (My Quizzes); the saved quiz must render
+    await waitFor(() => {
+      expect(screen.getByText('Mitochondria — medium')).toBeInTheDocument();
+    });
+
+    // The Study link must point to /quiz/:id
+    const studyLink = screen.getByRole('link', { name: /study/i });
+    expect(studyLink).toHaveAttribute('href', '/quiz/sq-7-2-4');
+
+    // The "My Quizzes" tab badge should reflect the seeded count (1)
+    const myQuizzesTab = screen.getByRole('button', { name: /my quizzes/i });
+    expect(myQuizzesTab).toHaveTextContent('1');
+  });
+
+  it('AC-7.2.4: My Quizzes empty state renders when /quiz/my is empty', async () => {
+    // Fetch mock already returns [] by default for /quiz/my (see beforeEach)
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+    });
+
+    // QuizList renders the empty message defined in Dashboard.jsx
+    expect(
+      screen.getByText(/you haven't generated any quizzes yet/i)
+    ).toBeInTheDocument();
+  });
 });

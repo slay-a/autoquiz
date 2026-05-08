@@ -1,0 +1,621 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/s72x4nap",
+    "id": "s72x4nap",
+    "slide": 4,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Calibri",
+      "Georgia"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/o7qpg3ex",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        38.4,
+        864,
+        67.2
+      ],
+      "geometry": "rect",
+      "text": "What the App Does",
+      "textPreview": "What the App Does",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "What the App Does"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "What the App Does",
+          "runs": [
+            {
+              "index": 1,
+              "text": "What the App Does",
+              "fontSize": 50.67,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dsji5sne",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        100.8,
+        864,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Two roles, one platform",
+      "textPreview": "Two roles, one platform",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Two roles, one platform"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Two roles, one platform",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Two roles, one platform",
+              "fontSize": 21.33,
+              "typeface": "Calibri",
+              "color": "#64748B",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6dcbulwv",
+      "id": "4",
+      "name": "Shape 2",
+      "bbox": [
+        48,
+        163.2,
+        422.4,
+        336
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#1E2761",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vy90je9c",
+      "id": "5",
+      "name": "Shape 3",
+      "bbox": [
+        48,
+        163.2,
+        422.4,
+        52.8
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/oj2t83it",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        48,
+        163.2,
+        422.4,
+        52.8
+      ],
+      "geometry": "rect",
+      "text": "INSTRUCTORS",
+      "textPreview": "INSTRUCTORS",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "INSTRUCTORS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "INSTRUCTORS",
+          "runs": [
+            {
+              "index": 1,
+              "text": "INSTRUCTORS",
+              "fontSize": 21.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/d4vmtwra",
+      "id": "7",
+      "name": "Text 5",
+      "bbox": [
+        72,
+        230.4,
+        379.2,
+        259.2
+      ],
+      "geometry": "rect",
+      "text": "Create classes with invite codes\nUpload course material per class\nGenerate quizzes (GPT-4o + RAG)\nShare / unshare quizzes on demand\nGenerate structured study notes\nPublish notes to students\nManage members, delete classes",
+      "textPreview": "Create classes with invite codes | Upload course material per class | Generate quizzes (GPT-4o + RAG) | Share / unshare quizzes on demand...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 7,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• Create classes with invite codes"
+          },
+          {
+            "index": 2,
+            "text": "• Upload course material per class"
+          },
+          {
+            "index": 3,
+            "text": "• Generate quizzes (GPT-4o + RAG)"
+          },
+          {
+            "index": 4,
+            "text": "• Share / unshare quizzes on demand"
+          },
+          {
+            "index": 5,
+            "text": "• Generate structured study notes"
+          },
+          {
+            "index": 6,
+            "text": "• Publish notes to students"
+          },
+          {
+            "index": 7,
+            "text": "• Manage members, delete classes"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Create classes with invite codes",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Create classes with invite codes",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Upload course material per class",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Upload course material per class",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "Generate quizzes (GPT-4o + RAG)",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Generate quizzes (GPT-4o + RAG)",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "Share / unshare quizzes on demand",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Share / unshare quizzes on demand",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "text": "Generate structured study notes",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Generate structured study notes",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "text": "Publish notes to students",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Publish notes to students",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "text": "Manage members, delete classes",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Manage members, delete classes",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6hcrmhk3",
+      "id": "8",
+      "name": "Shape 6",
+      "bbox": [
+        489.6,
+        163.2,
+        422.4,
+        336
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#F96167",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/z25kb6xk",
+      "id": "9",
+      "name": "Shape 7",
+      "bbox": [
+        489.6,
+        163.2,
+        422.4,
+        52.8
+      ],
+      "geometry": "rect",
+      "fillColor": "#F96167",
+      "lineColor": "#F96167",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vy90je9c",
+      "id": "10",
+      "name": "Text 8",
+      "bbox": [
+        489.6,
+        163.2,
+        422.4,
+        52.8
+      ],
+      "geometry": "rect",
+      "text": "STUDENTS",
+      "textPreview": "STUDENTS",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "STUDENTS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "STUDENTS",
+          "runs": [
+            {
+              "index": 1,
+              "text": "STUDENTS",
+              "fontSize": 21.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6dcbulwv",
+      "id": "11",
+      "name": "Text 9",
+      "bbox": [
+        513.6,
+        230.4,
+        379.2,
+        259.2
+      ],
+      "geometry": "rect",
+      "text": "Join classes via invite code\nTake quizzes shared by instructors\nRead published class notes\nGenerate personal quizzes from any topic\nBuild flashcard sets from quiz results\nUpload personal files for study notes\nEdit and study flashcards",
+      "textPreview": "Join classes via invite code | Take quizzes shared by instructors | Read published class notes | Generate personal quizzes from any topic...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 7,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• Join classes via invite code"
+          },
+          {
+            "index": 2,
+            "text": "• Take quizzes shared by instructors"
+          },
+          {
+            "index": 3,
+            "text": "• Read published class notes"
+          },
+          {
+            "index": 4,
+            "text": "• Generate personal quizzes from any topic"
+          },
+          {
+            "index": 5,
+            "text": "• Build flashcard sets from quiz results"
+          },
+          {
+            "index": 6,
+            "text": "• Upload personal files for study notes"
+          },
+          {
+            "index": 7,
+            "text": "• Edit and study flashcards"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Join classes via invite code",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Join classes via invite code",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Take quizzes shared by instructors",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Take quizzes shared by instructors",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "Read published class notes",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Read published class notes",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "text": "Generate personal quizzes from any topic",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Generate personal quizzes from any topic",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "text": "Build flashcard sets from quiz results",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Build flashcard sets from quiz results",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "text": "Upload personal files for study notes",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Upload personal files for study notes",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "text": "Edit and study flashcards",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Edit and study flashcards",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

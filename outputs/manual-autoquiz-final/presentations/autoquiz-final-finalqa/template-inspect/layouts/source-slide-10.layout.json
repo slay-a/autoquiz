@@ -1,0 +1,1250 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/29gr2p8n",
+    "id": "29gr2p8n",
+    "slide": 11,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Aptos",
+      "Aptos Display",
+      "Aptos Mono"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9gr2p8nq",
+      "id": "2",
+      "name": "Shape 0",
+      "bbox": [
+        55.68,
+        54.72,
+        9.6,
+        9.6
+      ],
+      "geometry": "rect",
+      "fillColor": "#6D28D9",
+      "lineColor": "#6D28D9",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gvy90je9",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        74.88,
+        46.08,
+        230.4,
+        26.88
+      ],
+      "geometry": "rect",
+      "text": "SUBMISSION MAP",
+      "textPreview": "SUBMISSION MAP",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "SUBMISSION MAP"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "SUBMISSION MAP",
+          "runs": [
+            {
+              "index": 1,
+              "text": "SUBMISSION MAP",
+              "fontSize": 11.33,
+              "typeface": "Aptos",
+              "color": "#64748B",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/r2p8nqxs",
+      "id": "4",
+      "name": "Text 2",
+      "bbox": [
+        55.68,
+        78.72,
+        1056,
+        55.68
+      ],
+      "geometry": "rect",
+      "text": "Everything the grader needs has a clear location.",
+      "textPreview": "Everything the grader needs has a clear location.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Everything the grader needs has a clear location."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Everything the grader needs has a clear location.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Everything the grader needs has a clear location.",
+              "fontSize": 30.67,
+              "typeface": "Aptos Display",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2hwfyxob",
+      "id": "5",
+      "name": "Text 3",
+      "bbox": [
+        57.6,
+        144,
+        1046.4,
+        26.88
+      ],
+      "geometry": "rect",
+      "text": "Use this as the final pre-upload checklist on Friday, May 8, 2026.",
+      "textPreview": "Use this as the final pre-upload checklist on Friday, May 8, 2026.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Use this as the final pre-upload checklist on Friday, May 8, 2026."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Use this as the final pre-upload checklist on Friday, May 8, 2026.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Use this as the final pre-upload checklist on Friday, May 8, 2026.",
+              "fontSize": 15.33,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/94fu18jq",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        1173.12,
+        55.68,
+        43.2,
+        19.2
+      ],
+      "geometry": "rect",
+      "text": "10",
+      "textPreview": "10",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "10"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "10",
+          "runs": [
+            {
+              "index": 1,
+              "text": "10",
+              "fontSize": 11.33,
+              "typeface": "Aptos Mono",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kjm1cfa9",
+      "id": "7",
+      "name": "Shape 5",
+      "bbox": [
+        78.72,
+        193.92,
+        192,
+        48
+      ],
+      "geometry": "rect",
+      "fillColor": "#6D28D9",
+      "lineColor": "#6D28D9",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rqd4vmtw",
+      "id": "8",
+      "name": "Text 6",
+      "bbox": [
+        93.12,
+        210.24,
+        163.2,
+        11.52
+      ],
+      "geometry": "rect",
+      "text": "Canvas",
+      "textPreview": "Canvas",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Canvas"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Canvas",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Canvas",
+              "fontSize": 12.4,
+              "typeface": "Aptos",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/25kb6xkf",
+      "id": "9",
+      "name": "Text 7",
+      "bbox": [
+        297.6,
+        201.6,
+        321.6,
+        19.2
+      ],
+      "geometry": "rect",
+      "text": "AutoQuiz_Final_Project.pptx",
+      "textPreview": "AutoQuiz_Final_Project.pptx",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AutoQuiz_Final_Project.pptx"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AutoQuiz_Final_Project.pptx",
+          "runs": [
+            {
+              "index": 1,
+              "text": "AutoQuiz_Final_Project.pptx",
+              "fontSize": 13.87,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4fu18jqh",
+      "id": "10",
+      "name": "Text 8",
+      "bbox": [
+        625.92,
+        202.56,
+        532.8,
+        21.12
+      ],
+      "geometry": "rect",
+      "text": "Upload this improved PPTX with embedded demo video.",
+      "textPreview": "Upload this improved PPTX with embedded demo video.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Upload this improved PPTX with embedded demo video."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Upload this improved PPTX with embedded demo video.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Upload this improved PPTX with embedded demo video.",
+              "fontSize": 11.87,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x0nuxc3y",
+      "id": "11",
+      "name": "Shape 9",
+      "bbox": [
+        78.72,
+        268.8,
+        192,
+        48
+      ],
+      "geometry": "rect",
+      "fillColor": "#F59E0B",
+      "lineColor": "#F59E0B",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/m94fu18j",
+      "id": "12",
+      "name": "Text 10",
+      "bbox": [
+        93.12,
+        285.12,
+        163.2,
+        11.52
+      ],
+      "geometry": "rect",
+      "text": "Google Sheets",
+      "textPreview": "Google Sheets",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Google Sheets"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Google Sheets",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Google Sheets",
+              "fontSize": 12.4,
+              "typeface": "Aptos",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fu18jqh0",
+      "id": "13",
+      "name": "Text 11",
+      "bbox": [
+        297.6,
+        276.48,
+        321.6,
+        19.2
+      ],
+      "geometry": "rect",
+      "text": "Architecture document",
+      "textPreview": "Architecture document",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Architecture document"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Architecture document",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Architecture document",
+              "fontSize": 13.87,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/83itgfml",
+      "id": "14",
+      "name": "Text 12",
+      "bbox": [
+        625.92,
+        277.44,
+        532.8,
+        21.12
+      ],
+      "geometry": "rect",
+      "text": "Paste/share DESIGN.md-derived architecture content and grant instructor access.",
+      "textPreview": "Paste/share DESIGN.md-derived architecture content and grant instructor access.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Paste/share DESIGN.md-derived architecture content and grant instructor access."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Paste/share DESIGN.md-derived architecture content and grant instructor access.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Paste/share DESIGN.md-derived architecture content and grant instructor access.",
+              "fontSize": 11.87,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xobm58z2",
+      "id": "15",
+      "name": "Shape 13",
+      "bbox": [
+        78.72,
+        343.68,
+        192,
+        48
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F766E",
+      "lineColor": "#0F766E",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qxs72x4n",
+      "id": "16",
+      "name": "Text 14",
+      "bbox": [
+        93.12,
+        360,
+        163.2,
+        11.52
+      ],
+      "geometry": "rect",
+      "text": "GitHub",
+      "textPreview": "GitHub",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "GitHub"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "GitHub",
+          "runs": [
+            {
+              "index": 1,
+              "text": "GitHub",
+              "fontSize": 12.4,
+              "typeface": "Aptos",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fil0rqd4",
+      "id": "17",
+      "name": "Text 15",
+      "bbox": [
+        297.6,
+        351.36,
+        321.6,
+        19.2
+      ],
+      "geometry": "rect",
+      "text": "https://github.com/slay-a/autoquiz",
+      "textPreview": "https://github.com/slay-a/autoquiz",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "https://github.com/slay-a/autoquiz"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "https://github.com/slay-a/autoquiz",
+          "runs": [
+            {
+              "index": 1,
+              "text": "https://github.com/slay-a/autoquiz",
+              "fontSize": 13.87,
+              "typeface": "Aptos Mono",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/4zidonyd",
+      "id": "18",
+      "name": "Text 16",
+      "bbox": [
+        625.92,
+        352.32,
+        532.8,
+        21.12
+      ],
+      "geometry": "rect",
+      "text": "Repo contains specs, tests, implementation, CI workflow, and source history.",
+      "textPreview": "Repo contains specs, tests, implementation, CI workflow, and source history.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Repo contains specs, tests, implementation, CI workflow, and source history."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Repo contains specs, tests, implementation, CI workflow, and source history.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Repo contains specs, tests, implementation, CI workflow, and source history.",
+              "fontSize": 11.87,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xkf6dcbu",
+      "id": "19",
+      "name": "Shape 17",
+      "bbox": [
+        78.72,
+        418.56,
+        192,
+        48
+      ],
+      "geometry": "rect",
+      "fillColor": "#F9735B",
+      "lineColor": "#F9735B",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xczed8v6",
+      "id": "20",
+      "name": "Text 18",
+      "bbox": [
+        93.12,
+        434.88,
+        163.2,
+        11.52
+      ],
+      "geometry": "rect",
+      "text": "Specs",
+      "textPreview": "Specs",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Specs"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Specs",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Specs",
+              "fontSize": 12.4,
+              "typeface": "Aptos",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8v6psfil",
+      "id": "21",
+      "name": "Text 19",
+      "bbox": [
+        297.6,
+        426.24,
+        321.6,
+        19.2
+      ],
+      "geometry": "rect",
+      "text": "specs/*.md",
+      "textPreview": "specs/*.md",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "specs/*.md"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "specs/*.md",
+          "runs": [
+            {
+              "index": 1,
+              "text": "specs/*.md",
+              "fontSize": 13.87,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fa9w3m94",
+      "id": "22",
+      "name": "Text 20",
+      "bbox": [
+        625.92,
+        427.2,
+        532.8,
+        21.12
+      ],
+      "geometry": "rect",
+      "text": "Feature stories and acceptance criteria live beside implementation.",
+      "textPreview": "Feature stories and acceptance criteria live beside implementation.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Feature stories and acceptance criteria live beside implementation."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Feature stories and acceptance criteria live beside implementation.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Feature stories and acceptance criteria live beside implementation.",
+              "fontSize": 11.87,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qpg3ex0n",
+      "id": "23",
+      "name": "Shape 21",
+      "bbox": [
+        78.72,
+        493.44,
+        192,
+        48
+      ],
+      "geometry": "rect",
+      "fillColor": "#18223B",
+      "lineColor": "#18223B",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x4nap4r6",
+      "id": "24",
+      "name": "Text 22",
+      "bbox": [
+        93.12,
+        509.76,
+        163.2,
+        11.52
+      ],
+      "geometry": "rect",
+      "text": "Tests",
+      "textPreview": "Tests",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Tests"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Tests",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Tests",
+              "fontSize": 12.4,
+              "typeface": "Aptos",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8jqh0fep",
+      "id": "25",
+      "name": "Text 23",
+      "bbox": [
+        297.6,
+        501.12,
+        321.6,
+        19.2
+      ],
+      "geometry": "rect",
+      "text": "backend/tests and frontend/src/__tests__",
+      "textPreview": "backend/tests and frontend/src/__tests__",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "backend/tests and frontend/src/__tests__"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "backend/tests and frontend/src/__tests__",
+          "runs": [
+            {
+              "index": 1,
+              "text": "backend/tests and frontend/src/__tests__",
+              "fontSize": 13.87,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fyxobm58",
+      "id": "26",
+      "name": "Text 24",
+      "bbox": [
+        625.92,
+        502.08,
+        532.8,
+        21.12
+      ],
+      "geometry": "rect",
+      "text": "Backend and frontend test suites are indexed and CI-gated.",
+      "textPreview": "Backend and frontend test suites are indexed and CI-gated.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Backend and frontend test suites are indexed and CI-gated."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Backend and frontend test suites are indexed and CI-gated.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Backend and frontend test suites are indexed and CI-gated.",
+              "fontSize": 11.87,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qd4vmtwr",
+      "id": "27",
+      "name": "Shape 25",
+      "bbox": [
+        78.72,
+        597.12,
+        1130.88,
+        67.2
+      ],
+      "geometry": "rect",
+      "fillColor": "#18223B",
+      "lineColor": "#18223B",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 27,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xs72x4na",
+      "id": "28",
+      "name": "Text 26",
+      "bbox": [
+        100.8,
+        620.16,
+        1080,
+        19.2
+      ],
+      "geometry": "rect",
+      "text": "Final readiness: deck improved, demo embedded, repo URL visible. Last manual step: confirm Canvas/Google Sheet/GitHub access from the instructor side.",
+      "textPreview": "Final readiness: deck improved, demo embedded, repo URL visible. Last manual step: confirm Canvas/Google Sheet/GitHub access from the ins...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Final readiness: deck improved, demo embedded, repo URL visible. Last manual step: confirm Canvas/Google Sheet/GitHub access from the instructor side."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Final readiness: deck improved, demo embedded, repo URL visible. Last manual step: confirm Canvas/Google Sheet/GitHub access from the instructor side.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Final readiness: deck improved, demo embedded, repo URL visible. Last manual step: confirm Canvas/Google Sheet/GitHub access from the instructor side.",
+              "fontSize": 13.6,
+              "typeface": "Aptos",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 28,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/87ed8bat",
+      "id": "29",
+      "name": "Shape 27",
+      "bbox": [
+        55.68,
+        673.92,
+        1166.4,
+        0
+      ],
+      "geometry": "line",
+      "lineColor": "#DDE3EA",
+      "lineWidth": 0.8
+    },
+    {
+      "order": 29,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2p8nqxs7",
+      "id": "30",
+      "name": "Text 28",
+      "bbox": [
+        55.68,
+        683.52,
+        691.2,
+        17.28
+      ],
+      "geometry": "rect",
+      "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+      "textPreview": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+          "runs": [
+            {
+              "index": 1,
+              "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+              "fontSize": 10,
+              "typeface": "Aptos",
+              "color": "#94A3B8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 30,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ra5gbq1o",
+      "id": "31",
+      "name": "Text 29",
+      "bbox": [
+        1171.2,
+        683.52,
+        48,
+        17.28
+      ],
+      "geometry": "rect",
+      "text": "10/10",
+      "textPreview": "10/10",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "10/10"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "10/10",
+          "runs": [
+            {
+              "index": 1,
+              "text": "10/10",
+              "fontSize": 10,
+              "typeface": "Aptos",
+              "color": "#94A3B8"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

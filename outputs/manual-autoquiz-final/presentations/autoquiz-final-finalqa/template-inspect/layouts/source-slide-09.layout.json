@@ -1,0 +1,969 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/qh0fepkz",
+    "id": "qh0fepkz",
+    "slide": 10,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#F8FAFC",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Aptos",
+      "Aptos Display",
+      "Aptos Mono"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ovahoza1",
+      "id": "2",
+      "name": "Shape 0",
+      "bbox": [
+        55.68,
+        54.72,
+        9.6,
+        9.6
+      ],
+      "geometry": "rect",
+      "fillColor": "#6D28D9",
+      "lineColor": "#6D28D9",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dg7adsji",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        74.88,
+        46.08,
+        230.4,
+        26.88
+      ],
+      "geometry": "rect",
+      "text": "CONTRIBUTIONS",
+      "textPreview": "CONTRIBUTIONS",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "CONTRIBUTIONS"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "CONTRIBUTIONS",
+          "runs": [
+            {
+              "index": 1,
+              "text": "CONTRIBUTIONS",
+              "fontSize": 11.33,
+              "typeface": "Aptos",
+              "color": "#64748B",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6hcrmhk3",
+      "id": "4",
+      "name": "Text 2",
+      "bbox": [
+        55.68,
+        78.72,
+        1056,
+        55.68
+      ],
+      "geometry": "rect",
+      "text": "Individual contributions are traceable by module and scope.",
+      "textPreview": "Individual contributions are traceable by module and scope.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Individual contributions are traceable by module and scope."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Individual contributions are traceable by module and scope.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Individual contributions are traceable by module and scope.",
+              "fontSize": 30.67,
+              "typeface": "Aptos Display",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/z25kb6xk",
+      "id": "5",
+      "name": "Text 3",
+      "bbox": [
+        57.6,
+        144,
+        1046.4,
+        26.88
+      ],
+      "geometry": "rect",
+      "text": "The repo history also shows commits under each contributor's GitHub identity.",
+      "textPreview": "The repo history also shows commits under each contributor's GitHub identity.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "The repo history also shows commits under each contributor's GitHub identity."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "The repo history also shows commits under each contributor's GitHub identity.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "The repo history also shows commits under each contributor's GitHub identity.",
+              "fontSize": 15.33,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/onyd0z61",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        1173.12,
+        55.68,
+        43.2,
+        19.2
+      ],
+      "geometry": "rect",
+      "text": "09",
+      "textPreview": "09",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "09"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "09",
+          "runs": [
+            {
+              "index": 1,
+              "text": "09",
+              "fontSize": 11.33,
+              "typeface": "Aptos Mono",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/d8v6psfi",
+      "id": "7",
+      "name": "Shape 5",
+      "bbox": [
+        74.88,
+        196.8,
+        1130.88,
+        110.4
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DDE3EA",
+      "lineWidth": 0.93
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6dcbulwv",
+      "id": "8",
+      "name": "Shape 6",
+      "bbox": [
+        74.88,
+        196.8,
+        7.68,
+        110.4
+      ],
+      "geometry": "rect",
+      "fillColor": "#6D28D9",
+      "lineColor": "#6D28D9",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vy90je9c",
+      "id": "9",
+      "name": "Text 7",
+      "bbox": [
+        100.8,
+        221.76,
+        216,
+        49.92
+      ],
+      "geometry": "rect",
+      "text": "Srilaya Ponangi (Laya)\n@slay-a",
+      "textPreview": "Srilaya Ponangi (Laya) | @slay-a",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Srilaya Ponangi (Laya)"
+          },
+          {
+            "index": 2,
+            "text": "@slay-a"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Srilaya Ponangi (Laya)",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Srilaya Ponangi (Laya)",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "@slay-a",
+          "runs": [
+            {
+              "index": 1,
+              "text": "@slay-a",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nuxc3ylc",
+      "id": "10",
+      "name": "Text 8",
+      "bbox": [
+        343.68,
+        217.92,
+        820.8,
+        63.36
+      ],
+      "geometry": "rect",
+      "text": "Architecture source of truth; full-stack scaffold and repo hygiene; FEAT-001 auth pipeline; TopBar/profile entry point; Pydantic v2 config hardening; CI/dev scripts; logging/rate-limit/readiness cleanup.",
+      "textPreview": "Architecture source of truth; full-stack scaffold and repo hygiene; FEAT-001 auth pipeline; TopBar/profile entry point; Pydantic v2 confi...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Architecture source of truth; full-stack scaffold and repo hygiene; FEAT-001 auth pipeline; TopBar/profile entry point; Pydantic v2 config hardening;"
+          },
+          {
+            "index": 2,
+            "text": "CI/dev scripts; logging/rate-limit/readiness cleanup."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Architecture source of truth; full-stack scaffold and repo hygiene; FEAT-001 auth pipeline; TopBar/profile entry point; Pydantic v2 config hardening; CI/dev scripts; logging/rate-limit/readiness cleanup.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Architecture source of truth; full-stack scaffold and repo hygiene; FEAT-001 auth pipeline; TopBar/profile entry point; Pydantic v2 config hardening; CI/dev scripts; logging/rate-limit/readiness cleanup.",
+              "fontSize": 12.53,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/y90je9cv",
+      "id": "11",
+      "name": "Shape 9",
+      "bbox": [
+        74.88,
+        336,
+        1130.88,
+        110.4
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DDE3EA",
+      "lineWidth": 0.93
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5wjudg7a",
+      "id": "12",
+      "name": "Shape 10",
+      "bbox": [
+        74.88,
+        336,
+        7.68,
+        110.4
+      ],
+      "geometry": "rect",
+      "fillColor": "#F9735B",
+      "lineColor": "#F9735B",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gbq1oryt",
+      "id": "13",
+      "name": "Text 11",
+      "bbox": [
+        100.8,
+        360.96,
+        216,
+        49.92
+      ],
+      "geometry": "rect",
+      "text": "Justin Reyes\n@justinreyes145",
+      "textPreview": "Justin Reyes | @justinreyes145",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Justin Reyes"
+          },
+          {
+            "index": 2,
+            "text": "@justinreyes145"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Justin Reyes",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Justin Reyes",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "@justinreyes145",
+          "runs": [
+            {
+              "index": 1,
+              "text": "@justinreyes145",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/n29gr2p8",
+      "id": "14",
+      "name": "Text 12",
+      "bbox": [
+        343.68,
+        357.12,
+        820.8,
+        63.36
+      ],
+      "geometry": "rect",
+      "text": "LlamaIndex ingestion; file upload/storage; GPT-4o + RAG quiz generation; quiz study/saving; sharing; student notes; flashcards; test-suite stabilization.",
+      "textPreview": "LlamaIndex ingestion; file upload/storage; GPT-4o + RAG quiz generation; quiz study/saving; sharing; student notes; flashcards; test-suit...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LlamaIndex ingestion; file upload/storage; GPT-4o + RAG quiz generation; quiz study/saving; sharing; student notes; flashcards; test-suite"
+          },
+          {
+            "index": 2,
+            "text": "stabilization."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LlamaIndex ingestion; file upload/storage; GPT-4o + RAG quiz generation; quiz study/saving; sharing; student notes; flashcards; test-suite stabilization.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "LlamaIndex ingestion; file upload/storage; GPT-4o + RAG quiz generation; quiz study/saving; sharing; student notes; flashcards; test-suite stabilization.",
+              "fontSize": 12.53,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yhgn29gr",
+      "id": "15",
+      "name": "Shape 13",
+      "bbox": [
+        74.88,
+        475.2,
+        1130.88,
+        110.4
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DDE3EA",
+      "lineWidth": 0.93
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/58z25kb6",
+      "id": "16",
+      "name": "Shape 14",
+      "bbox": [
+        74.88,
+        475.2,
+        7.68,
+        110.4
+      ],
+      "geometry": "rect",
+      "fillColor": "#0F766E",
+      "lineColor": "#0F766E",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gn29gr2p",
+      "id": "17",
+      "name": "Text 15",
+      "bbox": [
+        100.8,
+        500.16,
+        216,
+        49.92
+      ],
+      "geometry": "rect",
+      "text": "Shima / Shabnam Jabbari\n@ShimaJabbari",
+      "textPreview": "Shima / Shabnam Jabbari | @ShimaJabbari",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Shima / Shabnam Jabbari"
+          },
+          {
+            "index": 2,
+            "text": "@ShimaJabbari"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Shima / Shabnam Jabbari",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Shima / Shabnam Jabbari",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "@ShimaJabbari",
+          "runs": [
+            {
+              "index": 1,
+              "text": "@ShimaJabbari",
+              "fontSize": 14,
+              "typeface": "Aptos",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/neloj2t8",
+      "id": "18",
+      "name": "Text 16",
+      "bbox": [
+        343.68,
+        496.32,
+        820.8,
+        63.36
+      ],
+      "geometry": "rect",
+      "text": "Instructor class management; student membership; theme preferences; user profile/avatar/RLS; event catalog completion; JWT verification; error envelope and layer-boundary fixes.",
+      "textPreview": "Instructor class management; student membership; theme preferences; user profile/avatar/RLS; event catalog completion; JWT verification; ...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Instructor class management; student membership; theme preferences; user profile/avatar/RLS; event catalog completion; JWT verification; error"
+          },
+          {
+            "index": 2,
+            "text": "envelope and layer-boundary fixes."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Instructor class management; student membership; theme preferences; user profile/avatar/RLS; event catalog completion; JWT verification; error envelope and layer-boundary fixes.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Instructor class management; student membership; theme preferences; user profile/avatar/RLS; event catalog completion; JWT verification; error envelope and layer-boundary fixes.",
+              "fontSize": 12.53,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ytsvu9kn",
+      "id": "19",
+      "name": "Shape 17",
+      "bbox": [
+        74.88,
+        591.36,
+        1130.88,
+        40.32
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#DDE3EA",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2x4nap4r",
+      "id": "20",
+      "name": "Shape 18",
+      "bbox": [
+        74.88,
+        591.36,
+        7.68,
+        40.32
+      ],
+      "geometry": "rect",
+      "fillColor": "#F59E0B",
+      "lineColor": "#F59E0B",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vixczed8",
+      "id": "21",
+      "name": "Text 19",
+      "bbox": [
+        98.88,
+        612.48,
+        1087.68,
+        23.04
+      ],
+      "geometry": "rect",
+      "text": "Commit identity note",
+      "textPreview": "Commit identity note",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Commit identity note"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Commit identity note",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Commit identity note",
+              "fontSize": 14.4,
+              "typeface": "Aptos Display",
+              "color": "#111827",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/k3q5o7qp",
+      "id": "22",
+      "name": "Text 20",
+      "bbox": [
+        98.88,
+        648.96,
+        1087.68,
+        17.28
+      ],
+      "geometry": "rect",
+      "text": "Recent commits use Srilaya Ponangi / slay-a identity; earlier shortlog entries include Laya/slay-a variants.",
+      "textPreview": "Recent commits use Srilaya Ponangi / slay-a identity; earlier shortlog entries include Laya/slay-a variants.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Recent commits use Srilaya Ponangi / slay-a identity; earlier shortlog entries include Laya/slay-a variants."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Recent commits use Srilaya Ponangi / slay-a identity; earlier shortlog entries include Laya/slay-a variants.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Recent commits use Srilaya Ponangi / slay-a identity; earlier shortlog entries include Laya/slay-a variants.",
+              "fontSize": 11.33,
+              "typeface": "Aptos",
+              "color": "#64748B"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/donyd0z6",
+      "id": "23",
+      "name": "Shape 21",
+      "bbox": [
+        55.68,
+        673.92,
+        1166.4,
+        0
+      ],
+      "geometry": "line",
+      "lineColor": "#DDE3EA",
+      "lineWidth": 0.8
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6psfil0r",
+      "id": "24",
+      "name": "Text 22",
+      "bbox": [
+        55.68,
+        683.52,
+        691.2,
+        17.28
+      ],
+      "geometry": "rect",
+      "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+      "textPreview": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+          "runs": [
+            {
+              "index": 1,
+              "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+              "fontSize": 10,
+              "typeface": "Aptos",
+              "color": "#94A3B8"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/val87ed8",
+      "id": "25",
+      "name": "Text 23",
+      "bbox": [
+        1171.2,
+        683.52,
+        48,
+        17.28
+      ],
+      "geometry": "rect",
+      "text": "9/10",
+      "textPreview": "9/10",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "9/10"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "9/10",
+          "runs": [
+            {
+              "index": 1,
+              "text": "9/10",
+              "fontSize": 10,
+              "typeface": "Aptos",
+              "color": "#94A3B8"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

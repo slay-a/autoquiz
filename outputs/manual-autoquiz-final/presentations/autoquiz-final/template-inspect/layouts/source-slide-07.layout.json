@@ -1,0 +1,287 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/0z61032l",
+    "id": "0z61032l",
+    "slide": 8,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#1E2761",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Calibri",
+      "Georgia"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x4nap4r6",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        38.4,
+        864,
+        67.2
+      ],
+      "geometry": "rect",
+      "text": "Live Demo",
+      "textPreview": "Live Demo",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Live Demo"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Live Demo",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Live Demo",
+              "fontSize": 50.67,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8jqh0fep",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        100.8,
+        864,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Walkthrough — instructor uploads, generates a shared quiz; student joins class and studies",
+      "textPreview": "Walkthrough — instructor uploads, generates a shared quiz; student joins class and studies",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Walkthrough — instructor uploads, generates a shared quiz; student joins class and studies"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Walkthrough — instructor uploads, generates a shared quiz; student joins class and studies",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Walkthrough — instructor uploads, generates a shared quiz; student joins class and studies",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fa9w3m94",
+      "id": "4",
+      "name": "Shape 2",
+      "bbox": [
+        144,
+        163.2,
+        672,
+        326.4
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(255, 255, 255, 0.1)",
+      "lineColor": "#CADCFC",
+      "lineWidth": 2.67
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qpg3ex0n",
+      "id": "5",
+      "name": "Shape 3",
+      "bbox": [
+        446.4,
+        288,
+        76.8,
+        76.8
+      ],
+      "geometry": "rtTriangle",
+      "fillColor": "#F96167",
+      "lineColor": "#F96167",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xczed8v6",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        144,
+        379.2,
+        672,
+        48
+      ],
+      "geometry": "rect",
+      "text": "[ Embed demo video here ]",
+      "textPreview": "[ Embed demo video here ]",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "[ Embed demo video here ]"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "[ Embed demo video here ]",
+          "runs": [
+            {
+              "index": 1,
+              "text": "[ Embed demo video here ]",
+              "fontSize": 21.33,
+              "typeface": "Calibri",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8v6psfil",
+      "id": "7",
+      "name": "Text 5",
+      "bbox": [
+        144,
+        427.2,
+        672,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "PowerPoint → Insert → Video → This Device, then resize to fit this frame.",
+      "textPreview": "PowerPoint → Insert → Video → This Device, then resize to fit this frame.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "PowerPoint → Insert → Video → This Device, then resize to fit this frame."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "PowerPoint → Insert → Video → This Device, then resize to fit this frame.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "PowerPoint → Insert → Video → This Device, then resize to fit this frame.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

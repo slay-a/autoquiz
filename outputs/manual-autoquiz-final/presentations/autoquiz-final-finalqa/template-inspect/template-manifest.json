@@ -1,0 +1,198 @@
+{
+  "sourcePptx": "/Users/slaya/Documents/GitHub/autoquiz/AutoQuiz_Final_Project.pptx",
+  "workspace": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa",
+  "outDir": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect",
+  "generatedAt": "2026-05-08T10:04:34.790Z",
+  "slideCount": 10,
+  "slideArtifacts": [
+    {
+      "slide": 1,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-01.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-01.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-01.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-01.layout.json"
+    },
+    {
+      "slide": 2,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-02.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-02.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-02.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-02.layout.json"
+    },
+    {
+      "slide": 3,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-03.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-03.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-03.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-03.layout.json"
+    },
+    {
+      "slide": 4,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-04.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-04.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-04.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-04.layout.json"
+    },
+    {
+      "slide": 5,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-05.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-05.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-05.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-05.layout.json"
+    },
+    {
+      "slide": 6,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-06.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-06.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-06.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-06.layout.json"
+    },
+    {
+      "slide": 7,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-07.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-07.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-07.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-07.layout.json"
+    },
+    {
+      "slide": 8,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-08.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-08.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-08.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-08.layout.json"
+    },
+    {
+      "slide": 9,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-09.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-09.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-09.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-09.layout.json"
+    },
+    {
+      "slide": 10,
+      "previewPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/source-slides/source-slide-10.png",
+      "previewRelativePath": "template-inspect/source-slides/source-slide-10.png",
+      "layoutPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/layouts/source-slide-10.layout.json",
+      "layoutRelativePath": "template-inspect/layouts/source-slide-10.layout.json"
+    }
+  ],
+  "inspectPath": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/template-inspect.ndjson",
+  "inspectRelativePath": "template-inspect/template-inspect.ndjson",
+  "inspectTruncated": true,
+  "inspectMetadata": {
+    "revision": "ohkv0t",
+    "target": {
+      "id": "pr/lntobx"
+    },
+    "kind": {
+      "requested": "slide,textbox,shape,image,table,chart",
+      "tokens": [
+        "slide",
+        "textbox",
+        "shape",
+        "image",
+        "table",
+        "chart"
+      ]
+    },
+    "include": {
+      "tokens": []
+    },
+    "exclude": {
+      "tokens": []
+    },
+    "notices": []
+  },
+  "extractedMedia": [
+    {
+      "entry": "ppt/media/",
+      "path": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/assets/ppt/media/media",
+      "relativePath": "template-inspect/assets/ppt/media/media",
+      "bytes": 0
+    },
+    {
+      "entry": "ppt/media/image-1-1.png",
+      "path": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/assets/ppt/media/image-1-1.png",
+      "relativePath": "template-inspect/assets/ppt/media/image-1-1.png",
+      "bytes": 53637
+    },
+    {
+      "entry": "ppt/media/image-4-1.png",
+      "path": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/assets/ppt/media/image-4-1.png",
+      "relativePath": "template-inspect/assets/ppt/media/image-4-1.png",
+      "bytes": 53637
+    },
+    {
+      "entry": "ppt/media/media-8-1.mp4",
+      "path": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/assets/ppt/media/media-8-1.mp4",
+      "relativePath": "template-inspect/assets/ppt/media/media-8-1.mp4",
+      "bytes": 394489
+    },
+    {
+      "entry": "ppt/media/image-8-3.png",
+      "path": "/Users/slaya/Documents/GitHub/autoquiz/outputs/manual-autoquiz-final/presentations/autoquiz-final-finalqa/template-inspect/assets/ppt/media/image-8-3.png",
+      "relativePath": "template-inspect/assets/ppt/media/image-8-3.png",
+      "bytes": 53637
+    }
+  ],
+  "fonts": [
+    "+mj-cs",
+    "+mj-ea",
+    "+mj-lt",
+    "+mn-cs",
+    "+mn-ea",
+    "+mn-lt",
+    "Angsana New",
+    "Aptos",
+    "Aptos Display",
+    "Aptos Mono",
+    "Arial",
+    "Cordia New",
+    "DaunPenh",
+    "DokChampa",
+    "Ebrima",
+    "Estrangelo Edessa",
+    "Euphemia",
+    "Gautami",
+    "Iskoola Pota",
+    "Javanese Text",
+    "Kalinga",
+    "Kartika",
+    "Latha",
+    "Leelawadee UI",
+    "MV Boli",
+    "Mangal",
+    "Microsoft Himalaya",
+    "Microsoft JhengHei",
+    "Microsoft New Tai Lue",
+    "Microsoft Tai Le",
+    "Microsoft Uighur",
+    "Microsoft Yi Baiti",
+    "Mongolian Baiti",
+    "MoolBoran",
+    "Myanmar Text",
+    "Nirmala UI",
+    "Nyala",
+    "Phagspa",
+    "Plantagenet Cherokee",
+    "Raavi",
+    "Segoe UI",
+    "Shruti",
+    "Sylfaen",
+    "Times New Roman",
+    "Tunga",
+    "Vrinda",
+    "新細明體",
+    "游ゴシック",
+    "游ゴシック Light",
+    "等线",
+    "等线 Light",
+    "맑은 고딕"
+  ],
+  "packageParts": {
+    "mediaCount": 5,
+    "slideXmlCount": 10,
+    "chartCount": 0,
+    "tableSlideCount": 0
+  }
+}

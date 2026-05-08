@@ -1,0 +1,1469 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/val87ed8",
+    "id": "val87ed8",
+    "slide": 5,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Calibri",
+      "Georgia"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qtcj6tov",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        38.4,
+        864,
+        67.2
+      ],
+      "geometry": "rect",
+      "text": "Architecture",
+      "textPreview": "Architecture",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Architecture"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Architecture",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Architecture",
+              "fontSize": 50.67,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/je9cvixc",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        100.8,
+        864,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "React → FastAPI → LlamaIndex (RAG) → Supabase + OpenAI",
+      "textPreview": "React → FastAPI → LlamaIndex (RAG) → Supabase + OpenAI",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "React → FastAPI → LlamaIndex (RAG) → Supabase + OpenAI"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "React → FastAPI → LlamaIndex (RAG) → Supabase + OpenAI",
+          "runs": [
+            {
+              "index": 1,
+              "text": "React → FastAPI → LlamaIndex (RAG) → Supabase + OpenAI",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#64748B",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/87ed8bat",
+      "id": "4",
+      "name": "Shape 2",
+      "bbox": [
+        48,
+        163.2,
+        170.88,
+        129.6
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xs72x4na",
+      "id": "5",
+      "name": "Text 3",
+      "bbox": [
+        48,
+        172.8,
+        170.88,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Browser",
+      "textPreview": "Browser",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Browser"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Browser",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Browser",
+              "fontSize": 21.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q1orytsv",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        48,
+        216,
+        170.88,
+        72
+      ],
+      "geometry": "rect",
+      "text": "React 18 + Vite\nTailwind",
+      "textPreview": "React 18 + Vite | Tailwind",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "React 18 + Vite"
+          },
+          {
+            "index": 2,
+            "text": "Tailwind"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "React 18 + Vite",
+          "runs": [
+            {
+              "index": 1,
+              "text": "React 18 + Vite",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Tailwind",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Tailwind",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/fmlkjm1c",
+      "id": "7",
+      "name": "Text 5",
+      "bbox": [
+        215.04,
+        196.8,
+        12.48,
+        57.6
+      ],
+      "geometry": "rect",
+      "text": "›",
+      "textPreview": "›",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "›"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "›",
+          "runs": [
+            {
+              "index": 1,
+              "text": "›",
+              "fontSize": 37.33,
+              "typeface": "Georgia",
+              "color": "#F96167",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8jqh0fep",
+      "id": "8",
+      "name": "Shape 6",
+      "bbox": [
+        223.68,
+        163.2,
+        170.88,
+        129.6
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x4nap4r6",
+      "id": "9",
+      "name": "Text 7",
+      "bbox": [
+        223.68,
+        172.8,
+        170.88,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "API",
+      "textPreview": "API",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "API"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "API",
+          "runs": [
+            {
+              "index": 1,
+              "text": "API",
+              "fontSize": 21.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1w7mp0bi",
+      "id": "10",
+      "name": "Text 8",
+      "bbox": [
+        223.68,
+        216,
+        170.88,
+        72
+      ],
+      "geometry": "rect",
+      "text": "FastAPI\n(Python 3.11)",
+      "textPreview": "FastAPI | (Python 3.11)",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "FastAPI"
+          },
+          {
+            "index": 2,
+            "text": "(Python 3.11)"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "FastAPI",
+          "runs": [
+            {
+              "index": 1,
+              "text": "FastAPI",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "(Python 3.11)",
+          "runs": [
+            {
+              "index": 1,
+              "text": "(Python 3.11)",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8bat47y1",
+      "id": "11",
+      "name": "Text 9",
+      "bbox": [
+        390.72,
+        196.8,
+        12.48,
+        57.6
+      ],
+      "geometry": "rect",
+      "text": "›",
+      "textPreview": "›",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "›"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "›",
+          "runs": [
+            {
+              "index": 1,
+              "text": "›",
+              "fontSize": 37.33,
+              "typeface": "Georgia",
+              "color": "#F96167",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jqh0fepk",
+      "id": "12",
+      "name": "Shape 10",
+      "bbox": [
+        399.36,
+        163.2,
+        170.88,
+        129.6
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q5o7qpg3",
+      "id": "13",
+      "name": "Text 11",
+      "bbox": [
+        399.36,
+        172.8,
+        170.88,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Async",
+      "textPreview": "Async",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Async"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Async",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Async",
+              "fontSize": 21.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/18jqh0fe",
+      "id": "14",
+      "name": "Text 12",
+      "bbox": [
+        399.36,
+        216,
+        170.88,
+        72
+      ],
+      "geometry": "rect",
+      "text": "Celery + Redis\nIngest jobs",
+      "textPreview": "Celery + Redis | Ingest jobs",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Celery + Redis"
+          },
+          {
+            "index": 2,
+            "text": "Ingest jobs"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Celery + Redis",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Celery + Redis",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Ingest jobs",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Ingest jobs",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8nqxs72x",
+      "id": "15",
+      "name": "Text 13",
+      "bbox": [
+        566.4,
+        196.8,
+        12.48,
+        57.6
+      ],
+      "geometry": "rect",
+      "text": "›",
+      "textPreview": "›",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "›"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "›",
+          "runs": [
+            {
+              "index": 1,
+              "text": "›",
+              "fontSize": 37.33,
+              "typeface": "Georgia",
+              "color": "#F96167",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j2t83itg",
+      "id": "16",
+      "name": "Shape 14",
+      "bbox": [
+        575.04,
+        163.2,
+        170.88,
+        129.6
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qh0fepkz",
+      "id": "17",
+      "name": "Text 15",
+      "bbox": [
+        575.04,
+        172.8,
+        170.88,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "RAG",
+      "textPreview": "RAG",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "RAG"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "RAG",
+          "runs": [
+            {
+              "index": 1,
+              "text": "RAG",
+              "fontSize": 21.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1cfa9w3m",
+      "id": "18",
+      "name": "Text 16",
+      "bbox": [
+        575.04,
+        216,
+        170.88,
+        72
+      ],
+      "geometry": "rect",
+      "text": "LlamaIndex\nparse·chunk·embed",
+      "textPreview": "LlamaIndex | parse·chunk·embed",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "LlamaIndex"
+          },
+          {
+            "index": 2,
+            "text": "parse·chunk·embed"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "LlamaIndex",
+          "runs": [
+            {
+              "index": 1,
+              "text": "LlamaIndex",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "parse·chunk·embed",
+          "runs": [
+            {
+              "index": 1,
+              "text": "parse·chunk·embed",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/crmhk3q5",
+      "id": "19",
+      "name": "Text 17",
+      "bbox": [
+        742.08,
+        196.8,
+        12.48,
+        57.6
+      ],
+      "geometry": "rect",
+      "text": "›",
+      "textPreview": "›",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "›"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "›",
+          "runs": [
+            {
+              "index": 1,
+              "text": "›",
+              "fontSize": 37.33,
+              "typeface": "Georgia",
+              "color": "#F96167",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/sfil0rqd",
+      "id": "20",
+      "name": "Shape 18",
+      "bbox": [
+        750.72,
+        163.2,
+        170.88,
+        129.6
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/h0fepkzu",
+      "id": "21",
+      "name": "Text 19",
+      "bbox": [
+        750.72,
+        172.8,
+        170.88,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Data + AI",
+      "textPreview": "Data + AI",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Data + AI"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Data + AI",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Data + AI",
+              "fontSize": 21.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/a9w3m94f",
+      "id": "22",
+      "name": "Text 20",
+      "bbox": [
+        750.72,
+        216,
+        170.88,
+        72
+      ],
+      "geometry": "rect",
+      "text": "Supabase + pgvector\nOpenAI GPT-4o",
+      "textPreview": "Supabase + pgvector | OpenAI GPT-4o",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Supabase + pgvector"
+          },
+          {
+            "index": 2,
+            "text": "OpenAI GPT-4o"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Supabase + pgvector",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Supabase + pgvector",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "OpenAI GPT-4o",
+          "runs": [
+            {
+              "index": 1,
+              "text": "OpenAI GPT-4o",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 22,
+      "kind": "table",
+      "scope": "slide",
+      "aid": "tb/8bat47y1",
+      "id": "23",
+      "name": "Table 0",
+      "bbox": [
+        48,
+        316.8,
+        864,
+        207.36
+      ],
+      "text": "Layer | Technology\nFrontend | React 18 · Vite · Tailwind · React Router v6\nBackend | FastAPI · Python 3.11+\nAuth | Supabase Auth (JWT, role-based)\nDatabase | Supabase Postgres + pgvector\nRAG | LlamaIndex (parse → chunk → embed → hybrid)\nLLM / Embed | OpenAI GPT-4o · text-embedding-3-small\nAsync | Celery + Redis",
+      "textPreview": "Layer | Technology | Frontend | React 18 · Vite · Tailwind · React Router v6 | Backend | FastAPI · Python 3.11+ | Auth | Supabase Auth (J...",
+      "rows": 8,
+      "cols": 2,
+      "cells": [
+        {
+          "index": 1,
+          "row": 1,
+          "column": 1,
+          "bbox": [
+            48,
+            316.8,
+            192,
+            25.92
+          ],
+          "text": "Layer",
+          "textPreview": "Layer",
+          "fillColor": "#1E2761",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Layer",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Layer",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "row": 1,
+          "column": 2,
+          "bbox": [
+            240,
+            316.8,
+            672,
+            25.92
+          ],
+          "text": "Technology",
+          "textPreview": "Technology",
+          "fillColor": "#1E2761",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Technology",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Technology",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "row": 2,
+          "column": 1,
+          "bbox": [
+            48,
+            342.72,
+            192,
+            25.92
+          ],
+          "text": "Frontend",
+          "textPreview": "Frontend",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Frontend",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Frontend",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "row": 2,
+          "column": 2,
+          "bbox": [
+            240,
+            342.72,
+            672,
+            25.92
+          ],
+          "text": "React 18 · Vite · Tailwind · React Router v6",
+          "textPreview": "React 18 · Vite · Tailwind · React Router v6",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "React 18 · Vite · Tailwind · React Router v6",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "React 18 · Vite · Tailwind · React Router v6",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "row": 3,
+          "column": 1,
+          "bbox": [
+            48,
+            368.64,
+            192,
+            25.92
+          ],
+          "text": "Backend",
+          "textPreview": "Backend",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Backend",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Backend",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "row": 3,
+          "column": 2,
+          "bbox": [
+            240,
+            368.64,
+            672,
+            25.92
+          ],
+          "text": "FastAPI · Python 3.11+",
+          "textPreview": "FastAPI · Python 3.11+",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "FastAPI · Python 3.11+",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "FastAPI · Python 3.11+",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "row": 4,
+          "column": 1,
+          "bbox": [
+            48,
+            394.56,
+            192,
+            25.92
+          ],
+          "text": "Auth",
+          "textPreview": "Auth",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Auth",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Auth",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "row": 4,
+          "column": 2,
+          "bbox": [
+            240,
+            394.56,
+            672,
+            25.92
+          ],
+          "text": "Supabase Auth (JWT, role-based)",
+          "textPreview": "Supabase Auth (JWT, role-based)",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Supabase Auth (JWT, role-based)",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Supabase Auth (JWT, role-based)",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "row": 5,
+          "column": 1,
+          "bbox": [
+            48,
+            420.48,
+            192,
+            25.92
+          ],
+          "text": "Database",
+          "textPreview": "Database",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Database",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Database",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "row": 5,
+          "column": 2,
+          "bbox": [
+            240,
+            420.48,
+            672,
+            25.92
+          ],
+          "text": "Supabase Postgres + pgvector",
+          "textPreview": "Supabase Postgres + pgvector",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Supabase Postgres + pgvector",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Supabase Postgres + pgvector",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "row": 6,
+          "column": 1,
+          "bbox": [
+            48,
+            446.4,
+            192,
+            25.92
+          ],
+          "text": "RAG",
+          "textPreview": "RAG",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "RAG",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "RAG",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "row": 6,
+          "column": 2,
+          "bbox": [
+            240,
+            446.4,
+            672,
+            25.92
+          ],
+          "text": "LlamaIndex (parse → chunk → embed → hybrid)",
+          "textPreview": "LlamaIndex (parse → chunk → embed → hybrid)",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "LlamaIndex (parse → chunk → embed → hybrid)",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "LlamaIndex (parse → chunk → embed → hybrid)",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "row": 7,
+          "column": 1,
+          "bbox": [
+            48,
+            472.32,
+            192,
+            25.92
+          ],
+          "text": "LLM / Embed",
+          "textPreview": "LLM / Embed",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "LLM / Embed",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "LLM / Embed",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "row": 7,
+          "column": 2,
+          "bbox": [
+            240,
+            472.32,
+            672,
+            25.92
+          ],
+          "text": "OpenAI GPT-4o · text-embedding-3-small",
+          "textPreview": "OpenAI GPT-4o · text-embedding-3-small",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "OpenAI GPT-4o · text-embedding-3-small",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "OpenAI GPT-4o · text-embedding-3-small",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "row": 8,
+          "column": 1,
+          "bbox": [
+            48,
+            498.24,
+            192,
+            25.92
+          ],
+          "text": "Async",
+          "textPreview": "Async",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Async",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Async",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "row": 8,
+          "column": 2,
+          "bbox": [
+            240,
+            498.24,
+            672,
+            25.92
+          ],
+          "text": "Celery + Redis",
+          "textPreview": "Celery + Redis",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Celery + Redis",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Celery + Redis",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

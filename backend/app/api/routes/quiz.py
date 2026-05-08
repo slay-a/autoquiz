@@ -10,6 +10,7 @@ from app.services.quiz_service import (
     check_file_ownership,
     get_quiz_by_id,
     save_quiz,
+    delete_quiz,
     get_my_quizzes as svc_get_my_quizzes,
     QuizNotFoundError,
 )
@@ -37,14 +38,6 @@ async def generate_quiz_endpoint(
     request: QuizRequest,
     current_user: dict = Depends(enforce_llm_rate_limit),
 ):
-    # Role guard: quiz generation is student-only (spec §3, DESIGN.md §4)
-    if current_user.get("role") == "instructor":
-        return _err(
-            403,
-            ROLE_FORBIDDEN,
-            "Quiz generation is not available for instructor accounts.",
-        )
-
     if not request.topic.strip():
         return _err(400, EMPTY_TOPIC, "Topic cannot be empty.")
 
@@ -124,6 +117,27 @@ def save_quiz_endpoint(
 def get_my_quizzes_endpoint(current_user: dict = Depends(get_current_user)):
     """Return saved quizzes for the authenticated student, newest-first."""
     return svc_get_my_quizzes(current_user["id"])
+
+
+@router.delete("/{quiz_id}", status_code=204)
+def delete_quiz_endpoint(
+    quiz_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        delete_quiz(quiz_id, current_user["id"])
+    except QuizNotFoundError:
+        return _err(404, QUIZ_NOT_FOUND, "Quiz not found.")
+    log_event(
+        event="quiz.delete.completed",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user["id"],
+        actor_role=current_user.get("role"),
+        resource_type="quiz",
+        resource_id=quiz_id,
+        meta={"quiz_id": quiz_id},
+    )
 
 
 @router.get("/{quiz_id}")

@@ -1,0 +1,487 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/fu18jqh0",
+    "id": "fu18jqh0",
+    "slide": 9,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#18223B",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Aptos",
+      "Aptos Display",
+      "Aptos Mono"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u9knih4b",
+      "id": "2",
+      "name": "Shape 0",
+      "bbox": [
+        55.68,
+        54.72,
+        9.6,
+        9.6
+      ],
+      "geometry": "rect",
+      "fillColor": "#F9735B",
+      "lineColor": "#F9735B",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/judg7ads",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        74.88,
+        46.08,
+        230.4,
+        26.88
+      ],
+      "geometry": "rect",
+      "text": "DEMO",
+      "textPreview": "DEMO",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "DEMO"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "DEMO",
+          "runs": [
+            {
+              "index": 1,
+              "text": "DEMO",
+              "fontSize": 11.33,
+              "typeface": "Aptos",
+              "color": "#CBD5E1",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/c7u54zid",
+      "id": "4",
+      "name": "Text 2",
+      "bbox": [
+        55.68,
+        78.72,
+        1056,
+        55.68
+      ],
+      "geometry": "rect",
+      "text": "Embedded walkthrough video",
+      "textPreview": "Embedded walkthrough video",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Embedded walkthrough video"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Embedded walkthrough video",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Embedded walkthrough video",
+              "fontSize": 30.67,
+              "typeface": "Aptos Display",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1orytsvu",
+      "id": "5",
+      "name": "Text 3",
+      "bbox": [
+        57.6,
+        144,
+        1046.4,
+        26.88
+      ],
+      "geometry": "rect",
+      "text": "Instructor class management, quiz/notes publishing, student study dashboard, and quiz scoring are shown in the embedded recording.",
+      "textPreview": "Instructor class management, quiz/notes publishing, student study dashboard, and quiz scoring are shown in the embedded recording.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Instructor class management, quiz/notes publishing, student study dashboard, and quiz scoring are shown in the embedded recording."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Instructor class management, quiz/notes publishing, student study dashboard, and quiz scoring are shown in the embedded recording.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Instructor class management, quiz/notes publishing, student study dashboard, and quiz scoring are shown in the embedded recording.",
+              "fontSize": 15.33,
+              "typeface": "Aptos",
+              "color": "#CBD5E1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u18jqh0f",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        1173.12,
+        55.68,
+        43.2,
+        19.2
+      ],
+      "geometry": "rect",
+      "text": "08",
+      "textPreview": "08",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "08"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "08",
+          "runs": [
+            {
+              "index": 1,
+              "text": "08",
+              "fontSize": 11.33,
+              "typeface": "Aptos Mono",
+              "color": "#CBD5E1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/jm1cfa9w",
+      "id": "7",
+      "name": "Shape 5",
+      "bbox": [
+        88.32,
+        193.92,
+        1104,
+        403.2
+      ],
+      "geometry": "rect",
+      "fillColor": "#000000",
+      "lineColor": "#94A3B8",
+      "lineWidth": 1.07
+    },
+    {
+      "order": 7,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/m94fu18j",
+      "id": "14",
+      "name": "Media 0",
+      "bbox": [
+        88.32,
+        193.92,
+        1104,
+        403.2
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image-8-3.png",
+        "contentType": "image/png",
+        "byteLength": 53637
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image-8-3.png",
+        "contentType": "image/png",
+        "byteLength": 53637
+      }
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5gbq1ory",
+      "id": "9",
+      "name": "Shape 6",
+      "bbox": [
+        88.32,
+        617.28,
+        1104,
+        34.56
+      ],
+      "geometry": "rect",
+      "fillColor": "#202B46",
+      "lineColor": "#334155",
+      "lineWidth": 0.8
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/18jqh0fe",
+      "id": "10",
+      "name": "Text 7",
+      "bbox": [
+        107.52,
+        627.84,
+        1046.4,
+        12.48
+      ],
+      "geometry": "rect",
+      "text": "Demo file embedded as MP4 in the PPTX package; no external link is required for playback.",
+      "textPreview": "Demo file embedded as MP4 in the PPTX package; no external link is required for playback.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Demo file embedded as MP4 in the PPTX package; no external link is required for playback."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Demo file embedded as MP4 in the PPTX package; no external link is required for playback.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Demo file embedded as MP4 in the PPTX package; no external link is required for playback.",
+              "fontSize": 11.2,
+              "typeface": "Aptos",
+              "color": "#CBD5E1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/8nqxs72x",
+      "id": "11",
+      "name": "Shape 8",
+      "bbox": [
+        55.68,
+        673.92,
+        1166.4,
+        0
+      ],
+      "geometry": "line",
+      "lineColor": "#334155",
+      "lineWidth": 0.8
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/j2t83itg",
+      "id": "12",
+      "name": "Text 9",
+      "bbox": [
+        55.68,
+        683.52,
+        691.2,
+        17.28
+      ],
+      "geometry": "rect",
+      "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+      "textPreview": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+          "runs": [
+            {
+              "index": 1,
+              "text": "AutoQuiz final project - https://github.com/slay-a/autoquiz",
+              "fontSize": 10,
+              "typeface": "Aptos",
+              "color": "#CBD5E1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/qh0fepkz",
+      "id": "13",
+      "name": "Text 10",
+      "bbox": [
+        1171.2,
+        683.52,
+        48,
+        17.28
+      ],
+      "geometry": "rect",
+      "text": "8/10",
+      "textPreview": "8/10",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "8/10"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "8/10",
+          "runs": [
+            {
+              "index": 1,
+              "text": "8/10",
+              "fontSize": 10,
+              "typeface": "Aptos",
+              "color": "#CBD5E1"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

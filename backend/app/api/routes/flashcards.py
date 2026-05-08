@@ -91,10 +91,10 @@ def create_flashcard_set(
     if body.set_type:
         payload["set_type"] = body.set_type
 
-    result = supabase.table("flashcard_sets").insert(payload).select().single().execute()
+    result = supabase.table("flashcard_sets").insert(payload).execute()
     if not result.data:
         return _err(500, "INTERNAL_ERROR", "Failed to create flashcard set.")
-    row = result.data
+    row = result.data[0]
     log_event(
         "flashcard.set.created",
         level="INFO",

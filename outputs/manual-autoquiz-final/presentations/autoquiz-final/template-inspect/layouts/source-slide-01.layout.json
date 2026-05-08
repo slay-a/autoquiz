@@ -1,0 +1,375 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/2x4nap4r",
+    "id": "2x4nap4r",
+    "slide": 2,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#1E2761",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Calibri",
+      "Consolas",
+      "Georgia"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cvixczed",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        134.4,
+        864,
+        105.6
+      ],
+      "geometry": "rect",
+      "text": "AutoQuiz",
+      "textPreview": "AutoQuiz",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AutoQuiz"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AutoQuiz",
+          "runs": [
+            {
+              "index": 1,
+              "text": "AutoQuiz",
+              "fontSize": 96,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5gbq1ory",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        240,
+        864,
+        48
+      ],
+      "geometry": "rect",
+      "text": "AI-Powered Study Platform",
+      "textPreview": "AI-Powered Study Platform",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "AI-Powered Study Platform"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AI-Powered Study Platform",
+          "runs": [
+            {
+              "index": 1,
+              "text": "AI-Powered Study Platform",
+              "fontSize": 29.33,
+              "typeface": "Calibri",
+              "color": "#CADCFC",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/udg7adsj",
+      "id": "4",
+      "name": "Text 2",
+      "bbox": [
+        48,
+        302.4,
+        864,
+        57.6
+      ],
+      "geometry": "rect",
+      "text": "Upload course material. Generate grounded quizzes and study notes. Share with students.",
+      "textPreview": "Upload course material. Generate grounded quizzes and study notes. Share with students.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Upload course material. Generate grounded quizzes and study notes. Share with students."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Upload course material. Generate grounded quizzes and study notes. Share with students.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Upload course material. Generate grounded quizzes and study notes. Share with students.",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#FFFFFF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nyd0z610",
+      "id": "5",
+      "name": "Text 3",
+      "bbox": [
+        48,
+        436.8,
+        864,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "Final Project   ·   Multi-Agent TDD Workflow",
+      "textPreview": "Final Project   ·   Multi-Agent TDD Workflow",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Final Project   ·   Multi-Agent TDD Workflow"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Final Project   ·   Multi-Agent TDD Workflow",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Final Project   ·   ",
+              "fontSize": 17.33,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            },
+            {
+              "index": 2,
+              "text": "Multi-Agent TDD Workflow",
+              "fontSize": 17.33,
+              "typeface": "Calibri",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cj6tovah",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        48,
+        470.4,
+        864,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "github.com/slay-a/autoquiz",
+      "textPreview": "github.com/slay-a/autoquiz",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "github.com/slay-a/autoquiz"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "github.com/slay-a/autoquiz",
+          "runs": [
+            {
+              "index": 1,
+              "text": "github.com/slay-a/autoquiz",
+              "fontSize": 17.33,
+              "typeface": "Consolas",
+              "color": "#CADCFC"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/54zidony",
+      "id": "7",
+      "name": "Shape 5",
+      "bbox": [
+        825.6,
+        0,
+        134.4,
+        540
+      ],
+      "geometry": "rect",
+      "fillColor": "#F96167",
+      "lineColor": "#F96167",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u9knih4b",
+      "id": "8",
+      "name": "Text 6",
+      "bbox": [
+        825.6,
+        220.8,
+        134.4,
+        96
+      ],
+      "geometry": "rect",
+      "text": "AQ",
+      "textPreview": "AQ",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "A"
+          },
+          {
+            "index": 2,
+            "text": "Q"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "AQ",
+          "runs": [
+            {
+              "index": 1,
+              "text": "AQ",
+              "fontSize": 106.67,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

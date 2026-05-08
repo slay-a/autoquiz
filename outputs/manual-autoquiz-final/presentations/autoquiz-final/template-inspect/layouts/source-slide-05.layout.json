@@ -1,0 +1,1015 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/mlkjm1cf",
+    "id": "mlkjm1cf",
+    "slide": 6,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Calibri",
+      "Georgia"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ovahoza1",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        38.4,
+        864,
+        67.2
+      ],
+      "geometry": "rect",
+      "text": "Multi-Agent TDD Workflow",
+      "textPreview": "Multi-Agent TDD Workflow",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Multi-Agent TDD Workflow"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Multi-Agent TDD Workflow",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Multi-Agent TDD Workflow",
+              "fontSize": 48,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dg7adsji",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        100.8,
+        864,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Each feature passes through four collaborating agents",
+      "textPreview": "Each feature passes through four collaborating agents",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Each feature passes through four collaborating agents"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Each feature passes through four collaborating agents",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Each feature passes through four collaborating agents",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#64748B",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6hcrmhk3",
+      "id": "4",
+      "name": "Shape 2",
+      "bbox": [
+        48,
+        158.4,
+        211.2,
+        340.8
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#CADCFC",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/z25kb6xk",
+      "id": "5",
+      "name": "Shape 3",
+      "bbox": [
+        48,
+        158.4,
+        211.2,
+        11.52
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/onyd0z61",
+      "id": "6",
+      "name": "Shape 4",
+      "bbox": [
+        72,
+        192,
+        52.8,
+        52.8
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/d8v6psfi",
+      "id": "7",
+      "name": "Text 5",
+      "bbox": [
+        72,
+        192,
+        52.8,
+        52.8
+      ],
+      "geometry": "rect",
+      "text": "1",
+      "textPreview": "1",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "1"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "1",
+          "runs": [
+            {
+              "index": 1,
+              "text": "1",
+              "fontSize": 29.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6dcbulwv",
+      "id": "8",
+      "name": "Text 6",
+      "bbox": [
+        67.2,
+        259.2,
+        172.8,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Test Creation",
+      "textPreview": "Test Creation",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Test Creation"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Test Creation",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Test Creation",
+              "fontSize": 22.67,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vy90je9c",
+      "id": "9",
+      "name": "Text 7",
+      "bbox": [
+        67.2,
+        312,
+        172.8,
+        177.6
+      ],
+      "geometry": "rect",
+      "text": "Writes failing tests from the feature spec (Red phase). pytest + Vitest suites grow alongside features.",
+      "textPreview": "Writes failing tests from the feature spec (Red phase). pytest + Vitest suites grow alongside features.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Writes failing tests from"
+          },
+          {
+            "index": 2,
+            "text": "the feature spec (Red"
+          },
+          {
+            "index": 3,
+            "text": "phase). pytest + Vitest"
+          },
+          {
+            "index": 4,
+            "text": "suites grow alongside"
+          },
+          {
+            "index": 5,
+            "text": "features."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Writes failing tests from the feature spec (Red phase). pytest + Vitest suites grow alongside features.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Writes failing tests from the feature spec (Red phase). pytest + Vitest suites grow alongside features.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nuxc3ylc",
+      "id": "10",
+      "name": "Shape 8",
+      "bbox": [
+        271.68,
+        158.4,
+        211.2,
+        340.8
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#CADCFC",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/y90je9cv",
+      "id": "11",
+      "name": "Shape 9",
+      "bbox": [
+        271.68,
+        158.4,
+        211.2,
+        11.52
+      ],
+      "geometry": "rect",
+      "fillColor": "#F96167",
+      "lineColor": "#F96167",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5wjudg7a",
+      "id": "12",
+      "name": "Shape 10",
+      "bbox": [
+        295.68,
+        192,
+        52.8,
+        52.8
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gbq1oryt",
+      "id": "13",
+      "name": "Text 11",
+      "bbox": [
+        295.68,
+        192,
+        52.8,
+        52.8
+      ],
+      "geometry": "rect",
+      "text": "2",
+      "textPreview": "2",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "2"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "2",
+          "runs": [
+            {
+              "index": 1,
+              "text": "2",
+              "fontSize": 29.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/n29gr2p8",
+      "id": "14",
+      "name": "Text 12",
+      "bbox": [
+        290.88,
+        259.2,
+        172.8,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Code Developer",
+      "textPreview": "Code Developer",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Code"
+          },
+          {
+            "index": 2,
+            "text": "Developer"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Code Developer",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Code Developer",
+              "fontSize": 22.67,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yhgn29gr",
+      "id": "15",
+      "name": "Text 13",
+      "bbox": [
+        290.88,
+        312,
+        172.8,
+        177.6
+      ],
+      "geometry": "rect",
+      "text": "Implements backend routes, services, frontend components and Supabase schema until tests pass (Green).",
+      "textPreview": "Implements backend routes, services, frontend components and Supabase schema until tests pass (Green).",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Implements backend"
+          },
+          {
+            "index": 2,
+            "text": "routes, services, frontend"
+          },
+          {
+            "index": 3,
+            "text": "components and"
+          },
+          {
+            "index": 4,
+            "text": "Supabase schema until"
+          },
+          {
+            "index": 5,
+            "text": "tests pass (Green)."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Implements backend routes, services, frontend components and Supabase schema until tests pass (Green).",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Implements backend routes, services, frontend components and Supabase schema until tests pass (Green).",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/58z25kb6",
+      "id": "16",
+      "name": "Shape 14",
+      "bbox": [
+        495.36,
+        158.4,
+        211.2,
+        340.8
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#CADCFC",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gn29gr2p",
+      "id": "17",
+      "name": "Shape 15",
+      "bbox": [
+        495.36,
+        158.4,
+        211.2,
+        11.52
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/neloj2t8",
+      "id": "18",
+      "name": "Shape 16",
+      "bbox": [
+        519.36,
+        192,
+        52.8,
+        52.8
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ytsvu9kn",
+      "id": "19",
+      "name": "Text 17",
+      "bbox": [
+        519.36,
+        192,
+        52.8,
+        52.8
+      ],
+      "geometry": "rect",
+      "text": "3",
+      "textPreview": "3",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "3"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "3",
+          "runs": [
+            {
+              "index": 1,
+              "text": "3",
+              "fontSize": 29.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/2x4nap4r",
+      "id": "20",
+      "name": "Text 18",
+      "bbox": [
+        514.56,
+        259.2,
+        172.8,
+        48
+      ],
+      "geometry": "rect",
+      "text": "Architecture Review",
+      "textPreview": "Architecture Review",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Architecture"
+          },
+          {
+            "index": 2,
+            "text": "Review"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Architecture Review",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Architecture Review",
+              "fontSize": 22.67,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vixczed8",
+      "id": "21",
+      "name": "Text 19",
+      "bbox": [
+        514.56,
+        312,
+        172.8,
+        177.6
+      ],
+      "geometry": "rect",
+      "text": "Validates each change against docs/DESIGN.md — layer boundaries, error envelopes, event catalog, RLS.",
+      "textPreview": "Validates each change against docs/DESIGN.md — layer boundaries, error envelopes, event catalog, RLS.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Validates each change"
+          },
+          {
+            "index": 2,
+            "text": "against docs/DESIGN.md"
+          },
+          {
+            "index": 3,
+            "text": "— layer boundaries, error"
+          },
+          {
+            "index": 4,
+            "text": "envelopes, event catalog,"
+          },
+          {
+            "index": 5,
+            "text": "RLS."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Validates each change against docs/DESIGN.md — layer boundaries, error envelopes, event catalog, RLS.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Validates each change against docs/DESIGN.md — layer boundaries, error envelopes, event catalog, RLS.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 21,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/k3q5o7qp",
+      "id": "22",
+      "name": "Shape 20",
+      "bbox": [
+        719.04,
+        158.4,
+        211.2,
+        340.8
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#CADCFC",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/donyd0z6",
+      "id": "23",
+      "name": "Shape 21",
+      "bbox": [
+        719.04,
+        158.4,
+        211.2,
+        11.52
+      ],
+      "geometry": "rect",
+      "fillColor": "#F96167",
+      "lineColor": "#F96167",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 23,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/6psfil0r",
+      "id": "24",
+      "name": "Shape 22",
+      "bbox": [
+        743.04,
+        192,
+        52.8,
+        52.8
+      ],
+      "geometry": "ellipse",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 24,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/val87ed8",
+      "id": "25",
+      "name": "Text 23",
+      "bbox": [
+        743.04,
+        192,
+        52.8,
+        52.8
+      ],
+      "geometry": "rect",
+      "text": "4",
+      "textPreview": "4",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "4"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "4",
+          "runs": [
+            {
+              "index": 1,
+              "text": "4",
+              "fontSize": 29.33,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 25,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/kre1w7mp",
+      "id": "26",
+      "name": "Text 24",
+      "bbox": [
+        738.24,
+        259.2,
+        172.8,
+        48
+      ],
+      "geometry": "rect",
+      "text": "DevOps",
+      "textPreview": "DevOps",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "DevOps"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "DevOps",
+          "runs": [
+            {
+              "index": 1,
+              "text": "DevOps",
+              "fontSize": 22.67,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 26,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dcbulwva",
+      "id": "27",
+      "name": "Text 25",
+      "bbox": [
+        738.24,
+        312,
+        172.8,
+        177.6
+      ],
+      "geometry": "rect",
+      "text": "CI gating, env hygiene, structured logging, rate-limiting, schema migrations, dev-orchestrator scripts.",
+      "textPreview": "CI gating, env hygiene, structured logging, rate-limiting, schema migrations, dev-orchestrator scripts.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "CI gating, env hygiene,"
+          },
+          {
+            "index": 2,
+            "text": "structured logging,"
+          },
+          {
+            "index": 3,
+            "text": "rate-limiting, schema"
+          },
+          {
+            "index": 4,
+            "text": "migrations,"
+          },
+          {
+            "index": 5,
+            "text": "dev-orchestrator scripts."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "CI gating, env hygiene, structured logging, rate-limiting, schema migrations, dev-orchestrator scripts.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "CI gating, env hygiene, structured logging, rate-limiting, schema migrations, dev-orchestrator scripts.",
+              "fontSize": 14.67,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

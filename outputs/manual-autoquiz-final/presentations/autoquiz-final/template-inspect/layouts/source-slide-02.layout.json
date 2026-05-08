@@ -1,0 +1,509 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/pg3ex0nu",
+    "id": "pg3ex0nu",
+    "slide": 3,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Calibri",
+      "Georgia"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/5o7qpg3e",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        38.4,
+        864,
+        67.2
+      ],
+      "geometry": "rect",
+      "text": "Purpose",
+      "textPreview": "Purpose",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Purpose"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Purpose",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Purpose",
+              "fontSize": 50.67,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/g3ex0nux",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        100.8,
+        864,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Why AutoQuiz exists",
+      "textPreview": "Why AutoQuiz exists",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Why AutoQuiz exists"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Why AutoQuiz exists",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Why AutoQuiz exists",
+              "fontSize": 21.33,
+              "typeface": "Calibri",
+              "color": "#64748B",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/r65wjudg",
+      "id": "4",
+      "name": "Shape 2",
+      "bbox": [
+        48,
+        163.2,
+        422.4,
+        336
+      ],
+      "geometry": "rect",
+      "fillColor": "#CADCFC",
+      "lineColor": "#CADCFC",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ylc7u54z",
+      "id": "5",
+      "name": "Shape 3",
+      "bbox": [
+        48,
+        163.2,
+        7.68,
+        336
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9cvixcze",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        72,
+        177.6,
+        384,
+        43.2
+      ],
+      "geometry": "rect",
+      "text": "The Problem",
+      "textPreview": "The Problem",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "The Problem"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "The Problem",
+          "runs": [
+            {
+              "index": 1,
+              "text": "The Problem",
+              "fontSize": 26.67,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/gr2p8nqx",
+      "id": "7",
+      "name": "Text 5",
+      "bbox": [
+        72,
+        230.4,
+        384,
+        259.2
+      ],
+      "geometry": "rect",
+      "text": "Instructors spend hours hand-crafting quizzes and review notes.\nStudents struggle to find study material grounded in their actual coursework.\nGeneric AI tools hallucinate — they aren't tied to the class material.",
+      "textPreview": "Instructors spend hours hand-crafting quizzes and review notes. | Students struggle to find study material grounded in their actual cours...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 6,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• Instructors spend hours hand-crafting"
+          },
+          {
+            "index": 2,
+            "text": "quizzes and review notes."
+          },
+          {
+            "index": 3,
+            "text": "• Students struggle to find study material"
+          },
+          {
+            "index": 4,
+            "text": "grounded in their actual coursework."
+          },
+          {
+            "index": 5,
+            "text": "• Generic AI tools hallucinate — they aren't"
+          },
+          {
+            "index": 6,
+            "text": "tied to the class material."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Instructors spend hours hand-crafting quizzes and review notes.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Instructors spend hours hand-crafting quizzes and review notes.",
+              "fontSize": 17.33,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Students struggle to find study material grounded in their actual coursework.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Students struggle to find study material grounded in their actual coursework.",
+              "fontSize": 17.33,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "Generic AI tools hallucinate — they aren't tied to the class material.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Generic AI tools hallucinate — they aren't tied to the class material.",
+              "fontSize": 17.33,
+              "typeface": "Calibri",
+              "color": "#0F172A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rytsvu9k",
+      "id": "8",
+      "name": "Shape 6",
+      "bbox": [
+        489.6,
+        163.2,
+        422.4,
+        336
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/yd0z6103",
+      "id": "9",
+      "name": "Shape 7",
+      "bbox": [
+        489.6,
+        163.2,
+        7.68,
+        336
+      ],
+      "geometry": "rect",
+      "fillColor": "#F96167",
+      "lineColor": "#F96167",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wb2hwfyx",
+      "id": "10",
+      "name": "Text 8",
+      "bbox": [
+        513.6,
+        177.6,
+        384,
+        43.2
+      ],
+      "geometry": "rect",
+      "text": "Our Solution",
+      "textPreview": "Our Solution",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Our Solution"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Our Solution",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Our Solution",
+              "fontSize": 26.67,
+              "typeface": "Georgia",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/lwval87e",
+      "id": "11",
+      "name": "Text 9",
+      "bbox": [
+        513.6,
+        230.4,
+        384,
+        259.2
+      ],
+      "geometry": "rect",
+      "text": "Upload PDF / DOCX / PPTX, get quizzes grounded in that material via RAG.\nInstructors share quizzes and structured notes with their classes.\nStudents generate personal quizzes and flashcards from any topic.",
+      "textPreview": "Upload PDF / DOCX / PPTX, get quizzes grounded in that material via RAG. | Instructors share quizzes and structured notes with their clas...",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 6,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• Upload PDF / DOCX / PPTX, get quizzes"
+          },
+          {
+            "index": 2,
+            "text": "grounded in that material via RAG."
+          },
+          {
+            "index": 3,
+            "text": "• Instructors share quizzes and structured"
+          },
+          {
+            "index": 4,
+            "text": "notes with their classes."
+          },
+          {
+            "index": 5,
+            "text": "• Students generate personal quizzes and"
+          },
+          {
+            "index": 6,
+            "text": "flashcards from any topic."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Upload PDF / DOCX / PPTX, get quizzes grounded in that material via RAG.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Upload PDF / DOCX / PPTX, get quizzes grounded in that material via RAG.",
+              "fontSize": 17.33,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "text": "Instructors share quizzes and structured notes with their classes.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Instructors share quizzes and structured notes with their classes.",
+              "fontSize": 17.33,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "text": "Students generate personal quizzes and flashcards from any topic.",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Students generate personal quizzes and flashcards from any topic.",
+              "fontSize": 17.33,
+              "typeface": "Calibri",
+              "color": "#CADCFC"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

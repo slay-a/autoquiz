@@ -1,0 +1,533 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/58z25kb6",
+    "id": "58z25kb6",
+    "slide": 7,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Calibri",
+      "Georgia"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ylc7u54z",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        38.4,
+        864,
+        67.2
+      ],
+      "geometry": "rect",
+      "text": "Individual Contributions",
+      "textPreview": "Individual Contributions",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Individual Contributions"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Individual Contributions",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Individual Contributions",
+              "fontSize": 48,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/r65wjudg",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        100.8,
+        864,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Each commit authored under the contributor's own GitHub identity",
+      "textPreview": "Each commit authored under the contributor's own GitHub identity",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Each commit authored under the contributor's own GitHub identity"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Each commit authored under the contributor's own GitHub identity",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Each commit authored under the contributor's own GitHub identity",
+              "fontSize": 17.33,
+              "typeface": "Calibri",
+              "color": "#64748B",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "table",
+      "scope": "slide",
+      "aid": "tb/5gbq1ory",
+      "id": "4",
+      "name": "Table 0",
+      "bbox": [
+        38.4,
+        148.8,
+        883.2,
+        364.8
+      ],
+      "text": "Contributor | GitHub | Modules / Scope\nSrilaya Ponangi (Laya) | @slay-a | Project scaffold and full-stack skeleton; docs/DESIGN.md authoring and revisions (architecture, error handling, event catalog, schema); multi-agent pipeline + .claude/agents/* setup; FEAT-001 auth pipeline run; TopBar profile entry point and light-mode UI fixes; backend config hardening (Pydantic v2); repo hygiene (.gitignore, env examples, router future flags).\nJustin Reyes | @justinreyes145 | FEAT-004 LlamaIndex ingestion (parse → clean → chunk → embed); FEAT-005 file upload + storage; FEAT-006 quiz generation (GPT-4o + RAG); FEAT-007 quiz study & saving (with Shima); FEAT-008 quiz sharing; FEAT-009 student notes; FEAT-010 instructor notes (with Shima); FEAT-011 flashcard study; FEAT-013 user-story drafting; test-suite stabilisation.\nShima (Shabnam) Jabbari | @ShimaJabbari\n@Shabnamjabbari | FEAT-002 class management (instructor); FEAT-003 class membership (student); FEAT-012 dark mode + theme preferences; FEAT-013 user profile (avatar, RLS); FEAT-014 event-catalog completeness; layer-boundary enforcement (FastAPI route migration); JWT signature verification (issue-037); error-envelope standardisation (issue-022).",
+      "textPreview": "Contributor | GitHub | Modules / Scope | Srilaya Ponangi (Laya) | @slay-a | Project scaffold and full-stack skeleton; docs/DESIGN.md auth...",
+      "rows": 4,
+      "cols": 3,
+      "cells": [
+        {
+          "index": 1,
+          "row": 1,
+          "column": 1,
+          "bbox": [
+            38.4,
+            148.8,
+            163.2,
+            38.4
+          ],
+          "text": "Contributor",
+          "textPreview": "Contributor",
+          "fillColor": "#1E2761",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Contributor",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Contributor",
+                  "fontSize": 16,
+                  "typeface": "Calibri",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "row": 1,
+          "column": 2,
+          "bbox": [
+            201.6,
+            148.8,
+            134.4,
+            38.4
+          ],
+          "text": "GitHub",
+          "textPreview": "GitHub",
+          "fillColor": "#1E2761",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "GitHub",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "GitHub",
+                  "fontSize": 16,
+                  "typeface": "Calibri",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "row": 1,
+          "column": 3,
+          "bbox": [
+            336,
+            148.8,
+            585.6,
+            38.4
+          ],
+          "text": "Modules / Scope",
+          "textPreview": "Modules / Scope",
+          "fillColor": "#1E2761",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Modules / Scope",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Modules / Scope",
+                  "fontSize": 16,
+                  "typeface": "Calibri",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "row": 2,
+          "column": 1,
+          "bbox": [
+            38.4,
+            187.2,
+            163.2,
+            110.4
+          ],
+          "text": "Srilaya Ponangi (Laya)",
+          "textPreview": "Srilaya Ponangi (Laya)",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Srilaya Ponangi (Laya)",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Srilaya Ponangi (Laya)",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#1E2761",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "row": 2,
+          "column": 2,
+          "bbox": [
+            201.6,
+            187.2,
+            134.4,
+            110.4
+          ],
+          "text": "@slay-a",
+          "textPreview": "@slay-a",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "@slay-a",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "@slay-a",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#F96167"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "row": 2,
+          "column": 3,
+          "bbox": [
+            336,
+            187.2,
+            585.6,
+            110.4
+          ],
+          "text": "Project scaffold and full-stack skeleton; docs/DESIGN.md authoring and revisions (architecture, error handling, event catalog, schema); multi-agent pipeline + .claude/agents/* setup; FEAT-001 auth pipeline run; TopBar profile entry point and light-mode UI fixes; backend config hardening (Pydantic v2); repo hygiene (.gitignore, env examples, router future flags).",
+          "textPreview": "Project scaffold and full-stack skeleton; docs/DESIGN.md authoring and revisions (architecture, error handling, event catalog, schema); m...",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Project scaffold and full-stack skeleton; docs/DESIGN.md authoring and revisions (architecture, error handling, event catalog, schema); multi-agent pipeline + .claude/agents/* setup; FEAT-001 auth pipeline run; TopBar profile entry point and light-mode UI fixes; backend config hardening (Pydantic v2); repo hygiene (.gitignore, env examples, router future flags).",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Project scaffold and full-stack skeleton; docs/DESIGN.md authoring and revisions (architecture, error handling, event catalog, schema); multi-agent pipeline + .claude/agents/* setup; FEAT-001 auth pipeline run; TopBar profile entry point and light-mode UI fixes; backend config hardening (Pydantic v2); repo hygiene (.gitignore, env examples, router future flags).",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "row": 3,
+          "column": 1,
+          "bbox": [
+            38.4,
+            297.6,
+            163.2,
+            115.2
+          ],
+          "text": "Justin Reyes",
+          "textPreview": "Justin Reyes",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Justin Reyes",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Justin Reyes",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#1E2761",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "row": 3,
+          "column": 2,
+          "bbox": [
+            201.6,
+            297.6,
+            134.4,
+            115.2
+          ],
+          "text": "@justinreyes145",
+          "textPreview": "@justinreyes145",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "@justinreyes145",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "@justinreyes145",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#F96167"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "row": 3,
+          "column": 3,
+          "bbox": [
+            336,
+            297.6,
+            585.6,
+            115.2
+          ],
+          "text": "FEAT-004 LlamaIndex ingestion (parse → clean → chunk → embed); FEAT-005 file upload + storage; FEAT-006 quiz generation (GPT-4o + RAG); FEAT-007 quiz study & saving (with Shima); FEAT-008 quiz sharing; FEAT-009 student notes; FEAT-010 instructor notes (with Shima); FEAT-011 flashcard study; FEAT-013 user-story drafting; test-suite stabilisation.",
+          "textPreview": "FEAT-004 LlamaIndex ingestion (parse → clean → chunk → embed); FEAT-005 file upload + storage; FEAT-006 quiz generation (GPT-4o + RAG); F...",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "FEAT-004 LlamaIndex ingestion (parse → clean → chunk → embed); FEAT-005 file upload + storage; FEAT-006 quiz generation (GPT-4o + RAG); FEAT-007 quiz study & saving (with Shima); FEAT-008 quiz sharing; FEAT-009 student notes; FEAT-010 instructor notes (with Shima); FEAT-011 flashcard study; FEAT-013 user-story drafting; test-suite stabilisation.",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "FEAT-004 LlamaIndex ingestion (parse → clean → chunk → embed); FEAT-005 file upload + storage; FEAT-006 quiz generation (GPT-4o + RAG); FEAT-007 quiz study & saving (with Shima); FEAT-008 quiz sharing; FEAT-009 student notes; FEAT-010 instructor notes (with Shima); FEAT-011 flashcard study; FEAT-013 user-story drafting; test-suite stabilisation.",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "row": 4,
+          "column": 1,
+          "bbox": [
+            38.4,
+            412.8,
+            163.2,
+            100.8
+          ],
+          "text": "Shima (Shabnam) Jabbari",
+          "textPreview": "Shima (Shabnam) Jabbari",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Shima (Shabnam) Jabbari",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Shima (Shabnam) Jabbari",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#1E2761",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "row": 4,
+          "column": 2,
+          "bbox": [
+            201.6,
+            412.8,
+            134.4,
+            100.8
+          ],
+          "text": "@ShimaJabbari\n@Shabnamjabbari",
+          "textPreview": "@ShimaJabbari | @Shabnamjabbari",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "@ShimaJabbari",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "@ShimaJabbari",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#F96167"
+                }
+              ]
+            },
+            {
+              "index": 2,
+              "text": "@Shabnamjabbari",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "@Shabnamjabbari",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#F96167"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "row": 4,
+          "column": 3,
+          "bbox": [
+            336,
+            412.8,
+            585.6,
+            100.8
+          ],
+          "text": "FEAT-002 class management (instructor); FEAT-003 class membership (student); FEAT-012 dark mode + theme preferences; FEAT-013 user profile (avatar, RLS); FEAT-014 event-catalog completeness; layer-boundary enforcement (FastAPI route migration); JWT signature verification (issue-037); error-envelope standardisation (issue-022).",
+          "textPreview": "FEAT-002 class management (instructor); FEAT-003 class membership (student); FEAT-012 dark mode + theme preferences; FEAT-013 user profil...",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "FEAT-002 class management (instructor); FEAT-003 class membership (student); FEAT-012 dark mode + theme preferences; FEAT-013 user profile (avatar, RLS); FEAT-014 event-catalog completeness; layer-boundary enforcement (FastAPI route migration); JWT signature verification (issue-037); error-envelope standardisation (issue-022).",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "FEAT-002 class management (instructor); FEAT-003 class membership (student); FEAT-012 dark mode + theme preferences; FEAT-013 user profile (avatar, RLS); FEAT-014 event-catalog completeness; layer-boundary enforcement (FastAPI route migration); JWT signature verification (issue-037); error-envelope standardisation (issue-022).",
+                  "fontSize": 14,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

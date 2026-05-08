@@ -343,6 +343,30 @@ def join_class(
     }
 
 
+class LeaveClassRequest(BaseModel):
+    class_id: str
+
+
+@router.post("/leave", status_code=200)
+def leave_class(
+    req: LeaveClassRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    """Student leaves a class by class_id."""
+    remove_class_member(req.class_id, current_user["id"])
+    log_event(
+        event="class.member.left",
+        level="INFO",
+        outcome="success",
+        actor_id=current_user["id"],
+        actor_role=current_user.get("role"),
+        resource_type="class",
+        resource_id=req.class_id,
+        meta={"class_id": req.class_id},
+    )
+    return {"message": "Successfully left class"}
+
+
 @router.get("/student/classes", response_model=list[StudentClassItem])
 def get_student_classes_route(current_user: dict = Depends(get_current_user)):
     """

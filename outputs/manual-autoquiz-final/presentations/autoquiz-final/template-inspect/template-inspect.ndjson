@@ -1,0 +1,99 @@
+{"kind":"slide","id":"sl/2x4nap4r","slide":2,"title":"AutoQuiz","textShapes":6}
+{"kind":"textbox","id":"sh/cvixczed","slide":2,"textChars":8,"textLines":1}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":2,"textChars":25,"textLines":1}
+{"kind":"textbox","id":"sh/udg7adsj","slide":2,"textChars":87,"textLines":1}
+{"kind":"textbox","id":"sh/nyd0z610","slide":2,"textChars":44,"textLines":1}
+{"kind":"textbox","id":"sh/cj6tovah","slide":2,"textChars":26,"textLines":1}
+{"kind":"shape","id":"sh/54zidony","slide":2,"name":"Shape 5","bbox":[825.6,0,134.4,540]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":2,"textChars":2,"textLines":1}
+{"kind":"slide","id":"sl/pg3ex0nu","slide":3,"title":"Purpose","textShapes":6}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":3,"textChars":7,"textLines":1}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":3,"textChars":19,"textLines":1}
+{"kind":"shape","id":"sh/r65wjudg","slide":3,"name":"Shape 2","bbox":[48,163.2,422.4,336]}
+{"kind":"shape","id":"sh/ylc7u54z","slide":3,"name":"Shape 3","bbox":[48,163.2,7.68,336]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":3,"textChars":11,"textLines":1}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":3,"textChars":212,"textLines":3}
+{"kind":"shape","id":"sh/rytsvu9k","slide":3,"name":"Shape 6","bbox":[489.6,163.2,422.4,336]}
+{"kind":"shape","id":"sh/yd0z6103","slide":3,"name":"Shape 7","bbox":[489.6,163.2,7.68,336]}
+{"kind":"textbox","id":"sh/wb2hwfyx","slide":3,"textChars":12,"textLines":1}
+{"kind":"textbox","id":"sh/lwval87e","slide":3,"textChars":205,"textLines":3}
+{"kind":"slide","id":"sl/s72x4nap","slide":4,"title":"What the App Does","textShapes":6}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":4,"textChars":17,"textLines":1}
+{"kind":"textbox","id":"sh/dsji5sne","slide":4,"textChars":23,"textLines":1}
+{"kind":"shape","id":"sh/6dcbulwv","slide":4,"name":"Shape 2","bbox":[48,163.2,422.4,336]}
+{"kind":"shape","id":"sh/vy90je9c","slide":4,"name":"Shape 3","bbox":[48,163.2,422.4,52.8]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":4,"textChars":11,"textLines":1}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":4,"textChars":220,"textLines":7}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":4,"name":"Shape 6","bbox":[489.6,163.2,422.4,336]}
+{"kind":"shape","id":"sh/z25kb6xk","slide":4,"name":"Shape 7","bbox":[489.6,163.2,422.4,52.8]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":4,"textChars":8,"textLines":1}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":4,"textChars":234,"textLines":7}
+{"kind":"slide","id":"sl/val87ed8","slide":5,"title":"Architecture","textShapes":16}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":5,"textChars":12,"textLines":1}
+{"kind":"textbox","id":"sh/je9cvixc","slide":5,"textChars":54,"textLines":1}
+{"kind":"shape","id":"sh/87ed8bat","slide":5,"name":"Shape 2","bbox":[48,163.2,170.88,129.6]}
+{"kind":"textbox","id":"sh/xs72x4na","slide":5,"textChars":7,"textLines":1}
+{"kind":"textbox","id":"sh/q1orytsv","slide":5,"textChars":24,"textLines":2}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":5,"textChars":1,"textLines":1}
+{"kind":"shape","id":"sh/8jqh0fep","slide":5,"name":"Shape 6","bbox":[223.68,163.2,170.88,129.6]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":5,"textChars":3,"textLines":1}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":5,"textChars":21,"textLines":2}
+{"kind":"textbox","id":"sh/8bat47y1","slide":5,"textChars":1,"textLines":1}
+{"kind":"shape","id":"sh/jqh0fepk","slide":5,"name":"Shape 10","bbox":[399.36,163.2,170.88,129.6]}
+{"kind":"textbox","id":"sh/q5o7qpg3","slide":5,"textChars":5,"textLines":1}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":5,"textChars":26,"textLines":2}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":5,"textChars":1,"textLines":1}
+{"kind":"shape","id":"sh/j2t83itg","slide":5,"name":"Shape 14","bbox":[575.04,163.2,170.88,129.6]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":5,"textChars":3,"textLines":1}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":5,"textChars":28,"textLines":2}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":5,"textChars":1,"textLines":1}
+{"kind":"shape","id":"sh/sfil0rqd","slide":5,"name":"Shape 18","bbox":[750.72,163.2,170.88,129.6]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":5,"textChars":9,"textLines":1}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":5,"textChars":33,"textLines":2}
+{"kind":"table","id":"tb/8bat47y1","slide":5,"name":"Table 0","rows":8,"cols":2,"preview":"Layer | Technology","bbox":[48,316.8,864,96]}
+{"kind":"slide","id":"sl/mlkjm1cf","slide":6,"title":"Multi-Agent TDD Workflow","textShapes":14}
+{"kind":"textbox","id":"sh/ovahoza1","slide":6,"textChars":24,"textLines":1}
+{"kind":"textbox","id":"sh/dg7adsji","slide":6,"textChars":53,"textLines":1}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":6,"name":"Shape 2","bbox":[48,158.4,211.2,340.8]}
+{"kind":"shape","id":"sh/z25kb6xk","slide":6,"name":"Shape 3","bbox":[48,158.4,211.2,11.52]}
+{"kind":"shape","id":"sh/onyd0z61","slide":6,"name":"Shape 4","bbox":[72,192,52.8,52.8]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":6,"textChars":1,"textLines":1}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":6,"textChars":13,"textLines":1}
+{"kind":"textbox","id":"sh/vy90je9c","slide":6,"textChars":103,"textLines":1}
+{"kind":"shape","id":"sh/nuxc3ylc","slide":6,"name":"Shape 8","bbox":[271.68,158.4,211.2,340.8]}
+{"kind":"shape","id":"sh/y90je9cv","slide":6,"name":"Shape 9","bbox":[271.68,158.4,211.2,11.52]}
+{"kind":"shape","id":"sh/5wjudg7a","slide":6,"name":"Shape 10","bbox":[295.68,192,52.8,52.8]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":6,"textChars":1,"textLines":1}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":6,"textChars":14,"textLines":1}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":6,"textChars":102,"textLines":1}
+{"kind":"shape","id":"sh/58z25kb6","slide":6,"name":"Shape 14","bbox":[495.36,158.4,211.2,340.8]}
+{"kind":"shape","id":"sh/gn29gr2p","slide":6,"name":"Shape 15","bbox":[495.36,158.4,211.2,11.52]}
+{"kind":"shape","id":"sh/neloj2t8","slide":6,"name":"Shape 16","bbox":[519.36,192,52.8,52.8]}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":6,"textChars":1,"textLines":1}
+{"kind":"textbox","id":"sh/2x4nap4r","slide":6,"textChars":19,"textLines":1}
+{"kind":"textbox","id":"sh/vixczed8","slide":6,"textChars":101,"textLines":1}
+{"kind":"shape","id":"sh/k3q5o7qp","slide":6,"name":"Shape 20","bbox":[719.04,158.4,211.2,340.8]}
+{"kind":"shape","id":"sh/donyd0z6","slide":6,"name":"Shape 21","bbox":[719.04,158.4,211.2,11.52]}
+{"kind":"shape","id":"sh/6psfil0r","slide":6,"name":"Shape 22","bbox":[743.04,192,52.8,52.8]}
+{"kind":"textbox","id":"sh/val87ed8","slide":6,"textChars":1,"textLines":1}
+{"kind":"textbox","id":"sh/kre1w7mp","slide":6,"textChars":6,"textLines":1}
+{"kind":"textbox","id":"sh/dcbulwva","slide":6,"textChars":103,"textLines":1}
+{"kind":"slide","id":"sl/58z25kb6","slide":7,"title":"Individual Contributions","textShapes":2}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":7,"textChars":24,"textLines":1}
+{"kind":"textbox","id":"sh/r65wjudg","slide":7,"textChars":64,"textLines":1}
+{"kind":"table","id":"tb/5gbq1ory","slide":7,"name":"Table 0","rows":4,"cols":3,"preview":"Contributor | GitHub | Modules / Scope","bbox":[38.4,148.8,883.2,96]}
+{"kind":"slide","id":"sl/0z61032l","slide":8,"title":"Live Demo","textShapes":4}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":8,"textChars":9,"textLines":1}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":8,"textChars":90,"textLines":1}
+{"kind":"shape","id":"sh/fa9w3m94","slide":8,"name":"Shape 2","bbox":[144,163.2,672,326.4]}
+{"kind":"shape","id":"sh/qpg3ex0n","slide":8,"name":"Shape 3","bbox":[446.4,288,76.8,76.8]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":8,"textChars":25,"textLines":1}
+{"kind":"textbox","id":"sh/8v6psfil","slide":8,"textChars":73,"textLines":1}
+{"kind":"slide","id":"sl/fu18jqh0","slide":9,"title":"Repository & Submission","textShapes":4}
+{"kind":"textbox","id":"sh/u9knih4b","slide":9,"textChars":23,"textLines":1}
+{"kind":"textbox","id":"sh/judg7ads","slide":9,"textChars":31,"textLines":1}
+{"kind":"shape","id":"sh/c7u54zid","slide":9,"name":"Shape 2","bbox":[48,158.4,864,96]}
+{"kind":"textbox","id":"sh/1orytsvu","slide":9,"textChars":17,"textLines":1}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":9,"textChars":26,"textLines":1}
+{"kind":"table","id":"tb/itgfmlkj","slide":9,"name":"Table 0","rows":8,"cols":2,"preview":"Deliverable | Location","bbox":[48,273.6,864,96]}
+{"kind":"notice","message":"Truncated: omitted 0 lines. Increase maxChars or narrow target."}

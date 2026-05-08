@@ -4,7 +4,7 @@ import { supabase } from "../../lib/supabase";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   BookOpen, Layers, PlusCircle, Users, FileText,
-  Loader2, LogIn, Globe, Lock
+  Loader2, LogIn, Globe, Lock, Trash2, LogOut
 } from "lucide-react";
 
 export default function StudentDashboard() {
@@ -214,19 +214,29 @@ export default function StudentDashboard() {
         <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-violet-400 animate-spin" /></div>
       ) : (
         <>
-          {tab === "quizzes"    && <QuizList quizzes={myQuizzes} emptyMsg="You haven't generated any quizzes yet." />}
+          {tab === "quizzes"    && <QuizList quizzes={myQuizzes} emptyMsg="You haven't generated any quizzes yet." onRefresh={fetchAll} />}
           {tab === "class"      && <QuizList quizzes={classQuizzes} emptyMsg="No quizzes shared by instructors yet." showClass />}
           {tab === "notes"      && <NotesList notes={classNotes} />}
           {tab === "mynotes"    && <MyNotesList notes={myNotes} />}
-          {tab === "flashcards" && <FlashcardList sets={flashcardSets} />}
-          {tab === "classes"    && <ClassList classes={classes} />}
+          {tab === "flashcards" && <FlashcardList sets={flashcardSets} onRefresh={fetchAll} />}
+          {tab === "classes"    && <ClassList classes={classes} onRefresh={fetchAll} />}
         </>
       )}
     </div>
   );
 }
 
-function QuizList({ quizzes, emptyMsg, showClass }) {
+function QuizList({ quizzes, emptyMsg, showClass, onRefresh }) {
+  async function deleteQuiz(id) {
+    if (!confirm("Delete this quiz?")) return;
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    await fetch(`http://localhost:8000/quiz/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    onRefresh?.();
+  }
+
   if (!quizzes.length) return (
     <div className="card p-10 text-center text-gray-400 dark:text-slate-500 space-y-2">
       <BookOpen className="w-8 h-8 mx-auto opacity-40" />
@@ -248,6 +258,11 @@ function QuizList({ quizzes, emptyMsg, showClass }) {
             </p>
           </div>
           <Link to={`/quiz/${q.id}`} className="btn-primary text-xs py-1.5">Study</Link>
+          {!showClass && (
+            <button onClick={() => deleteQuiz(q.id)} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors">
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       ))}
     </div>
@@ -281,7 +296,17 @@ function NotesList({ notes }) {
   );
 }
 
-function FlashcardList({ sets }) {
+function FlashcardList({ sets, onRefresh }) {
+  async function deleteSet(id) {
+    if (!confirm("Delete this flashcard set?")) return;
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    await fetch(`http://localhost:8000/flashcards/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    onRefresh?.();
+  }
+
   if (!sets.length) return (
     <div className="card p-10 text-center text-gray-400 dark:text-slate-500 space-y-2">
       <Layers className="w-8 h-8 mx-auto opacity-40" />
@@ -300,13 +325,27 @@ function FlashcardList({ sets }) {
             <p className="text-xs text-gray-400 dark:text-slate-500">{s.cards?.length} cards</p>
           </div>
           <Link to={`/flashcards/${s.id}`} className="btn-primary text-xs py-1.5">Study</Link>
+          <button onClick={() => deleteSet(s.id)} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors">
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       ))}
     </div>
   );
 }
 
-function ClassList({ classes }) {
+function ClassList({ classes, onRefresh }) {
+  async function leaveClass(id, name) {
+    if (!confirm(`Leave "${name}"?`)) return;
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+    await fetch("http://localhost:8000/classes/leave", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ class_id: id }),
+    });
+    onRefresh?.();
+  }
+
   if (!classes.length) return (
     <div className="card p-10 text-center text-gray-400 dark:text-slate-500 space-y-2">
       <Users className="w-8 h-8 mx-auto opacity-40" />
@@ -321,9 +360,12 @@ function ClassList({ classes }) {
             <h3 className="font-semibold text-gray-800 dark:text-slate-100">{c.name}</h3>
             <span className="badge bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 font-mono">{c.class_code}</span>
           </div>
-          <p className="text-xs text-gray-400 dark:text-slate-500">
+          <p className="text-xs text-gray-400 dark:text-slate-500 mb-3">
             {c.description || "No description"}
           </p>
+          <button onClick={() => leaveClass(c.id, c.name)} className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-500 transition-colors">
+            <LogOut className="w-3.5 h-3.5" /> Leave class
+          </button>
         </div>
       ))}
     </div>

@@ -97,6 +97,17 @@ def save_quiz(
     return result.data[0]
 
 
+def delete_quiz(quiz_id: str, user_id: str) -> None:
+    """Delete a quiz owned by user_id. Raises QuizNotFoundError if not found or not owned."""
+    supabase = get_supabase()
+    result = supabase.table("saved_quizzes").select("created_by").eq("id", quiz_id).execute()
+    if not result.data:
+        raise QuizNotFoundError("Quiz not found")
+    if result.data[0]["created_by"] != user_id:
+        raise QuizNotFoundError("Quiz not found")
+    supabase.table("saved_quizzes").delete().eq("id", quiz_id).execute()
+
+
 def get_my_quizzes(user_id: str) -> list:
     """Return all saved quizzes for the authenticated student, newest-first."""
     supabase = get_supabase()

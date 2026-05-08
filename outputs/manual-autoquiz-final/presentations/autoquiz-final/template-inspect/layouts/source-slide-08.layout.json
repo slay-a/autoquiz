@@ -1,0 +1,742 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/fu18jqh0",
+    "id": "fu18jqh0",
+    "slide": 9,
+    "layoutId": "/ppt/slideLayouts/slideLayout1.xml",
+    "layoutName": "DEFAULT",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "typefaces": [
+      "+mn-lt",
+      "Calibri",
+      "Consolas",
+      "Georgia"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout1.xml",
+      "name": "DEFAULT",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u9knih4b",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        48,
+        38.4,
+        864,
+        67.2
+      ],
+      "geometry": "rect",
+      "text": "Repository & Submission",
+      "textPreview": "Repository & Submission",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Repository & Submission"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Repository & Submission",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Repository & Submission",
+              "fontSize": 48,
+              "typeface": "Georgia",
+              "color": "#1E2761",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/judg7ads",
+      "id": "3",
+      "name": "Text 1",
+      "bbox": [
+        48,
+        100.8,
+        864,
+        38.4
+      ],
+      "geometry": "rect",
+      "text": "Where to find every deliverable",
+      "textPreview": "Where to find every deliverable",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Where to find every deliverable"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Where to find every deliverable",
+          "runs": [
+            {
+              "index": 1,
+              "text": "Where to find every deliverable",
+              "fontSize": 18.67,
+              "typeface": "Calibri",
+              "color": "#64748B",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/c7u54zid",
+      "id": "4",
+      "name": "Shape 2",
+      "bbox": [
+        48,
+        158.4,
+        864,
+        96
+      ],
+      "geometry": "rect",
+      "fillColor": "#1E2761",
+      "lineColor": "#1E2761",
+      "lineWidth": 1.33
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1orytsvu",
+      "id": "5",
+      "name": "Text 3",
+      "bbox": [
+        67.2,
+        168,
+        825.6,
+        33.6
+      ],
+      "geometry": "rect",
+      "text": "GitHub Repository",
+      "textPreview": "GitHub Repository",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "GitHub Repository"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "GitHub Repository",
+          "runs": [
+            {
+              "index": 1,
+              "text": "GitHub Repository",
+              "fontSize": 16,
+              "typeface": "Calibri",
+              "color": "#CADCFC",
+              "italic": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/u18jqh0f",
+      "id": "6",
+      "name": "Text 4",
+      "bbox": [
+        67.2,
+        201.6,
+        825.6,
+        48
+      ],
+      "geometry": "rect",
+      "text": "github.com/slay-a/autoquiz",
+      "textPreview": "github.com/slay-a/autoquiz",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "alignment": "left"
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "github.com/slay-a/autoquiz"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "github.com/slay-a/autoquiz",
+          "runs": [
+            {
+              "index": 1,
+              "text": "github.com/slay-a/autoquiz",
+              "fontSize": 34.67,
+              "typeface": "Consolas",
+              "color": "#FFFFFF",
+              "bold": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "table",
+      "scope": "slide",
+      "aid": "tb/itgfmlkj",
+      "id": "7",
+      "name": "Table 0",
+      "bbox": [
+        48,
+        273.6,
+        864,
+        215.04
+      ],
+      "text": "Deliverable | Location\nThis presentation (PPTX) | Canvas\nArchitectural document (DESIGN.md) | Google Sheets · docs/DESIGN.md\nUser stories + acceptance criteria | specs/IMPLEMENTED_USER_STORIES.md\nTest case index | docs/TESTCASES.md\nBackend tests (pytest, 270+) | backend/tests/ — CI gated\nFrontend tests (Vitest, 290+) | frontend/src/__tests__/ — CI gated\nMulti-agent TDD config | .claude/agents/",
+      "textPreview": "Deliverable | Location | This presentation (PPTX) | Canvas | Architectural document (DESIGN.md) | Google Sheets · docs/DESIGN.md | User s...",
+      "rows": 8,
+      "cols": 2,
+      "cells": [
+        {
+          "index": 1,
+          "row": 1,
+          "column": 1,
+          "bbox": [
+            48,
+            273.6,
+            403.2,
+            26.88
+          ],
+          "text": "Deliverable",
+          "textPreview": "Deliverable",
+          "fillColor": "#1E2761",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Deliverable",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Deliverable",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "row": 1,
+          "column": 2,
+          "bbox": [
+            451.2,
+            273.6,
+            460.8,
+            26.88
+          ],
+          "text": "Location",
+          "textPreview": "Location",
+          "fillColor": "#1E2761",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Location",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Location",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#FFFFFF",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "row": 2,
+          "column": 1,
+          "bbox": [
+            48,
+            300.48,
+            403.2,
+            26.88
+          ],
+          "text": "This presentation (PPTX)",
+          "textPreview": "This presentation (PPTX)",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "This presentation (PPTX)",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "This presentation (PPTX)",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "row": 2,
+          "column": 2,
+          "bbox": [
+            451.2,
+            300.48,
+            460.8,
+            26.88
+          ],
+          "text": "Canvas",
+          "textPreview": "Canvas",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Canvas",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Canvas",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "row": 3,
+          "column": 1,
+          "bbox": [
+            48,
+            327.36,
+            403.2,
+            26.88
+          ],
+          "text": "Architectural document (DESIGN.md)",
+          "textPreview": "Architectural document (DESIGN.md)",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Architectural document (DESIGN.md)",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Architectural document (DESIGN.md)",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "row": 3,
+          "column": 2,
+          "bbox": [
+            451.2,
+            327.36,
+            460.8,
+            26.88
+          ],
+          "text": "Google Sheets · docs/DESIGN.md",
+          "textPreview": "Google Sheets · docs/DESIGN.md",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Google Sheets · docs/DESIGN.md",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Google Sheets · docs/DESIGN.md",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "row": 4,
+          "column": 1,
+          "bbox": [
+            48,
+            354.24,
+            403.2,
+            26.88
+          ],
+          "text": "User stories + acceptance criteria",
+          "textPreview": "User stories + acceptance criteria",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "User stories + acceptance criteria",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "User stories + acceptance criteria",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "row": 4,
+          "column": 2,
+          "bbox": [
+            451.2,
+            354.24,
+            460.8,
+            26.88
+          ],
+          "text": "specs/IMPLEMENTED_USER_STORIES.md",
+          "textPreview": "specs/IMPLEMENTED_USER_STORIES.md",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "specs/IMPLEMENTED_USER_STORIES.md",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "specs/IMPLEMENTED_USER_STORIES.md",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "row": 5,
+          "column": 1,
+          "bbox": [
+            48,
+            381.12,
+            403.2,
+            26.88
+          ],
+          "text": "Test case index",
+          "textPreview": "Test case index",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Test case index",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Test case index",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "row": 5,
+          "column": 2,
+          "bbox": [
+            451.2,
+            381.12,
+            460.8,
+            26.88
+          ],
+          "text": "docs/TESTCASES.md",
+          "textPreview": "docs/TESTCASES.md",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "docs/TESTCASES.md",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "docs/TESTCASES.md",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "row": 6,
+          "column": 1,
+          "bbox": [
+            48,
+            408,
+            403.2,
+            26.88
+          ],
+          "text": "Backend tests (pytest, 270+)",
+          "textPreview": "Backend tests (pytest, 270+)",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Backend tests (pytest, 270+)",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Backend tests (pytest, 270+)",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "row": 6,
+          "column": 2,
+          "bbox": [
+            451.2,
+            408,
+            460.8,
+            26.88
+          ],
+          "text": "backend/tests/ — CI gated",
+          "textPreview": "backend/tests/ — CI gated",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "backend/tests/ — CI gated",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "backend/tests/ — CI gated",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "row": 7,
+          "column": 1,
+          "bbox": [
+            48,
+            434.88,
+            403.2,
+            26.88
+          ],
+          "text": "Frontend tests (Vitest, 290+)",
+          "textPreview": "Frontend tests (Vitest, 290+)",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Frontend tests (Vitest, 290+)",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Frontend tests (Vitest, 290+)",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "row": 7,
+          "column": 2,
+          "bbox": [
+            451.2,
+            434.88,
+            460.8,
+            26.88
+          ],
+          "text": "frontend/src/__tests__/ — CI gated",
+          "textPreview": "frontend/src/__tests__/ — CI gated",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "frontend/src/__tests__/ — CI gated",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "frontend/src/__tests__/ — CI gated",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "row": 8,
+          "column": 1,
+          "bbox": [
+            48,
+            461.76,
+            403.2,
+            26.88
+          ],
+          "text": "Multi-agent TDD config",
+          "textPreview": "Multi-agent TDD config",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": "Multi-agent TDD config",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": "Multi-agent TDD config",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "row": 8,
+          "column": 2,
+          "bbox": [
+            451.2,
+            461.76,
+            460.8,
+            26.88
+          ],
+          "text": ".claude/agents/",
+          "textPreview": ".claude/agents/",
+          "paragraphs": [
+            {
+              "index": 1,
+              "text": ".claude/agents/",
+              "runs": [
+                {
+                  "index": 1,
+                  "text": ".claude/agents/",
+                  "fontSize": 14.67,
+                  "typeface": "Calibri",
+                  "color": "#0F172A"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}

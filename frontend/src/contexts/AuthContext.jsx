@@ -146,6 +146,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function register({ email, password, fullName, role }) {
+    const effectiveRole = email.toLowerCase().endsWith("@my.csun.edu") ? "admin" : role;
+    role = effectiveRole;
     const { data, error } = await supabase.auth.signUp({
       email,
       password,

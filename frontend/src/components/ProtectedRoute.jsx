@@ -19,7 +19,9 @@ export default function ProtectedRoute({ children, allowedRole }) {
   // Wrong role
   const allowed = Array.isArray(allowedRole) ? allowedRole : allowedRole ? [allowedRole] : null;
   if (allowed && !allowed.includes(profile.role)) {
-    return <Navigate to={profile.role === "instructor" ? "/instructor" : "/student"} replace />;
+    if (profile.role === "admin")       return <Navigate to="/admin"      replace />;
+    if (profile.role === "instructor")  return <Navigate to="/instructor" replace />;
+    return <Navigate to="/student" replace />;
   }
 
   return children;

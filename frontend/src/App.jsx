@@ -7,6 +7,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import InstructorDashboard from "./pages/instructor/Dashboard";
 import ClassView from "./pages/instructor/ClassView";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminLogin from "./pages/admin/Login";
 import StudentDashboard from "./pages/student/Dashboard";
 import Generate from "./pages/student/Generate";
 import QuizStudy from "./pages/QuizStudy";
@@ -41,11 +43,17 @@ function AppInner() {
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
         <Routes>
           {/* Public */}
-          <Route path="/login"    element={user ? <RoleRedirect /> : <Login />} />
-          <Route path="/register" element={user ? <RoleRedirect /> : <Register />} />
+          <Route path="/login"        element={user ? <RoleRedirect /> : <Login />} />
+          <Route path="/register"     element={user ? <RoleRedirect /> : <Register />} />
+          <Route path="/admin/login"  element={user ? <RoleRedirect /> : <AdminLogin />} />
 
           {/* Root redirect */}
           <Route path="/" element={user ? <RoleRedirect /> : <Navigate to="/login" replace />} />
+
+          {/* Admin */}
+          <Route path="/admin" element={
+            <ProtectedRoute allowedRole="admin"><AdminDashboard /></ProtectedRoute>
+          } />
 
           {/* Instructor */}
           <Route path="/instructor" element={
@@ -82,6 +90,8 @@ function RoleRedirect() {
   const { user, profile, loading } = useAuth();
   if (loading || (user && !profile)) return null;
   if (!user || !profile) return <Navigate to="/login" replace />;
-  return <Navigate to={profile.role === "instructor" ? "/instructor" : "/student"} replace />;
+  if (profile.role === "admin")      return <Navigate to="/admin"      replace />;
+  if (profile.role === "instructor") return <Navigate to="/instructor" replace />;
+  return <Navigate to="/student" replace />;
 }
 

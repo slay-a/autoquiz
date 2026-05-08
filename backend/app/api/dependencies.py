@@ -4,10 +4,10 @@ import uuid
 from typing import Optional
 
 import jwt
-from fastapi import Header, Request
+from fastapi import Depends, Header, Request
 from fastapi.responses import JSONResponse
 
-from app.core.error_codes import AUTH_REQUIRED
+from app.core.error_codes import AUTH_REQUIRED, ADMIN_REQUIRED
 from app.core.supabase import get_supabase
 
 
@@ -112,3 +112,14 @@ class _EnvelopeException(Exception):
 
     def __init__(self, response: JSONResponse) -> None:
         self.response = response
+
+
+def require_admin(current_user: dict = Depends(get_current_user)) -> dict:
+    if current_user.get("role") != "admin":
+        raise _EnvelopeException(
+            JSONResponse(
+                status_code=403,
+                content={"error": {"code": ADMIN_REQUIRED, "message": "Admin access required.", "request_id": str(uuid.uuid4())}},
+            )
+        )
+    return current_user

@@ -10,15 +10,19 @@ export default function Register() {
   const [error, setError]   = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const isAdminEmail = form.email.toLowerCase().endsWith("@my.csun.edu");
+  const effectiveRole = isAdminEmail ? "admin" : form.role;
+
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.role) { setError("Please choose a role."); return; }
+    if (!effectiveRole) { setError("Please choose a role."); return; }
     setLoading(true);
     setError(null);
     try {
-      await register({ email: form.email, password: form.password, fullName: form.fullName, role: form.role });
-      const targetPath = form.role === "instructor" ? "/instructor" : "/student";
-      navigate(targetPath);
+      await register({ email: form.email, password: form.password, fullName: form.fullName, role: effectiveRole });
+      if (effectiveRole === "admin")      navigate("/admin");
+      else if (effectiveRole === "instructor") navigate("/instructor");
+      else navigate("/student");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -42,28 +46,34 @@ export default function Register() {
             <div className="bg-red-50 border border-red-100 text-red-600 text-sm rounded-xl px-4 py-3">{error}</div>
           )}
 
-          {/* Role selector */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">I am a…</label>
-            <div className="grid grid-cols-2 gap-3">
-              <RoleCard
-                role="instructor"
-                icon={<GraduationCap className="w-6 h-6" />}
-                label="Instructor"
-                desc="Create & share quizzes with your class"
-                selected={form.role === "instructor"}
-                onClick={() => setForm({ ...form, role: "instructor" })}
-              />
-              <RoleCard
-                role="student"
-                icon={<BookOpen className="w-6 h-6" />}
-                label="Student"
-                desc="Study, generate quizzes & flashcards"
-                selected={form.role === "student"}
-                onClick={() => setForm({ ...form, role: "student" })}
-              />
+          {/* Role selector — hidden for @my.csun.edu (auto-admin) */}
+          {isAdminEmail ? (
+            <div className="bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 rounded-xl px-4 py-3 text-sm text-violet-700 dark:text-violet-300">
+              CSUN faculty email detected — you'll be registered as an <strong>Administrator</strong>.
             </div>
-          </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">I am a…</label>
+              <div className="grid grid-cols-2 gap-3">
+                <RoleCard
+                  role="instructor"
+                  icon={<GraduationCap className="w-6 h-6" />}
+                  label="Instructor"
+                  desc="Create & share quizzes with your class"
+                  selected={form.role === "instructor"}
+                  onClick={() => setForm({ ...form, role: "instructor" })}
+                />
+                <RoleCard
+                  role="student"
+                  icon={<BookOpen className="w-6 h-6" />}
+                  label="Student"
+                  desc="Study, generate quizzes & flashcards"
+                  selected={form.role === "student"}
+                  onClick={() => setForm({ ...form, role: "student" })}
+                />
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
@@ -85,7 +95,7 @@ export default function Register() {
                 placeholder="Min. 6 characters" className="input" />
             </div>
 
-            <button type="submit" disabled={loading || !form.role} className="btn-primary w-full mt-2">
+            <button type="submit" disabled={loading || !effectiveRole} className="btn-primary w-full mt-2">
               {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating account…</> : "Create Account"}
             </button>
           </form>

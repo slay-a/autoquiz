@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.api.routes import upload, retrieve, quiz, notes, classes, flashcards
+from app.api.routes import upload, retrieve, quiz, notes, classes, flashcards, admin
 from app.api.dependencies import _EnvelopeException
 from app.core.error_codes import INTERNAL_ERROR, VALIDATION_FAILED
 from app.core.logging import log_event
@@ -145,6 +145,7 @@ app.include_router(quiz.router)
 app.include_router(notes.router)
 app.include_router(classes.router)
 app.include_router(flashcards.router)
+app.include_router(admin.router)
 
 
 @app.get("/health")

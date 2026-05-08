@@ -24,33 +24,48 @@ AI-powered study platform — upload course material, generate quizzes and study
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────┐
-│              React + Vite + Tailwind CSS                │
-│   Auth · Instructor Dashboard · Student Dashboard       │
-│   ClassView · QuizStudy · FlashcardStudy · Notes       │
-└────────────────────────┬────────────────────────────────┘
-                         │ REST  (VITE_API_URL / Vite proxy)
-┌────────────────────────▼────────────────────────────────┐
-│                    FastAPI Backend                       │
-│   /upload  /retrieve  /quiz/generate  /notes/generate   │
-│                                                          │
-│   Celery + Redis  — async file processing jobs          │
-└──────┬──────────────────────────┬───────────────────────┘
-       │                          │
-┌──────▼──────┐        ┌──────────▼────────────────────┐
-│  LlamaIndex │        │           Supabase             │
-│  Parse      │        │  PostgreSQL   pgvector         │
-│  Chunk      │───────▶│  Auth (JWT + RLS)              │
-│  Embed      │        │  Storage (uploads bucket)      │
-│  Retrieve   │        │  Realtime (job status)         │
-└──────┬──────┘        └───────────────────────────────┘
-       │
-┌──────▼──────┐
-│  OpenAI API │
-│  GPT-4o     │  quiz generation · notes generation
-│  Embeddings │  text-embedding-3-small
-└─────────────┘
+```mermaid
+flowchart TD
+    subgraph Browser["Browser — React 18 + Vite + Tailwind"]
+        UI["Auth · Instructor / Student Dashboards · ClassView<br/>QuizStudy · FlashcardStudy · Notes · Profile"]
+    end
+
+    subgraph Backend["FastAPI Backend — Python 3.11"]
+        Routes["Routes:<br/>/upload  /retrieve<br/>/quiz/*  /notes/*<br/>/classes  /flashcards  /health"]
+        Celery["Celery worker<br/>(async ingest jobs)"]
+    end
+
+    subgraph LI["LlamaIndex pipeline"]
+        Parse["Parse"]
+        Chunk["Chunk"]
+        Embed["Embed"]
+        Retrieve["Hybrid retrieve"]
+    end
+
+    subgraph Supabase["Supabase"]
+        Auth["Auth — JWT + RLS"]
+        DB["Postgres + pgvector<br/>(profiles, classes, class_members,<br/>uploaded_files, chunks, saved_quizzes,<br/>flashcard_sets, class_notes, student_notes)"]
+        Storage["Storage<br/>(uploads bucket)"]
+    end
+
+    subgraph OpenAI["OpenAI API"]
+        Embeddings["text-embedding-3-small"]
+        GPT["GPT-4o"]
+    end
+
+    Redis[(Redis broker)]
+
+    UI -- "REST<br/>VITE_API_URL / Vite proxy" --> Routes
+    UI -- "JWT (anon key)" --> Auth
+    Routes --> Auth
+    Routes --> DB
+    Routes --> Storage
+    Routes -- "enqueue ingest job" --> Redis
+    Redis --> Celery
+    Celery --> Parse --> Chunk --> Embed --> DB
+    Routes -- "search" --> Retrieve --> DB
+    Embed --> Embeddings
+    Routes -- "quiz / notes prompts" --> GPT
 ```
 
 ## Tech Stack

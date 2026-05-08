@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 from app.api.routes import upload, retrieve, quiz, notes, classes, flashcards
 from app.api.dependencies import _EnvelopeException
 from app.core.error_codes import INTERNAL_ERROR, VALIDATION_FAILED
+from app.core.logging import log_event
 import uuid as _uuid
-import logging as _logging
 
 app = FastAPI(
     title="AutoQuiz API",
@@ -43,17 +43,28 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     JSON-response pattern used in routes, as well as FastAPI's own routing errors
     (405 Method Not Allowed, etc.) so {"detail": "..."} is never returned.
     """
-    _logging.getLogger("autoquiz").warning(
-        "HTTPException %s in request %s %s: %s",
-        exc.status_code, request.method, request.url.path, exc.detail,
+    request_id = str(_uuid.uuid4())
+    error_code = INTERNAL_ERROR if exc.status_code >= 500 else VALIDATION_FAILED
+    log_event(
+        event="http.exception",
+        level="ERROR" if exc.status_code >= 500 else "WARNING",
+        outcome="failure",
+        request_id=request_id,
+        error_code=error_code,
+        meta={
+            "status_code": exc.status_code,
+            "method": request.method,
+            "path": request.url.path,
+            "detail": str(exc.detail) if exc.detail else None,
+        },
     )
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "error": {
-                "code": INTERNAL_ERROR if exc.status_code >= 500 else VALIDATION_FAILED,
+                "code": error_code,
                 "message": str(exc.detail) if exc.detail else "An error occurred.",
-                "request_id": str(_uuid.uuid4()),
+                "request_id": request_id,
             }
         },
     )
@@ -68,6 +79,19 @@ async def request_validation_error_handler(request: Request, exc: RequestValidat
     permitted exception — its detail array shape is preserved unchanged so Pydantic
     tooling keeps working." We preserve the detail array inside the standard envelope.
     """
+    request_id = str(_uuid.uuid4())
+    log_event(
+        event="http.validation_failed",
+        level="WARNING",
+        outcome="failure",
+        request_id=request_id,
+        error_code=VALIDATION_FAILED,
+        meta={
+            "method": request.method,
+            "path": request.url.path,
+            "field_count": len(exc.errors()),
+        },
+    )
     return JSONResponse(
         status_code=422,
         content={
@@ -75,7 +99,7 @@ async def request_validation_error_handler(request: Request, exc: RequestValidat
                 "code": VALIDATION_FAILED,
                 "message": "One or more fields are invalid. Please check and try again.",
                 "details": exc.errors(),
-                "request_id": str(_uuid.uuid4()),
+                "request_id": request_id,
             }
         },
     )
@@ -87,9 +111,18 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     Global catch-all: any unhandled exception returns the standard 500 envelope.
     Per DESIGN.md §3.1.1 all non-2xx responses use the standard error envelope.
     """
-    _logging.getLogger("autoquiz").error(
-        "Unhandled exception in request %s %s", request.method, request.url.path,
-        exc_info=True,
+    request_id = str(_uuid.uuid4())
+    log_event(
+        event="http.unhandled_exception",
+        level="ERROR",
+        outcome="failure",
+        request_id=request_id,
+        error_code=INTERNAL_ERROR,
+        meta={
+            "method": request.method,
+            "path": request.url.path,
+            "exception_type": type(exc).__name__,
+        },
     )
     return JSONResponse(
         status_code=500,
@@ -97,7 +130,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
             "error": {
                 "code": INTERNAL_ERROR,
                 "message": "Something went wrong on our end. Please try again.",
-                "request_id": str(_uuid.uuid4()),
+                "request_id": request_id,
             }
         },
     )

@@ -273,6 +273,26 @@ Per-feature acceptance criteria and verification status live in
 The architectural source of truth is [`docs/DESIGN.md`](docs/DESIGN.md);
 the test-case index is [`docs/TESTCASES.md`](docs/TESTCASES.md).
 
+## Demo Data
+
+To seed an instructor, a student, a class, and a shared quiz for the
+live demo (idempotent — safe to re-run):
+
+```bash
+cd backend
+source venv/bin/activate
+python -m scripts.seed_demo
+```
+
+Demo logins (after seed):
+
+| Role | Email | Password |
+|---|---|---|
+| Instructor | `instructor.demo@autoquiz.local` | `DemoPass123!` |
+| Student | `student.demo@autoquiz.local` | `DemoPass123!` |
+
+The script prints the generated class invite code on completion.
+
 ## Course Submission Checklist
 
 | Deliverable | Where it goes | Source in this repo |

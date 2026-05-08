@@ -403,6 +403,39 @@
 
 ---
 
+### Story 7.4 — See score and self-assess after submission
+
+**Status: Verified**
+
+**As a** student,
+**I want** to see how I scored on auto-graded questions and to self-assess my short-answer responses,
+**so that** I know what I got right, what I missed, and which questions to convert into flashcards for further review.
+
+**Acceptance Criteria:**
+- AC-7.4.1: On submission, a violet score banner displays `correct/total_graded` over auto-graded questions only (MCQ + true/false). The banner copy varies by score band: 100% → "Perfect!", ≥80% → "Great job!", ≥50% → "Keep studying!", below 50% → "Review and try again".
+- AC-7.4.2: A trophy badge in the page header shows the same `correct/total_graded` ratio and toggles the score banner visibility on click.
+- AC-7.4.3: When at least one short-answer question is present, the banner footer notes that those questions are for self-review and not counted in the score.
+- AC-7.4.4: After submission, each short-answer card exposes an "I got this right" / "I got this wrong" toggle. The toggle is the only way a short-answer question is added to the wrong-pool for flashcard conversion (see Story 7.5).
+- AC-7.4.5: All scoring is computed client-side. No `/quiz/:id/submit` or `/quiz/:id/grade` endpoint exists.
+
+---
+
+### Story 7.5 — Convert wrong answers to flashcards
+
+**Status: Verified**
+
+**As a** student,
+**I want** to turn the questions I got wrong into a flashcard set,
+**so that** I can drill on my weak spots without re-taking the whole quiz.
+
+**Acceptance Criteria:**
+- AC-7.5.1: After submission, when at least one MCQ/TF question is wrong OR at least one short-answer question is self-marked wrong, a "Convert N wrong answers to flashcards" CTA appears both in the score banner and as a header badge.
+- AC-7.5.2: Clicking the CTA creates a row in `flashcard_sets` linked to the source quiz (`quiz_id`) with one card per wrong question (`front` = question, `back` = model answer, `explanation` = explanation).
+- AC-7.5.3: After creation, the page navigates to `/flashcards/:new_id`.
+- AC-7.5.4: The CTA is hidden when there are no wrong questions to convert.
+
+---
+
 ## Feature Group 8 — Quiz Sharing (Instructor)
 
 ### Story 8.1 — Share a quiz with a class
@@ -418,6 +451,21 @@
 - AC-8.1.2: Toggling share on sets `is_shared = true` in `saved_quizzes` for that quiz. Toggling it off sets `is_shared = false`.
 - AC-8.1.3: Only quizzes with `is_shared = true` appear on student dashboards for that class. A quiz with `is_shared = false` is absent from all student views.
 - AC-8.1.4: The share toggle reflects the current `is_shared` state when the page loads.
+
+---
+
+### Story 8.3 — Delete a shared quiz
+
+**Status: Verified**
+
+**As an** instructor,
+**I want** to delete a quiz I created for a class,
+**so that** I can remove content that is no longer relevant.
+
+**Acceptance Criteria:**
+- AC-8.3.1: Each quiz entry in the class detail view has a delete button. Clicking it removes the row from `saved_quizzes`.
+- AC-8.3.2: After deletion, the quiz is removed from the class quiz list without a full page reload.
+- AC-8.3.3: After deletion, the quiz no longer appears on any student dashboard.
 
 ---
 
@@ -451,6 +499,7 @@
 - AC-9.2.1: After notes are generated, a Save button is available. Clicking it stores the notes (tied to the current user and optionally to a `file_id`).
 - AC-9.2.2: The Save button shows a confirmation indicator after successful save and is not clickable again for the same notes.
 - AC-9.2.3: Saved notes are accessible from the student dashboard.
+- AC-9.2.4: Saved notes appear on the student dashboard under a "My Notes" tab (or equivalent section), with each entry linking to `/notes/:id`. The Class Notes tab is unaffected.
 
 ---
 
@@ -549,6 +598,7 @@
 - AC-11.3.2: The flashcard editor (`FlashcardEditor`) displays each card's `front` and `back` fields as editable inputs.
 - AC-11.3.3: The editor allows adding new cards and deleting existing cards.
 - AC-11.3.4: Saving updates the `cards` jsonb array in `flashcard_sets` for the corresponding set ID.
+- AC-11.3.5: Only the owner of a flashcard set (`created_by` = current user) can save changes or delete the set. An attempt to modify a set the user does not own is blocked at the editor and surfaces an ownership-error message.
 
 ---
 
@@ -618,5 +668,125 @@
 
 **Acceptance Criteria:**
 - AC-13.3.1: The right side of the navbar renders the user's `avatar_url` as a small round image. When `avatar_url` is `null`/missing, a fallback `User` lucide icon inside a neutral circle is shown instead.
-- AC-13.3.2: The avatar/name region is wrapped in a `<Link to="/profile">` and clicking it navigates to the profile page. The Logout button is unaffected and still works.
-- AC-13.3.3: After a successful save, the navbar reflects the updated `avatar_url` and `full_name` (achieved by reloading the page in this implementation — see §4c).
+- AC-13.3.2: The avatar/name region is wrapped in a `<Link to="/profile">` and clicking it navigates to the profile page.
+- AC-13.3.3: The Logout button remains functional alongside the avatar link — it is not obscured, is still clickable, and still calls `supabase.signOut()`.
+- AC-13.3.4: After a successful save, the navbar reflects the updated `avatar_url` and `full_name` (achieved by reloading the page in this implementation — see §4c).
+
+---
+
+## Feature Group 14 — §14.3 Event Catalog Completeness
+
+> **Source:** `specs/feat-014-event-catalog-completeness.md`. This feature has eight stories rather than the usual one or two, because each story closes a distinct emission gap from audit issue #38. AC numbering follows `AC-14.S.A` where `S` is the story number and `A` is the AC index within the story (the per-feature spec uses per-story `AC-1`, `AC-2`).
+
+### Story 14.1 — Upload route emits file-acceptance events
+
+**Status: Verified**
+
+**As a** system operator,
+**I want** `upload.file.accepted` and `upload.file.rejected` emitted from the upload route,
+**so that** every file ingestion attempt is traceable in structured logs.
+
+**Acceptance Criteria:**
+- AC-14.1.1: `backend/app/api/routes/upload.py` calls `log_event("upload.file.accepted", ...)` with `meta={"mime_type": ..., "size_bytes": ...}` on every successful file acceptance.
+- AC-14.1.2: `backend/app/api/routes/upload.py` calls `log_event("upload.file.rejected", ...)` with `level="WARNING"`, `outcome="failure"`, and `meta={"reason": "ext"|"size", "size_bytes": ...}` on every rejected upload.
+- AC-14.1.3: Neither event includes PII (no file names, emails, or content per §14.5).
+
+---
+
+### Story 14.2 — Retrieval service emits search-completion event
+
+**Status: Verified**
+
+**As a** system operator,
+**I want** `retrieval.search.completed` emitted from the retrieval service,
+**so that** search latency and result quality are observable.
+
+**Acceptance Criteria:**
+- AC-14.2.1: `backend/app/services/retrieval.py` calls `log_event("retrieval.search.completed", ...)` after every search with `meta={"top_k": ..., "chunks_returned": ..., "fallback_keyword": bool}` and `duration_ms` populated.
+- AC-14.2.2: The event fires on both success and failure paths (`outcome` field set accordingly).
+
+---
+
+### Story 14.3 — Notes-gen service emits lifecycle events
+
+**Status: Verified**
+
+**As a** system operator,
+**I want** `notes.generate.started`, `notes.generate.completed`, and `notes.generate.failed` emitted from the notes generation service,
+**so that** notes LLM call duration and failure modes are observable.
+
+**Acceptance Criteria:**
+- AC-14.3.1: `backend/app/services/notes_gen.py` calls `log_event("notes.generate.started", ...)` before invoking the LLM with `meta={"outside_sources": bool}`.
+- AC-14.3.2: `backend/app/services/notes_gen.py` calls `log_event("notes.generate.completed", ...)` on success with `duration_ms` populated and `meta={"has_file": bool, "prompt_tokens": int}`.
+- AC-14.3.3: `backend/app/services/notes_gen.py` calls `log_event("notes.generate.failed", level="ERROR", outcome="failure", ...)` on exception with `meta={"error_code": ..., "exception_type": ...}` and `duration_ms` populated.
+
+---
+
+### Story 14.4 — Notes route emits publish-toggle event
+
+**Status: Verified**
+
+**As a** system operator,
+**I want** `notes.publish.toggled` emitted from the notes route,
+**so that** every publish-state change is auditable.
+
+**Acceptance Criteria:**
+- AC-14.4.1: `backend/app/api/routes/notes.py` calls `log_event("notes.publish.toggled", ...)` on every publish/unpublish action with `meta={"note_id": ..., "is_published": bool}`.
+- AC-14.4.2: The event is emitted only after the DB write succeeds.
+
+---
+
+### Story 14.5 — Flashcards route emits set-lifecycle events
+
+**Status: Verified**
+
+**As a** system operator,
+**I want** `flashcard.set.created` and `flashcard.set.shared` emitted from the flashcards route,
+**so that** flashcard creation and sharing are observable.
+
+**Acceptance Criteria:**
+- AC-14.5.1: `backend/app/api/routes/flashcards.py` calls `log_event("flashcard.set.created", ...)` on every successful set creation with `meta={"set_id": ..., "card_count": int, "set_type": ...}`.
+- AC-14.5.2: `backend/app/api/routes/flashcards.py` calls `log_event("flashcard.set.shared", ...)` on every share action with `meta={"set_id": ..., "scope": "class"|"public"}`.
+
+---
+
+### Story 14.6 — Classes route emits member-removal event
+
+**Status: Verified**
+
+**As a** system operator,
+**I want** `class.member.removed` emitted from the classes route,
+**so that** all class membership changes are fully auditable.
+
+**Acceptance Criteria:**
+- AC-14.6.1: `backend/app/api/routes/classes.py` calls `log_event("class.member.removed", ...)` on every successful member removal with `meta={"class_id": ..., "removed_by_instructor": bool}`.
+- AC-14.6.2: The event fires only after the DB row is deleted (not before).
+
+---
+
+### Story 14.7 — Resolve un-cataloged quiz.load.completed event
+
+**Status: Verified**
+
+**As a** system operator,
+**I want** `quiz.load.completed` to either appear in the §14.3 catalog or be removed from the codebase,
+**so that** no emitted event violates the design-validator MAJOR rule.
+
+**Acceptance Criteria:**
+- AC-14.7.1: Either `quiz.load.completed` is added to DESIGN.md §14.3 with `level`, `outcome`, `Fires from`, and `meta fields` columns filled, OR the `log_event("quiz.load.completed", ...)` call in `backend/app/api/routes/quiz.py` is removed.
+
+---
+
+### Story 14.8 — Frontend emits auth-lifecycle and profile events
+
+**Status: Verified**
+
+**As a** system operator,
+**I want** `auth.session.started`, `auth.session.ended`, and `profile.updated` emitted from the frontend,
+**so that** auth lifecycle events are observable even before the server-sink endpoint (GAP-8) is built.
+
+**Acceptance Criteria:**
+- AC-14.8.1: A `logEvent(event, fields)` shim exists in the frontend (e.g., `frontend/src/utils/logEvent.js`) that writes a §14.1-conformant envelope to `console.info` (per §14.4 — GAP-8 is not in scope).
+- AC-14.8.2: `frontend/src/context/AuthContext.jsx` (or equivalent) calls `logEvent("auth.session.started", {...})` on successful sign-in and `logEvent("auth.session.ended", {...})` on sign-out.
+- AC-14.8.3: The Profile page calls `logEvent("profile.updated", {fields_changed: [...]})` after a successful profile update.
+- AC-14.8.4: No PII (email, display name, avatar URL) appears in any logged field per §14.5.

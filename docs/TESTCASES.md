@@ -8,14 +8,15 @@
 >
 > **Convention:** Each test case follows the format:
 > - **TC-ID:** Mirrors the AC it covers (e.g. TC-1.1.1 covers AC-1.1.1)
-> - **Type:** `UI` (Playwright), `API` (HTTP), `DB` (Supabase query), or `UNIT` (pytest)
+> - **Type:** `UI` (Vitest + React Testing Library, jsdom — Supabase / `fetch` mocked at the boundary), `API` (pytest + FastAPI `TestClient` — Supabase mocked), `UNIT` (pytest unit test against a service or helper), `DB` (Supabase live query — currently `MANUAL` until a live test instance is wired), or `MANUAL` (cannot be automated in the current harness; verified by hand pre-demo — used for visual contrast, RLS deployed-state checks, and cross-tab `storage` events)
 > - **Setup:** Seed data or state that must exist before the test runs
 > - **Steps:** Numbered, concrete actions with explicit selectors, endpoints, and payloads
 > - **Assertions:** Exact, machine-verifiable conditions that must all pass
 >
-> **Selector convention:** `[data-testid="x"]` attributes are the canonical selectors.
-> CSS class or element-type selectors are used only where test-id attributes are absent.
-> Network assertions use exact HTTP status codes. DB assertions use exact column values.
+> **Selector convention:** `[data-testid="x"]` attributes are the canonical selectors. CSS class or element-type selectors are used only where test-id attributes are absent.
+> **Network assertions:** in `UI` tests, network calls are asserted via mock invocation (`expect(fetch).toHaveBeenCalledWith(...)`); in `API` tests, via response status + body. **DB assertions:** in `API` tests, via `supabase_client.table().*` mock invocation. Live DB queries are reserved for `MANUAL` checks.
+>
+> **Note (2026-05-07):** The original convention referenced Playwright + live Supabase queries. The implemented harness is Vitest + RTL (frontend) and pytest + httpx (backend) with mocks at the network/DB boundary. TCs originally written for Playwright still describe the user-observable behaviour correctly; the assertion mechanism differs.
 
 ---
 
@@ -1678,6 +1679,171 @@
 
 ---
 
+### Story 7.4 — See score and self-assess after submission
+
+---
+
+**TC-7.4.1 — Score banner shows correct/total_graded over MCQ+TF only with score-band copy**
+**Type:** UI
+
+**Setup:** A quiz with 4 MCQ, 1 TF, and 2 short-answer questions is loaded at `/quiz/{quiz_id}`. The student answers all questions. Of the 5 auto-graded (MCQ + TF), the student gets 4 correct.
+
+**Steps:**
+1. Click `[data-testid="submit-quiz-button"]`.
+2. Wait for `[data-testid="score-banner"]` to render.
+3. Read its `textContent`.
+4. Repeat the run with 5/5, 0/5, and 3/5 correct to cover all four score bands.
+
+**Assertions:**
+- The banner displays `4/5` (auto-graded denominator excludes the 2 short-answer questions).
+- Banner copy contains `"Great job!"` for 4/5 (≥80%).
+- Banner copy contains `"Perfect!"` for 5/5 (100%).
+- Banner copy contains `"Keep studying!"` for 3/5 (≥50%).
+- Banner copy contains `"Review and try again"` for 0/5 (<50%).
+
+---
+
+**TC-7.4.2 — Trophy badge in header shows the same ratio and toggles banner visibility**
+**Type:** UI
+
+**Setup:** Quiz with 5 auto-graded questions and 4 correct has been submitted. `[data-testid="score-banner"]` is visible.
+
+**Steps:**
+1. Locate `[data-testid="score-trophy-badge"]` in the page header.
+2. Read its `textContent`.
+3. Click the badge.
+4. Check visibility of `[data-testid="score-banner"]`.
+5. Click the badge again.
+6. Check visibility of `[data-testid="score-banner"]`.
+
+**Assertions:**
+- The badge `textContent` matches the banner ratio (e.g. `4/5`).
+- After step 3: `[data-testid="score-banner"]` is hidden.
+- After step 5: `[data-testid="score-banner"]` is visible again.
+
+---
+
+**TC-7.4.3 — Banner footer notes short-answer self-review when SA questions are present**
+**Type:** UI
+
+**Setup (Part A):** Quiz contains at least one short-answer question. Quiz is submitted.
+**Setup (Part B):** Quiz contains only MCQ + TF (no short-answer). Quiz is submitted.
+
+**Steps:**
+1. Read the `textContent` of `[data-testid="score-banner-footer"]` (or the banner element if footer is inline).
+
+**Assertions (Part A):**
+- The footer text mentions self-review of short-answer questions and that they are not counted in the score.
+
+**Assertions (Part B):**
+- The self-review footer text is absent.
+
+---
+
+**TC-7.4.4 — Each short-answer card exposes self-assess "I got this right / wrong" toggle after submission**
+**Type:** UI
+
+**Setup:** Quiz contains at least one short-answer question. Quiz is submitted.
+
+**Steps:**
+1. Locate every `[data-testid="question-card"][data-question-type="short_answer"]`.
+2. Within each, locate `[data-testid="self-assess-correct-button"]` and `[data-testid="self-assess-incorrect-button"]`.
+3. Click `[data-testid="self-assess-incorrect-button"]` on the first short-answer card.
+4. Inspect the wrong-pool by reading the convert-to-flashcards CTA badge count (see TC-7.5.1).
+
+**Assertions:**
+- Both self-assess buttons are present on every short-answer card after submission.
+- The buttons are absent before submission.
+- Clicking incorrect adds the card to the wrong-pool (CTA count increments by 1).
+
+---
+
+**TC-7.4.5 — All scoring is computed client-side; no submit/grade endpoint is called**
+**Type:** UI
+
+**Setup:** Quiz is loaded at `/quiz/{quiz_id}`. Student answers all questions.
+
+**Steps:**
+1. Start network request monitor (mock `fetch`).
+2. Click `[data-testid="submit-quiz-button"]`.
+3. Wait for `[data-testid="score-banner"]` to render.
+4. Filter recorded network requests for any matching `/quiz/{quiz_id}/submit` or `/quiz/{quiz_id}/grade`.
+
+**Assertions:**
+- Zero requests were made to any `/quiz/.../submit` or `/quiz/.../grade` endpoint.
+- The score banner rendered without a server round-trip.
+
+---
+
+### Story 7.5 — Convert wrong answers to flashcards
+
+---
+
+**TC-7.5.1 — Convert CTA appears in banner and header when wrong-pool is non-empty**
+**Type:** UI
+
+**Setup:** Quiz with 4 MCQ, 1 TF, 2 short-answer is loaded. Student gets 1 MCQ wrong. After submission, the student self-marks 1 short-answer as wrong.
+
+**Steps:**
+1. Submit the quiz.
+2. Self-mark one short-answer as incorrect via `[data-testid="self-assess-incorrect-button"]`.
+3. Locate `[data-testid="convert-to-flashcards-cta"]` in the score banner.
+4. Locate `[data-testid="convert-to-flashcards-badge"]` in the page header.
+
+**Assertions:**
+- Both elements are present.
+- `textContent` of the CTA references `"2 wrong answers"` (1 MCQ + 1 self-marked SA).
+
+---
+
+**TC-7.5.2 — Clicking CTA creates flashcard_sets row linked to source quiz with one card per wrong question**
+**Type:** UI + DB
+
+**Setup:** Quiz with `quiz_id = 'q1'` is submitted. Wrong-pool contains 2 questions: one MCQ (`question = "Q1"`, `answer = "A"`, `explanation = "E1"`) and one self-marked SA (`question = "Q2"`, `answer = "A2"`, `explanation = "E2"`).
+
+**Steps:**
+1. Click `[data-testid="convert-to-flashcards-cta"]`.
+2. Wait for the `flashcard_sets` insert mock to be invoked (or query DB directly).
+3. Inspect the inserted row.
+
+**Assertions:**
+- `flashcard_sets` insert is called once with `quiz_id === "q1"`.
+- The inserted row's `cards` array has length 2.
+- `cards[0]` has `front === "Q1"`, `back === "A"`, `explanation === "E1"`.
+- `cards[1]` has `front === "Q2"`, `back === "A2"`, `explanation === "E2"`.
+
+---
+
+**TC-7.5.3 — After creation, page navigates to /flashcards/:new_id**
+**Type:** UI
+
+**Setup:** Conversion CTA is visible. Backend mock returns a created flashcard set with `id = 'new-set-1'`.
+
+**Steps:**
+1. Click `[data-testid="convert-to-flashcards-cta"]`.
+2. Wait for navigation.
+3. Read `window.location.pathname`.
+
+**Assertions:**
+- `window.location.pathname === "/flashcards/new-set-1"`.
+
+---
+
+**TC-7.5.4 — CTA is hidden when there are no wrong questions**
+**Type:** UI
+
+**Setup:** Quiz with all auto-graded answers correct and no short-answer self-marked wrong.
+
+**Steps:**
+1. Submit the quiz.
+2. Verify no short-answer is self-marked wrong (or that the quiz contains no SA questions).
+3. Query DOM for `[data-testid="convert-to-flashcards-cta"]` and `[data-testid="convert-to-flashcards-badge"]`.
+
+**Assertions:**
+- Both elements are absent from the DOM.
+
+---
+
 ## Feature Group 8 — Quiz Sharing (Instructor)
 
 ### Story 8.1 — Share a quiz with a class
@@ -1745,6 +1911,43 @@
 **Assertions:**
 - Quiz A's toggle has `aria-checked === "true"` (or equivalent `data-checked="true"`).
 - Quiz B's toggle has `aria-checked === "false"` (or equivalent `data-checked="false"`).
+
+---
+
+### Story 8.3 — Delete a shared quiz
+
+---
+
+**TC-8.3.1 — Delete button removes the row from saved_quizzes**
+**Type:** UI + DB
+
+**Setup:** An instructor is on `/instructor/class/{class_id}`. A quiz with known `quiz_id` is listed.
+
+**Steps:**
+1. Locate `[data-testid="quiz-delete-button"][data-quiz-id="{quiz_id}"]`.
+2. Click it. Confirm any prompt that appears.
+3. Wait for the `saved_quizzes` DELETE mock to be invoked (or query DB directly): `SELECT id FROM saved_quizzes WHERE id = '{quiz_id}'`.
+
+**Assertions:**
+- The DELETE on `saved_quizzes` was called with the matching `id`.
+- A subsequent SELECT returns zero rows for that `id`.
+
+---
+
+**TC-8.3.2 — After deletion, quiz is removed from class quiz list without page reload**
+**Type:** UI
+
+**Setup:** Instructor is on `/instructor/class/{class_id}`. Count `[data-testid="quiz-share-row"]` elements as `N`.
+
+**Steps:**
+1. Click `[data-testid="quiz-delete-button"][data-quiz-id="{quiz_id}"]` for one of the listed quizzes.
+2. Wait for the row to disappear (no full reload).
+3. Count `[data-testid="quiz-share-row"]` elements again.
+
+**Assertions:**
+- The new count equals `N - 1`.
+- The deleted quiz's `data-quiz-id` is no longer present in the DOM.
+- `window.location.pathname` is unchanged.
 
 ---
 
@@ -1870,6 +2073,29 @@
 
 **Assertions:**
 - At least one `[data-testid="note-card"]` is present in the notes section.
+
+---
+
+**TC-9.2.4 — Saved notes appear under "My Notes" tab on student dashboard with link to /notes/:id**
+**Type:** UI
+
+**Setup:** Authenticated student. `GET /notes/my` mock returns 2 saved notes with known `id` values `n1`, `n2` and titles `"Notes A"`, `"Notes B"`.
+
+**Steps:**
+1. Navigate to `/student`.
+2. Locate `[data-testid="my-notes-tab"]` and click it.
+3. Collect all `[data-testid="my-note-card"]` elements.
+4. For each, read its `data-note-id` and the `href` of its inner link.
+5. Repeat the run with an empty `/notes/my` response and check the empty-state element.
+6. Read the count badge on the My Notes tab.
+
+**Assertions:**
+- Two `[data-testid="my-note-card"]` elements are present.
+- Their `data-note-id` values are exactly `["n1", "n2"]` (order-independent).
+- Each card contains a link with `href` matching `/notes/{id}`.
+- With empty response: `[data-testid="my-notes-empty"]` is visible and no `[data-testid="my-note-card"]` is rendered.
+- The tab's count badge shows `"2"` when 2 notes exist.
+- The Class Notes tab is unaffected (still renders class-notes data from its own source).
 
 ---
 
@@ -2272,6 +2498,31 @@
 
 ---
 
+**TC-11.3.5 — Editor blocks save when current user does not own the set**
+**Type:** UI
+
+**Setup (Part A):** Authenticated user A loads `/flashcards/{set_id}/edit` for a set where `created_by = user A`.
+**Setup (Part B):** Authenticated user B loads `/flashcards/{set_id}/edit` for a set where `created_by = user A`.
+
+**Steps (Part A):**
+1. Render the editor page.
+2. Check for `[data-testid="flashcard-editor-form"]`.
+
+**Steps (Part B):**
+1. Render the editor page.
+2. Check for `[data-testid="flashcard-editor-ownership-error"]`.
+3. Check for `[data-testid="flashcard-editor-form"]`.
+
+**Assertions (Part A):**
+- `[data-testid="flashcard-editor-form"]` is present and editable.
+
+**Assertions (Part B):**
+- `[data-testid="flashcard-editor-ownership-error"]` is visible with a message indicating the user does not own the set.
+- `[data-testid="flashcard-editor-form"]` is NOT present.
+- No PUT to `/flashcards/{set_id}` can be made from this page state.
+
+---
+
 ## Feature Group 12 — Theme Preferences
 
 ### Story 12.1 — Toggle dark mode
@@ -2639,3 +2890,337 @@
 - The user is redirected to `/login`.
 - The `aq_profile` key is cleared from `localStorage`.
 - The user's session is terminated.
+
+---
+
+## Feature Group 14 — §14.3 Event Catalog Completeness
+
+> **Source:** `specs/feat-014-event-catalog-completeness.md`. This feature has eight stories rather than the usual one or two, because each story closes a distinct emission gap from audit issue #38.
+>
+> **AC numbering:** the per-feature spec numbers ACs as `AC-1`, `AC-2`, ... within each story rather than `AC-14.X.Y`. TCs in this section adopt `TC-14.S.A` where `S` is the story number and `A` is the AC index within the story.
+
+### Story 14.1 — Upload route emits file-acceptance events
+
+---
+
+**TC-14.1.1 — upload.file.accepted is emitted on every successful acceptance with mime_type and size_bytes meta**
+**Type:** API
+
+**Setup:** Mock `app.core.logging.log_event`. Authenticated user. Valid PDF payload under 50MB.
+
+**Steps:**
+1. POST a valid PDF to `/upload/`.
+2. Inspect the `log_event` mock call list for `event="upload.file.accepted"`.
+
+**Assertions:**
+- `log_event` was called exactly once with `event="upload.file.accepted"`.
+- `meta` contains `mime_type` and `size_bytes` (both non-null).
+
+---
+
+**TC-14.1.2 — upload.file.rejected is emitted on every rejected upload with WARNING level and reason meta**
+**Type:** API
+
+**Setup:** Mock `log_event`. Authenticated user.
+
+**Steps:**
+1. POST a `.txt` file (extension rejection) to `/upload/`.
+2. POST a 60MB PDF (size rejection) to `/upload/`.
+3. Inspect `log_event` mock for both calls.
+
+**Assertions:**
+- Both POSTs produce a `log_event` call with `event="upload.file.rejected"`, `level="WARNING"`, `outcome="failure"`.
+- The first call's `meta` contains `reason="ext"` and `size_bytes`.
+- The second call's `meta` contains `reason="size"` and `size_bytes`.
+
+---
+
+**TC-14.1.3 — upload events do not include PII (file names, emails, content)**
+**Type:** API
+
+**Setup:** Mock `log_event`. Submit a file named `student_report_card.pdf`.
+
+**Steps:**
+1. Submit valid and rejected uploads.
+2. Inspect every `log_event` call's `meta` keys/values.
+
+**Assertions:**
+- No `log_event` call's `meta` contains the file name `student_report_card.pdf` or any substring of it.
+- No `log_event` call contains an email-shaped string.
+- No `log_event` call contains file content bytes.
+
+---
+
+### Story 14.2 — Retrieval service emits search-completion event
+
+---
+
+**TC-14.2.1 — retrieval.search.completed is emitted after every search with top_k, chunks_returned, fallback_keyword, duration_ms**
+**Type:** UNIT
+
+**Setup:** Mock `log_event`. Mock vector + keyword search functions.
+
+**Steps:**
+1. Call `hybrid_search(topic="enzymes", file_id="f1", top_k=12)`.
+2. Inspect the `log_event` call.
+
+**Assertions:**
+- `log_event` was called once with `event="retrieval.search.completed"`.
+- `meta` contains `top_k=12`, `chunks_returned=<int>`, `fallback_keyword=<bool>`.
+- `duration_ms` is a positive integer.
+
+---
+
+**TC-14.2.2 — retrieval.search.completed fires on both success and failure outcomes**
+**Type:** UNIT
+
+**Setup:** Mock `log_event`. Two scenarios: (a) successful search; (b) search throws.
+
+**Steps:**
+1. Run scenario (a). Capture the `log_event` call.
+2. Run scenario (b). Capture the `log_event` call.
+
+**Assertions:**
+- (a) `log_event` call has `outcome="success"`.
+- (b) `log_event` call has `outcome="failure"`.
+
+---
+
+### Story 14.3 — Notes-gen service emits lifecycle events
+
+---
+
+**TC-14.3.1 — notes.generate.started is emitted before the LLM call with outside_sources meta**
+**Type:** UNIT
+
+**Setup:** Mock `log_event`. Mock OpenAI client to record call order.
+
+**Steps:**
+1. Call `generate_notes(topic="x", file_id=None, outside_sources=True)`.
+2. Inspect the order of `log_event` and OpenAI mock calls.
+
+**Assertions:**
+- `log_event("notes.generate.started", ...)` is called before any OpenAI mock call.
+- `meta` contains `outside_sources=True`.
+
+---
+
+**TC-14.3.2 — notes.generate.completed is emitted on success with duration_ms and {has_file, prompt_tokens}**
+**Type:** UNIT
+
+**Setup:** Mock `log_event`. Mock OpenAI to return a valid response with known `usage.prompt_tokens`.
+
+**Steps:**
+1. Call `generate_notes(topic="x", file_id="f1")`.
+2. Inspect the success-path `log_event` call.
+
+**Assertions:**
+- `log_event` is called with `event="notes.generate.completed"`.
+- `duration_ms > 0`.
+- `meta` contains `has_file=True`, `prompt_tokens=<int>`.
+
+---
+
+**TC-14.3.3 — notes.generate.failed is emitted on exception with error_code, exception_type, duration_ms**
+**Type:** UNIT
+
+**Setup:** Mock `log_event`. Mock OpenAI to raise an exception.
+
+**Steps:**
+1. Call `generate_notes(topic="x", file_id=None)` and catch the exception.
+2. Inspect the failure-path `log_event` call.
+
+**Assertions:**
+- `log_event` is called with `event="notes.generate.failed"`, `level="ERROR"`, `outcome="failure"`.
+- `meta` contains `error_code` and `exception_type`.
+- `duration_ms > 0`.
+
+---
+
+### Story 14.4 — Notes route emits publish-toggle event
+
+---
+
+**TC-14.4.1 — notes.publish.toggled is emitted on every publish/unpublish with note_id and is_published meta**
+**Type:** API
+
+**Setup:** Mock `log_event` and `supabase_client`. Authenticated instructor with an existing class note.
+
+**Steps:**
+1. PATCH the note's publish state to true.
+2. PATCH it back to false.
+3. Inspect `log_event` calls.
+
+**Assertions:**
+- Two `log_event("notes.publish.toggled", ...)` calls occurred.
+- First call's `meta` has `note_id=<id>`, `is_published=True`.
+- Second call's `meta` has `is_published=False`.
+
+---
+
+**TC-14.4.2 — notes.publish.toggled fires only after successful DB write**
+**Type:** API
+
+**Setup:** Mock `log_event`. Mock `supabase_client.update` to raise.
+
+**Steps:**
+1. PATCH the note's publish state.
+2. Inspect `log_event` calls.
+
+**Assertions:**
+- No `notes.publish.toggled` `log_event` call was made when the DB update failed.
+
+---
+
+### Story 14.5 — Flashcards route emits set-lifecycle events
+
+---
+
+**TC-14.5.1 — flashcard.set.created is emitted on creation with set_id, card_count, set_type meta**
+**Type:** API
+
+**Setup:** Mock `log_event` and `supabase_client`. Authenticated user.
+
+**Steps:**
+1. POST `/flashcards/` with a 3-card payload and `set_type="manual"`.
+2. Inspect `log_event` mock.
+
+**Assertions:**
+- `log_event("flashcard.set.created", ...)` was called once.
+- `meta` contains `set_id=<uuid>`, `card_count=3`, `set_type="manual"`.
+
+---
+
+**TC-14.5.2 — flashcard.set.shared is emitted on share action with set_id and scope meta**
+**Type:** API
+
+**Setup:** Mock `log_event` and `supabase_client`. An existing flashcard set owned by the authenticated user.
+
+**Steps:**
+1. PATCH `/flashcards/{set_id}/share` with `{"scope": "class"}`.
+2. Inspect `log_event` mock.
+3. Repeat with `{"scope": "public"}`.
+
+**Assertions:**
+- Both calls produce a `log_event("flashcard.set.shared", ...)` with `meta.set_id=<set_id>` and `meta.scope` matching the request.
+
+---
+
+### Story 14.6 — Classes route emits member-removal event
+
+---
+
+**TC-14.6.1 — class.member.removed is emitted on every removal with class_id and removed_by_instructor meta**
+**Type:** API
+
+**Setup:** Mock `log_event` and `supabase_client`. Authenticated instructor; a class with one member.
+
+**Steps:**
+1. DELETE the class member via the appropriate route.
+2. Inspect `log_event` mock.
+
+**Assertions:**
+- `log_event("class.member.removed", ...)` was called once.
+- `meta` contains `class_id=<id>`, `removed_by_instructor=True`.
+
+---
+
+**TC-14.6.2 — class.member.removed fires only after the DB delete succeeds**
+**Type:** API
+
+**Setup:** Mock `log_event`. Mock `supabase_client.delete` to raise.
+
+**Steps:**
+1. DELETE the class member.
+2. Inspect `log_event` mock.
+
+**Assertions:**
+- No `class.member.removed` call was made when the DB delete failed.
+
+---
+
+### Story 14.7 — Resolve un-cataloged quiz.load.completed event
+
+---
+
+**TC-14.7.1 — quiz.load.completed is either documented in DESIGN.md §14.3 or absent from the codebase**
+**Type:** UNIT
+
+**Setup:** Read both `docs/DESIGN.md` and the backend source tree.
+
+**Steps:**
+1. Grep `docs/DESIGN.md` for a §14.3 catalog table row containing `quiz.load.completed`.
+2. Grep `backend/` for any `log_event("quiz.load.completed", ...)` call.
+
+**Assertions:**
+- Exactly one of these is true:
+  - The DESIGN.md grep returns at least one §14.3 catalog row AND backend grep may return any number of results.
+  - OR the backend grep returns zero results.
+
+---
+
+### Story 14.8 — Frontend emits auth-lifecycle and profile events
+
+---
+
+**TC-14.8.1 — logEvent shim exists in frontend and writes a §14.1-conformant envelope to console.info**
+**Type:** UI
+
+**Setup:** Spy on `console.info`.
+
+**Steps:**
+1. Import `logEvent` from `frontend/src/utils/logEvent.js` (or equivalent).
+2. Call `logEvent("test.event", {actor_id: "u1", outcome: "success"})`.
+3. Inspect the latest `console.info` call.
+
+**Assertions:**
+- `logEvent` is exported as a function.
+- The logged object contains `event="test.event"`, `outcome="success"`, `level`, `timestamp`, and `actor_id="u1"`.
+
+---
+
+**TC-14.8.2 — AuthContext emits auth.session.started on sign-in and auth.session.ended on sign-out**
+**Type:** UI
+
+**Setup:** Spy on `logEvent`. Mock Supabase auth.
+
+**Steps:**
+1. Trigger a sign-in flow that resolves with a valid session.
+2. Trigger a sign-out flow.
+3. Inspect spy calls.
+
+**Assertions:**
+- `logEvent("auth.session.started", ...)` is called once after sign-in.
+- `logEvent("auth.session.ended", ...)` is called once after sign-out.
+
+---
+
+**TC-14.8.3 — Profile page emits profile.updated with fields_changed after successful update**
+**Type:** UI
+
+**Setup:** Spy on `logEvent`. Mock the Supabase profile update to succeed.
+
+**Steps:**
+1. Render the profile page.
+2. Change `full_name` and click Save.
+3. Inspect spy calls.
+
+**Assertions:**
+- `logEvent("profile.updated", {fields_changed: [...]})` is called exactly once after success.
+- `fields_changed` is an array containing `"full_name"`.
+
+---
+
+**TC-14.8.4 — No PII (email, display name, avatar URL) appears in any logged field**
+**Type:** UI
+
+**Setup:** Spy on `logEvent`. Authenticated user with `email="test@example.com"`, `full_name="Test Name"`, `avatar_url="https://api.dicebear.com/...?seed=zen"`.
+
+**Steps:**
+1. Trigger sign-in, sign-out, and a profile update.
+2. Inspect every spy call.
+
+**Assertions:**
+- No call's payload (top-level or `meta`) contains the email string `"test@example.com"`.
+- No call contains `"Test Name"` or any substring.
+- No call contains the full `avatar_url` string.

@@ -180,9 +180,36 @@ npm run dev
 
 App runs at `http://localhost:5173`.
 
+## Running Tests
+
+```bash
+# Backend (pytest, 270+ tests)
+cd backend
+source venv/bin/activate
+python -m pytest -q
+
+# Frontend (vitest, 290+ tests)
+cd frontend
+npm test
+```
+
+Both suites are also runnable individually per feature:
+
+```bash
+python -m pytest backend/tests/test_feat_006_quiz_generation.py -v
+npx vitest run src/__tests__/QuizStudy.test.jsx
+```
+
 ## Environment Variables
 
-Create `backend/.env`:
+Copy the example files and fill in your keys:
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.local.example frontend/.env.local
+```
+
+Reference — `backend/.env`:
 
 ```env
 OPENAI_API_KEY=sk-...
@@ -227,3 +254,21 @@ The schema creates: `profiles`, `classes`, `class_members`, `uploaded_files`, `p
 | `flashcard_sets` | Flashcard sets created from quiz results; `is_shared`/`is_public` control sharing |
 | `class_notes` | Instructor-generated study notes; `is_published` controls student visibility |
 | `student_notes` | Student-generated personal study notes tied to uploaded files |
+
+## Team & Contributions
+
+AutoQuiz was built collaboratively under a TDD multi-agent workflow
+(Test Creation, Code Developer, Architecture Review, DevOps). Each
+contribution below maps to commits authored under the listed GitHub
+identity.
+
+| Contributor | GitHub | Primary modules / scope |
+|---|---|---|
+| Srilaya Ponangi (Laya) | [@slay-a](https://github.com/slay-a) | Project scaffold and initial full-stack skeleton; `docs/DESIGN.md` authoring and revisions (architecture, error handling, event catalog, schema); multi-agent pipeline + `.claude/agents/*` setup; FEAT-001 auth pipeline run; `TopBar` profile entry point and light-mode UI fixes; backend config hardening (Pydantic v2); repo hygiene (`.gitignore`, env examples, router future flags). |
+| Justin Reyes | [@justinreyes145](https://github.com/justinreyes145) | FEAT-004 LlamaIndex ingestion (parse → clean → chunk → embed); FEAT-005 file upload + storage; FEAT-006 quiz generation (GPT-4o + RAG); FEAT-007 quiz study & saving (with Shima); FEAT-008 quiz sharing; FEAT-009 student notes; FEAT-010 instructor notes (with Shima); FEAT-011 flashcard study; FEAT-013 user-story drafting; test-suite stabilisation. |
+| Shima (Shabnam) Jabbari | [@ShimaJabbari](https://github.com/ShimaJabbari) / [@Shabnamjabbari](https://github.com/Shabnamjabbari) | FEAT-002 class management (instructor); FEAT-003 class membership (student); FEAT-012 dark mode + theme preferences; FEAT-013 user profile (avatar, RLS); FEAT-014 event-catalog completeness; layer-boundary enforcement (FastAPI route migration); JWT signature verification (issue-037); error-envelope standardisation (issue-022). |
+
+Per-feature acceptance criteria and verification status live in
+[`specs/IMPLEMENTED_USER_STORIES.md`](specs/IMPLEMENTED_USER_STORIES.md).
+The architectural source of truth is [`docs/DESIGN.md`](docs/DESIGN.md);
+the test-case index is [`docs/TESTCASES.md`](docs/TESTCASES.md).

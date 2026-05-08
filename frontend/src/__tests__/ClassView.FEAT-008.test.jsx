@@ -175,7 +175,10 @@ describe('ClassView - FEAT-008 Quiz Sharing', () => {
       await waitFor(() => expect(screen.getByText('Physics 101')).toBeInTheDocument());
 
       await waitFor(() => {
-        const label = screen.getByText('Quizzes');
+        // The label "Quizzes" appears twice now: once as the stat <p> in the
+        // header card and once as a tab <button>. Pick the <p>.
+        const label = screen.getAllByText('Quizzes').find((el) => el.tagName === 'P');
+        expect(label).toBeDefined();
         expect(label).toBeInTheDocument();
         expect(label.previousElementSibling.textContent).toBe('2');
       });
@@ -186,7 +189,10 @@ describe('ClassView - FEAT-008 Quiz Sharing', () => {
       renderClassView();
 
       await waitFor(() => {
-        const label = screen.getByText('Quizzes');
+        // The label "Quizzes" appears twice now: once as the stat <p> in the
+        // header card and once as a tab <button>. Pick the <p>.
+        const label = screen.getAllByText('Quizzes').find((el) => el.tagName === 'P');
+        expect(label).toBeDefined();
         expect(label.previousElementSibling.textContent).toBe('1');
       });
     });

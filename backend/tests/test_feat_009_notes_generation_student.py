@@ -131,9 +131,12 @@ def test_generate_notes_with_auth_calls_openai(client, student_user, mock_notes_
     with override_user(student_user), \
          patch("app.services.notes_gen._openai") as mock_openai:
 
-        # Mock OpenAI response
+        # Mock OpenAI response. Note: notes_gen.py emits a structured log
+        # event with `usage.prompt_tokens` in meta — must be a real int so
+        # `json.dumps` in log_event() doesn't choke on a Mock.
         mock_response = Mock()
         mock_response.choices = [Mock(message=Mock(content=json.dumps(mock_notes_response)))]
+        mock_response.usage.prompt_tokens = 42
         mock_openai.chat.completions.create.return_value = mock_response
 
         response = client.post(
@@ -151,9 +154,11 @@ def test_generate_notes_with_auth_calls_openai(client, student_user, mock_notes_
 def test_generate_notes_structure_validation(mock_notes_response):
     """AC-9.1.3 / AC-9.1.4: notes_gen.generate_notes() returns required shape (summary, key_concepts[term/definition/example], important_details, common_misconceptions). Triggered via outside_sources=True path (9.1.4) which exercises the same response contract."""
     with patch("app.services.notes_gen._openai") as mock_openai:
-        # Mock OpenAI response
+        # Mock OpenAI response — see test_generate_notes_with_auth_calls_openai
+        # for the prompt_tokens int requirement.
         mock_response = Mock()
         mock_response.choices = [Mock(message=Mock(content=json.dumps(mock_notes_response)))]
+        mock_response.usage.prompt_tokens = 42
         mock_openai.chat.completions.create.return_value = mock_response
 
         result = generate_notes(

@@ -75,29 +75,46 @@ class TestStory71StudyQuiz:
     AC-7.1.2-7.1.5: Frontend-only tests (see QuizView.test.jsx)
     """
 
-    def test_ac_711_quiz_load_access_control_enforced_in_frontend(self):
+    def test_ac_711_quiz_load_access_control_enforced_in_backend(self):
         """
-        AC-7.1.1: Quiz load access control is enforced in QuizStudy.jsx.
+        AC-7.1.1: Quiz load access control is enforced in the backend
+        `quiz_service.get_quiz_by_id` (post-FEAT-021 layer-boundary migration).
 
-        QuizStudy.jsx line 25 contains .or(`created_by.eq.${user.id},is_shared.eq.true`)
-        This test verifies the filter is present in the source file.
-
-        NOTE: This is a source-level assertion because quiz load is implemented
-        client-side via Supabase client, not via a backend API route.
+        The original implementation used a Supabase `.or()` filter in
+        QuizStudy.jsx; that violated DESIGN.md §0 (frontend → FastAPI →
+        Supabase). Access control is now in `quiz_service.py`:
+            if quiz["created_by"] != user_id and not quiz.get("is_shared"):
+                raise QuizNotFoundError(...)
         """
-        # Read QuizStudy.jsx and verify the access control filter is present
-        import os
-        frontend_path = os.path.join(
-            os.path.dirname(__file__), "../../frontend/src/pages/QuizStudy.jsx"
+        import pathlib
+        backend_path = (
+            pathlib.Path(__file__).resolve().parents[1]
+            / "app" / "services" / "quiz_service.py"
         )
-
-        with open(frontend_path, "r", encoding="utf-8") as f:
+        with open(backend_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # Assert the .or() filter is present
-        assert ".or(" in content, "QuizStudy.jsx must include .or() filter for access control"
-        assert "created_by.eq" in content, "QuizStudy.jsx must filter by created_by"
-        assert "is_shared.eq.true" in content, "QuizStudy.jsx must allow access to shared quizzes"
+        assert "get_quiz_by_id" in content, (
+            "quiz_service.py must define get_quiz_by_id"
+        )
+        # The two access-control predicates: own row OR shared
+        assert "created_by" in content and "is_shared" in content, (
+            "quiz_service.get_quiz_by_id must check both created_by and is_shared"
+        )
+        # And the frontend must NOT use .or() any more (regression guard)
+        frontend_path = (
+            pathlib.Path(__file__).resolve().parents[2]
+            / "frontend" / "src" / "pages" / "QuizStudy.jsx"
+        )
+        with open(frontend_path, "r", encoding="utf-8") as f:
+            qs = f.read()
+        assert ".or(" not in qs, (
+            "QuizStudy.jsx must not use Supabase .or() filter — access control "
+            "is enforced server-side via /quiz/{id} (DESIGN.md §0)"
+        )
+        assert "/quiz/" in qs, (
+            "QuizStudy.jsx must fetch via the FastAPI /quiz/{id} route"
+        )
 
 
 # -- Story 7.2: Save a generated quiz --------------------------------------
@@ -114,30 +131,36 @@ class TestStory72SaveQuiz:
 
     def test_ac_721_save_quiz_has_is_shared_false_and_created_by_from_jwt(self):
         """
-        AC-7.2.1: Save quiz insert has is_shared=false and created_by from JWT.
+        AC-7.2.1: Save quiz inserts with is_shared=False and created_by from
+        the JWT — both set server-side, never from request body.
 
-        Generate.jsx line 114-123 contains the insert payload:
-          is_shared: false,
-          created_by: user.id,
-
-        This test verifies the save logic is correct in the source file.
-
-        NOTE: This is a source-level assertion because quiz save is implemented
-        client-side via Supabase client insert, not via a backend API route.
+        Post-FEAT-021 layer-boundary migration, save now goes through
+        POST /quiz/save (route -> quiz_service.save_quiz). The route MUST set
+        created_by from current_user["id"] and the service MUST hardcode
+        is_shared=False.
         """
-        import os
-        frontend_path = os.path.join(
-            os.path.dirname(__file__), "../../frontend/src/pages/student/Generate.jsx"
+        import pathlib
+        repo_root = pathlib.Path(__file__).resolve().parents[2]
+
+        # Route enforces created_by from JWT
+        route_src = (repo_root / "backend" / "app" / "api" / "routes" / "quiz.py").read_text(encoding="utf-8")
+        assert 'created_by=current_user["id"]' in route_src, (
+            "/quiz/save must set created_by from current_user (JWT) — never "
+            "from request body"
         )
 
-        with open(frontend_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        # Service hardcodes is_shared=False on creation
+        svc_src = (repo_root / "backend" / "app" / "services" / "quiz_service.py").read_text(encoding="utf-8")
+        assert '"is_shared": False' in svc_src, (
+            "quiz_service.save_quiz must hardcode is_shared=False on insert"
+        )
 
-        # Assert is_shared: false is present
-        assert 'is_shared: false' in content, "Generate.jsx must set is_shared: false on save"
-
-        # Assert created_by: user.id is present
-        assert 'created_by: user.id' in content, "Generate.jsx must set created_by from user.id (JWT)"
+        # Frontend Generate.jsx must POST to /quiz/save (not insert via Supabase)
+        gen_src = (repo_root / "frontend" / "src" / "pages" / "student" / "Generate.jsx").read_text(encoding="utf-8")
+        assert '/quiz/save' in gen_src, (
+            "Generate.jsx must call POST /quiz/save for saving — not "
+            "supabase.from('saved_quizzes').insert (DESIGN.md §0)"
+        )
 
     def test_ac_722_title_format_uses_em_dash(self):
         """

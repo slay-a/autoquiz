@@ -13,6 +13,7 @@ Blockers covered:
   B-7: quiz.py emits quiz.load.completed which is absent from DESIGN.md §14.3 — must be added there
 """
 
+import pathlib
 import pytest
 import io
 import jwt
@@ -22,6 +23,8 @@ from unittest.mock import MagicMock, patch, call
 from fastapi.testclient import TestClient
 
 from main import app
+
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 from app.api.dependencies import get_current_user
 
 # ---------------------------------------------------------------------------
@@ -678,8 +681,8 @@ class TestQuizLoadCompletedInCatalog:
         AC-1: DESIGN.md §14.3 must contain 'quiz.load.completed'.
         This test fails until the row is added to the catalog table.
         """
-        design_md_path = "/Users/shimajabbari/Documents/GitHub/autoquiz/docs/DESIGN.md"
-        with open(design_md_path, "r") as f:
+        design_md_path = REPO_ROOT / "docs" / "DESIGN.md"
+        with open(design_md_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         assert "quiz.load.completed" in content, (
@@ -694,8 +697,8 @@ class TestQuizLoadCompletedInCatalog:
         user_id in meta (UUID is acceptable for actor_id field, not meta).
         Per §14.5, only actor_id (positional field) should carry the user UUID.
         """
-        quiz_py_path = "/Users/shimajabbari/Documents/GitHub/autoquiz/backend/app/api/routes/quiz.py"
-        with open(quiz_py_path, "r") as f:
+        quiz_py_path = REPO_ROOT / "backend" / "app" / "api" / "routes" / "quiz.py"
+        with open(quiz_py_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Find the quiz.load.completed block and verify user_id is not in meta

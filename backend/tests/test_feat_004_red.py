@@ -75,7 +75,7 @@ class TestB1LegacyFunctionsRemoved:
         """retrieval.py must not import SUPPORTED_EXTENSIONS (legacy dict)."""
         import ast, pathlib
         retrieval_src = pathlib.Path(
-            "/Users/shabnamjabbari/Documents/GitHub/autoquiz/backend/app/services/retrieval.py"
+            pathlib.Path(__file__).resolve().parents[1] / "app" / "services" / "retrieval.py"
         ).read_text()
         tree = ast.parse(retrieval_src)
         for node in ast.walk(tree):
@@ -90,7 +90,7 @@ class TestB1LegacyFunctionsRemoved:
         """retrieval.py fallback search must use LLAMAINDEX_PARSERS, not legacy wrappers."""
         import ast, pathlib
         retrieval_src = pathlib.Path(
-            "/Users/shabnamjabbari/Documents/GitHub/autoquiz/backend/app/services/retrieval.py"
+            pathlib.Path(__file__).resolve().parents[1] / "app" / "services" / "retrieval.py"
         ).read_text()
         assert "LLAMAINDEX_PARSERS" in retrieval_src, (
             "retrieval.py does not reference LLAMAINDEX_PARSERS — "
@@ -249,7 +249,7 @@ class TestB4CeleryTaskServiceLayerCompliance:
         """
         import ast, pathlib
         worker_src = pathlib.Path(
-            "/Users/shabnamjabbari/Documents/GitHub/autoquiz/backend/celery_worker.py"
+            pathlib.Path(__file__).resolve().parents[1] / "celery_worker.py"
         ).read_text()
         tree = ast.parse(worker_src)
 
@@ -301,7 +301,7 @@ class TestB5StructuredLoggingInIngestion:
         """celery_worker.py must import log_event from app.core.logging."""
         import ast, pathlib
         worker_src = pathlib.Path(
-            "/Users/shabnamjabbari/Documents/GitHub/autoquiz/backend/celery_worker.py"
+            pathlib.Path(__file__).resolve().parents[1] / "celery_worker.py"
         ).read_text()
         tree = ast.parse(worker_src)
         found_log_event = False
@@ -320,7 +320,7 @@ class TestB5StructuredLoggingInIngestion:
         """celery_worker.py must emit the 'ingestion.job.started' event."""
         import pathlib
         worker_src = pathlib.Path(
-            "/Users/shabnamjabbari/Documents/GitHub/autoquiz/backend/celery_worker.py"
+            pathlib.Path(__file__).resolve().parents[1] / "celery_worker.py"
         ).read_text()
         assert "ingestion.job.started" in worker_src, (
             "celery_worker.py does not emit 'ingestion.job.started' — "
@@ -331,7 +331,7 @@ class TestB5StructuredLoggingInIngestion:
         """celery_worker.py must emit the 'ingestion.job.completed' event."""
         import pathlib
         worker_src = pathlib.Path(
-            "/Users/shabnamjabbari/Documents/GitHub/autoquiz/backend/celery_worker.py"
+            pathlib.Path(__file__).resolve().parents[1] / "celery_worker.py"
         ).read_text()
         assert "ingestion.job.completed" in worker_src, (
             "celery_worker.py does not emit 'ingestion.job.completed' — "
@@ -342,7 +342,7 @@ class TestB5StructuredLoggingInIngestion:
         """celery_worker.py must emit the 'ingestion.job.failed' event."""
         import pathlib
         worker_src = pathlib.Path(
-            "/Users/shabnamjabbari/Documents/GitHub/autoquiz/backend/celery_worker.py"
+            pathlib.Path(__file__).resolve().parents[1] / "celery_worker.py"
         ).read_text()
         assert "ingestion.job.failed" in worker_src, (
             "celery_worker.py does not emit 'ingestion.job.failed' — "

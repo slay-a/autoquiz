@@ -5,11 +5,17 @@
  * - AC-7.3.1: Regenerate sends POST /quiz/generate with original params AND Authorization header
  * - AC-7.3.2: Regenerated quiz title has (v2) suffix
  * - AC-7.3.3: Page navigates to /quiz/:new_id after regenerate
+ *
+ * Architecture note (post FEAT-021): QuizStudy fetches via the FastAPI backend
+ *   GET  /quiz/:id        → load quiz
+ *   POST /quiz/generate   → regenerate questions
+ *   POST /quiz/save       → persist the regenerated quiz with (v2) suffix
+ * Tests therefore mock fetch (URL-keyed), not the Supabase client.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { BrowserRouter, useParams, useNavigate } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import QuizStudy from '../pages/QuizStudy';
 
 // Mock react-router-dom
@@ -31,21 +37,12 @@ vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-// Mock supabase
+// Mock supabase (only auth.getSession is used now — for the bearer token)
 const mockGetSession = vi.fn();
-const mockFrom = vi.fn();
-const mockSelect = vi.fn();
-const mockEq = vi.fn();
-const mockOr = vi.fn();
-const mockSingle = vi.fn();
-const mockInsert = vi.fn();
-
 vi.mock('../lib/supabase', () => ({
   supabase: {
-    auth: {
-      getSession: () => mockGetSession(),
-    },
-    from: (...args) => mockFrom(...args),
+    auth: { getSession: () => mockGetSession() },
+    from: vi.fn(),
   },
 }));
 
@@ -105,6 +102,29 @@ const mockQuiz = {
   ],
 };
 
+const mockRegenResponse = {
+  questions: [
+    {
+      question_id: 'q3',
+      question: 'New question',
+      type: 'mcq',
+      options: [
+        { label: 'A', text: 'Option A' },
+        { label: 'B', text: 'Option B' },
+        { label: 'C', text: 'Option C' },
+        { label: 'D', text: 'Option D' },
+      ],
+      answer: 'A',
+      explanation: 'Explanation',
+    },
+  ],
+};
+
+const mockSavedRegenQuiz = {
+  id: 'new-quiz-456',
+  title: 'Biology — Medium (v2)',
+};
+
 const renderQuizStudy = () => {
   return render(
     <BrowserRouter>
@@ -113,79 +133,47 @@ const renderQuizStudy = () => {
   );
 };
 
+// URL-keyed default mock — every test starts from this.
+function installFetchMock() {
+  global.fetch.mockImplementation((url, options) => {
+    const method = options?.method ?? 'GET';
+    if (method === 'GET' && /\/quiz\/quiz-123$/.test(url)) {
+      return Promise.resolve({ ok: true, json: async () => mockQuiz });
+    }
+    if (method === 'POST' && /\/quiz\/generate$/.test(url)) {
+      return Promise.resolve({ ok: true, json: async () => mockRegenResponse });
+    }
+    if (method === 'POST' && /\/quiz\/save$/.test(url)) {
+      return Promise.resolve({ ok: true, json: async () => mockSavedRegenQuiz });
+    }
+    return Promise.resolve({ ok: true, json: async () => ({}) });
+  });
+}
+
 describe('QuizStudy Component — Story 7.3 (Regenerate a quiz)', () => {
   beforeEach(() => {
     vi.resetAllMocks();
 
     mockUseParams.mockReturnValue({ id: 'quiz-123' });
-
-    mockUseAuth.mockReturnValue({
-      user: mockUser,
-      loading: false,
-    });
-
+    mockUseAuth.mockReturnValue({ user: mockUser, loading: false });
     mockGetSession.mockResolvedValue({
-      data: {
-        session: {
-          access_token: 'test-token-123',
-        },
-      },
+      data: { session: { access_token: 'test-token-123' } },
     });
 
-    // Mock Supabase quiz fetch chain
-    mockSingle.mockResolvedValue({ data: mockQuiz, error: null });
-    mockOr.mockReturnValue({ single: mockSingle });
-    mockEq.mockReturnValue({ or: mockOr });
-    mockSelect.mockReturnValue({ eq: mockEq });
-    mockFrom.mockReturnValue({ select: mockSelect, insert: mockInsert });
+    installFetchMock();
   });
 
   describe('AC-7.3.1: Regenerate sends POST /quiz/generate with original params AND Authorization header', () => {
-    it('sends POST request to /quiz/generate with original quiz parameters', async () => {
-      // Mock successful regenerate response
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          questions: [
-            {
-              question_id: 'q3',
-              question: 'New question',
-              type: 'mcq',
-              options: [
-                { label: 'A', text: 'Option A' },
-                { label: 'B', text: 'Option B' },
-                { label: 'C', text: 'Option C' },
-                { label: 'D', text: 'Option D' },
-              ],
-              answer: 'A',
-              explanation: 'Explanation',
-            },
-          ],
-        }),
-      });
-
-      // Mock insert for saving regenerated quiz
-      mockInsert.mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 'new-quiz-456' },
-            error: null,
-          }),
-        }),
-      });
-
+    it('sends POST request to /quiz/generate with correct method, headers and body', async () => {
       renderQuizStudy();
 
-      // Wait for quiz to load
       await waitFor(() => {
         expect(screen.getByRole('heading', { name: /Biology — Medium/i })).toBeInTheDocument();
       });
 
-      // Click Regenerate button
       const regenerateButton = screen.getByRole('button', { name: /Regenerate/i });
       fireEvent.click(regenerateButton);
 
-      // Assert fetch was called with correct parameters
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith(
           expect.stringContaining('/quiz/generate'),
@@ -202,114 +190,42 @@ describe('QuizStudy Component — Story 7.3 (Regenerate a quiz)', () => {
     });
 
     it('includes Authorization header in regenerate request', async () => {
-      // Mock successful regenerate response
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          questions: [
-            {
-              question_id: 'q3',
-              question: 'New question',
-              type: 'mcq',
-              options: [
-                { label: 'A', text: 'Option A' },
-                { label: 'B', text: 'Option B' },
-                { label: 'C', text: 'Option C' },
-                { label: 'D', text: 'Option D' },
-              ],
-              answer: 'A',
-              explanation: 'Explanation',
-            },
-          ],
-        }),
-      });
-
-      // Mock insert for saving regenerated quiz
-      mockInsert.mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 'new-quiz-456' },
-            error: null,
-          }),
-        }),
-      });
-
       renderQuizStudy();
 
-      // Wait for quiz to load
       await waitFor(() => {
         expect(screen.getByRole('heading', { name: /Biology — Medium/i })).toBeInTheDocument();
       });
 
-      // Click Regenerate button
-      const regenerateButton = screen.getByRole('button', { name: /Regenerate/i });
-      fireEvent.click(regenerateButton);
+      fireEvent.click(screen.getByRole('button', { name: /Regenerate/i }));
 
-      // Assert Authorization header contains Bearer token
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            headers: expect.objectContaining({
-              'Authorization': 'Bearer test-token-123',
-            }),
-          })
+        // Find the /quiz/generate call specifically
+        const genCall = global.fetch.mock.calls.find(
+          ([u]) => typeof u === 'string' && u.includes('/quiz/generate')
         );
+        expect(genCall).toBeDefined();
+        expect(genCall[1].headers.Authorization).toBe('Bearer test-token-123');
       });
     });
 
     it('sends original quiz parameters in request body', async () => {
-      // Mock successful regenerate response
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          questions: [
-            {
-              question_id: 'q3',
-              question: 'New question',
-              type: 'mcq',
-              options: [
-                { label: 'A', text: 'Option A' },
-                { label: 'B', text: 'Option B' },
-                { label: 'C', text: 'Option C' },
-                { label: 'D', text: 'Option D' },
-              ],
-              answer: 'A',
-              explanation: 'Explanation',
-            },
-          ],
-        }),
-      });
-
-      // Mock insert for saving regenerated quiz
-      mockInsert.mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 'new-quiz-456' },
-            error: null,
-          }),
-        }),
-      });
-
       renderQuizStudy();
 
-      // Wait for quiz to load
       await waitFor(() => {
         expect(screen.getByRole('heading', { name: /Biology — Medium/i })).toBeInTheDocument();
       });
 
-      // Click Regenerate button
-      const regenerateButton = screen.getByRole('button', { name: /Regenerate/i });
-      fireEvent.click(regenerateButton);
+      fireEvent.click(screen.getByRole('button', { name: /Regenerate/i }));
 
-      // Assert request body contains original parameters
       await waitFor(() => {
-        const fetchCall = global.fetch.mock.calls[0];
-        const requestBody = JSON.parse(fetchCall[1].body);
-
+        const genCall = global.fetch.mock.calls.find(
+          ([u]) => typeof u === 'string' && u.includes('/quiz/generate')
+        );
+        expect(genCall).toBeDefined();
+        const requestBody = JSON.parse(genCall[1].body);
         expect(requestBody.topic).toBe('Biology');
         expect(requestBody.difficulty).toBe('Medium');
-        expect(requestBody.num_questions).toBe(2); // Length of mockQuiz.questions
+        expect(requestBody.num_questions).toBe(2); // length of mockQuiz.questions
         expect(requestBody.file_id).toBe('file-456');
         expect(requestBody.outside_sources).toBe(true);
       });
@@ -317,107 +233,38 @@ describe('QuizStudy Component — Story 7.3 (Regenerate a quiz)', () => {
   });
 
   describe('AC-7.3.2: Regenerated quiz title has (v2) suffix', () => {
-    it('saves regenerated quiz with (v2) suffix in title', async () => {
-      // Mock successful regenerate response
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          questions: [
-            {
-              question_id: 'q3',
-              question: 'New question',
-              type: 'mcq',
-              options: [
-                { label: 'A', text: 'Option A' },
-                { label: 'B', text: 'Option B' },
-                { label: 'C', text: 'Option C' },
-                { label: 'D', text: 'Option D' },
-              ],
-              answer: 'A',
-              explanation: 'Explanation',
-            },
-          ],
-        }),
-      });
-
-      // Mock insert for saving regenerated quiz
-      mockInsert.mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 'new-quiz-456' },
-            error: null,
-          }),
-        }),
-      });
-
+    it('POSTs /quiz/save with title suffixed (v2)', async () => {
       renderQuizStudy();
 
-      // Wait for quiz to load
       await waitFor(() => {
         expect(screen.getByRole('heading', { name: /Biology — Medium/i })).toBeInTheDocument();
       });
 
-      // Click Regenerate button
-      const regenerateButton = screen.getByRole('button', { name: /Regenerate/i });
-      fireEvent.click(regenerateButton);
+      fireEvent.click(screen.getByRole('button', { name: /Regenerate/i }));
 
-      // Assert insert was called with (v2) suffix in title
       await waitFor(() => {
-        expect(mockInsert).toHaveBeenCalledWith(
-          expect.objectContaining({
-            title: 'Biology — Medium (v2)',
-          })
+        const saveCall = global.fetch.mock.calls.find(
+          ([u]) => typeof u === 'string' && u.includes('/quiz/save')
         );
+        expect(saveCall).toBeDefined();
+        const body = JSON.parse(saveCall[1].body);
+        expect(body.title).toBe('Biology — Medium (v2)');
+        expect(body.topic).toBe('Biology');
+        expect(body.questions).toEqual(mockRegenResponse.questions);
       });
     });
   });
 
   describe('AC-7.3.3: Page navigates to /quiz/:new_id after regenerate', () => {
     it('navigates to new quiz URL after successful regenerate', async () => {
-      // Mock successful regenerate response
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          questions: [
-            {
-              question_id: 'q3',
-              question: 'New question',
-              type: 'mcq',
-              options: [
-                { label: 'A', text: 'Option A' },
-                { label: 'B', text: 'Option B' },
-                { label: 'C', text: 'Option C' },
-                { label: 'D', text: 'Option D' },
-              ],
-              answer: 'A',
-              explanation: 'Explanation',
-            },
-          ],
-        }),
-      });
-
-      // Mock insert for saving regenerated quiz
-      mockInsert.mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 'new-quiz-456' },
-            error: null,
-          }),
-        }),
-      });
-
       renderQuizStudy();
 
-      // Wait for quiz to load
       await waitFor(() => {
         expect(screen.getByRole('heading', { name: /Biology — Medium/i })).toBeInTheDocument();
       });
 
-      // Click Regenerate button
-      const regenerateButton = screen.getByRole('button', { name: /Regenerate/i });
-      fireEvent.click(regenerateButton);
+      fireEvent.click(screen.getByRole('button', { name: /Regenerate/i }));
 
-      // Assert navigate was called with new quiz ID
       await waitFor(() => {
         expect(mockNavigate).toHaveBeenCalledWith('/quiz/new-quiz-456');
       });

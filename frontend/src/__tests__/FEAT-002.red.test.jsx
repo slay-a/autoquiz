@@ -69,8 +69,11 @@ beforeEach(() => {
     data: { session: { access_token: mockToken } },
   });
 
+  // Class-detail endpoint matched by exact suffix so /files, /quizzes,
+  // /notes sub-routes fall through to [] (otherwise ClassView crashes
+  // calling .find on a class-detail object).
   global.fetch.mockImplementation((url) => {
-    if (url.includes('/classes/class-123')) {
+    if (/\/classes\/class-123$/.test(url)) {
       return Promise.resolve({ ok: true, json: async () => mockClassDetail });
     }
     return Promise.resolve({ ok: true, json: async () => [] });

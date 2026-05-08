@@ -87,12 +87,28 @@ describe('StudentDashboard - FEAT-008 Quiz Sharing', () => {
       data: [],
     });
 
-    // Default fetch mock
-    global.fetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({ quizzes: [], notes: [] }),
+    // Default fetch mock — Dashboard.jsx fires 5 parallel fetches on mount:
+    //   GET /quiz/my, /flashcards/my, /classes/student/classes,
+    //   /classes/student/content, /notes/my
+    // The shared-quizzes payload arrives in /classes/student/content.
+    // Tests override this implementation when they need to seed quizzes.
+    global.fetch.mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/classes/student/content')) {
+        return Promise.resolve({ ok: true, json: async () => ({ quizzes: [], notes: [] }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
     });
   });
+
+  // Helper for tests that seed shared-quiz data on /classes/student/content
+  function mockContentResponse({ quizzes = [], notes = [] }) {
+    global.fetch.mockImplementation((url) => {
+      if (typeof url === 'string' && url.includes('/classes/student/content')) {
+        return Promise.resolve({ ok: true, json: async () => ({ quizzes, notes }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => [] });
+    });
+  }
 
   // ── AC-8.1.3: Only shared quizzes appear ──────────────────────────
 
@@ -118,18 +134,7 @@ describe('StudentDashboard - FEAT-008 Quiz Sharing', () => {
         className: 'Physics 101',
       };
 
-      // Mock GET /classes/student/content to return only shared quizzes
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          quizzes: [sharedQuiz1, sharedQuiz2],
-          notes: [],
-        }),
-      });
+      mockContentResponse({ quizzes: [sharedQuiz1, sharedQuiz2] });
 
       renderDashboard();
 
@@ -153,18 +158,7 @@ describe('StudentDashboard - FEAT-008 Quiz Sharing', () => {
     });
 
     it('displays empty state when no shared quizzes exist', async () => {
-      // Mock GET /classes/student/content to return empty quizzes
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          quizzes: [],
-          notes: [],
-        }),
-      });
+      mockContentResponse({ quizzes: [], notes: [] });
 
       renderDashboard();
 
@@ -183,17 +177,7 @@ describe('StudentDashboard - FEAT-008 Quiz Sharing', () => {
     });
 
     it('fetches class content from GET /classes/student/content', async () => {
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          quizzes: [],
-          notes: [],
-        }),
-      });
+      mockContentResponse({ quizzes: [], notes: [] });
 
       renderDashboard();
 
@@ -228,19 +212,7 @@ describe('StudentDashboard - FEAT-008 Quiz Sharing', () => {
         className: 'Math 101',
       };
 
-      // Mock response: only quizzes from joined classes
-      // No quizzes from other classes should appear
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          quizzes: [joinedClassQuiz],
-          notes: [],
-        }),
-      });
+      mockContentResponse({ quizzes: [joinedClassQuiz] });
 
       renderDashboard();
 
@@ -275,17 +247,7 @@ describe('StudentDashboard - FEAT-008 Quiz Sharing', () => {
         className: 'Math 201',
       };
 
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          quizzes: [quiz],
-          notes: [],
-        }),
-      });
+      mockContentResponse({ quizzes: [quiz] });
 
       renderDashboard();
 
@@ -315,17 +277,7 @@ describe('StudentDashboard - FEAT-008 Quiz Sharing', () => {
         className: 'Test Class',
       };
 
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          quizzes: [quiz],
-          notes: [],
-        }),
-      });
+      mockContentResponse({ quizzes: [quiz] });
 
       renderDashboard();
 
@@ -378,17 +330,7 @@ describe('StudentDashboard - FEAT-008 Quiz Sharing', () => {
         },
       ];
 
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          quizzes: quizzes,
-          notes: [],
-        }),
-      });
+      mockContentResponse({ quizzes });
 
       renderDashboard();
 

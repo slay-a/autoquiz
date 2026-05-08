@@ -985,25 +985,10 @@ describe('Generate Page — FEAT-007 Story 7.2 (Save a Quiz)', () => {
         }),
       });
 
-      // Mock supabase insert
-      const mockInsert = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 'saved-quiz-123' },
-            error: null,
-          }),
-        }),
-      });
-
-      mockFrom.mockReturnValue({
-        insert: mockInsert,
-        delete: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-            }),
-          }),
-        }),
+      // Mock POST /quiz/save (post FEAT-021 — was supabase.insert)
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'saved-quiz-123', title: 'Biology — medium' }),
       });
 
       renderGenerate();
@@ -1028,13 +1013,14 @@ describe('Generate Page — FEAT-007 Story 7.2 (Save a Quiz)', () => {
       const saveButton = screen.getByRole('button', { name: /Save Quiz/i });
       fireEvent.click(saveButton);
 
-      // Assert insert was called with em dash in title
+      // Assert POST /quiz/save was called with em dash in title body
       await waitFor(() => {
-        expect(mockInsert).toHaveBeenCalledWith(
-          expect.objectContaining({
-            title: 'Biology — medium',
-          })
+        const saveCall = global.fetch.mock.calls.find(
+          ([u]) => typeof u === 'string' && u.includes('/quiz/save')
         );
+        expect(saveCall).toBeDefined();
+        const body = JSON.parse(saveCall[1].body);
+        expect(body.title).toBe('Biology — medium');
       });
     });
   });
@@ -1071,25 +1057,10 @@ describe('Generate Page — FEAT-007 Story 7.2 (Save a Quiz)', () => {
         }),
       });
 
-      // Mock supabase insert
-      const mockInsert = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 'saved-quiz-123' },
-            error: null,
-          }),
-        }),
-      });
-
-      mockFrom.mockReturnValue({
-        insert: mockInsert,
-        delete: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-            }),
-          }),
-        }),
+      // Mock POST /quiz/save success
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'saved-quiz-123', title: 'Biology — medium' }),
       });
 
       renderGenerate();
@@ -1155,25 +1126,10 @@ describe('Generate Page — FEAT-007 Story 7.2 (Save a Quiz)', () => {
         }),
       });
 
-      // Mock supabase insert
-      const mockInsert = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: { id: 'saved-quiz-123' },
-            error: null,
-          }),
-        }),
-      });
-
-      mockFrom.mockReturnValue({
-        insert: mockInsert,
-        delete: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockResolvedValue({ data: null, error: null }),
-            }),
-          }),
-        }),
+      // Mock POST /quiz/save success
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'saved-quiz-123', title: 'Biology — medium' }),
       });
 
       renderGenerate();
@@ -1203,8 +1159,11 @@ describe('Generate Page — FEAT-007 Story 7.2 (Save a Quiz)', () => {
         expect(screen.getByText(/Saved/i)).toBeInTheDocument();
       });
 
-      // Assert insert was called exactly once
-      expect(mockInsert).toHaveBeenCalledTimes(1);
+      // Assert /quiz/save was called exactly once
+      const saveCalls = global.fetch.mock.calls.filter(
+        ([u]) => typeof u === 'string' && u.includes('/quiz/save')
+      );
+      expect(saveCalls.length).toBe(1);
 
       // Assert Save button is no longer clickable (it's been replaced by a badge)
       expect(screen.queryByRole('button', { name: /Save Quiz/i })).not.toBeInTheDocument();

@@ -123,30 +123,16 @@ describe('ClassView - FEAT-002', () => {
       return mockChain;
     });
 
-    // Default: mock all fetch calls to return empty arrays
+    // Default: mock all fetch calls. The class-detail endpoint is matched
+    // by EXACT suffix so `/classes/class-123/files`, `/classes/class-123/quizzes`,
+    // `/classes/class-123/notes` fall through to their own array branches
+    // (otherwise ClassView crashes on `files.find` etc.).
     global.fetch.mockImplementation((url) => {
-      if (url.includes('/classes/class-123')) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => mockClassDetail,
-        });
+      if (/\/classes\/class-123$/.test(url)) {
+        return Promise.resolve({ ok: true, json: async () => mockClassDetail });
       }
-      if (url.includes('/files')) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => [],
-        });
-      }
-      if (url.includes('/quizzes')) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => [],
-        });
-      }
-      return Promise.resolve({
-        ok: true,
-        json: async () => [],
-      });
+      // All other /classes/class-123/* endpoints return [] by default
+      return Promise.resolve({ ok: true, json: async () => [] });
     });
   });
 
@@ -242,7 +228,7 @@ describe('ClassView - FEAT-002', () => {
     };
 
     global.fetch.mockImplementation((url) => {
-      if (url.includes('/classes/class-123')) {
+      if (/\/classes\/class-123$/.test(url)) {
         return Promise.resolve({
           ok: true,
           json: async () => emptyClassDetail,
@@ -295,7 +281,7 @@ describe('ClassView - FEAT-002', () => {
     };
 
     global.fetch.mockImplementation((url) => {
-      if (url.includes('/classes/class-123')) {
+      if (/\/classes\/class-123$/.test(url)) {
         return Promise.resolve({
           ok: true,
           json: async () => classWithoutDescription,
@@ -331,7 +317,7 @@ describe('ClassView - FEAT-002', () => {
     };
 
     global.fetch.mockImplementation((url) => {
-      if (url.includes('/classes/class-123')) {
+      if (/\/classes\/class-123$/.test(url)) {
         return Promise.resolve({
           ok: true,
           json: async () => classWithPartialProfiles,
@@ -419,29 +405,18 @@ describe('ClassView - FEAT-005 Story 5.3 (File Re-Access)', () => {
       },
     });
 
+    // Class-detail endpoint matched by exact suffix; /files seeded with
+    // mockFiles for the AC-5.3 file-picker tests; other sub-endpoints fall
+    // through to []. ClassView fetches files via /classes/:id/files (post
+    // FEAT-021 layer-boundary migration), not via supabase.from.
     global.fetch.mockImplementation((url) => {
-      if (url.includes('/classes/class-123')) {
+      if (/\/classes\/class-123$/.test(url)) {
         return Promise.resolve({ ok: true, json: async () => mockClassDetail });
       }
+      if (/\/classes\/class-123\/files$/.test(url)) {
+        return Promise.resolve({ ok: true, json: async () => mockFiles });
+      }
       return Promise.resolve({ ok: true, json: async () => [] });
-    });
-
-    // The new implementation queries uploaded_files and processing_jobs separately,
-    // then intersects on file_id client-side (avoids broken !inner join — no FK on processing_jobs.file_id).
-    // eq() is the terminal call for processing_jobs; order() is terminal for uploaded_files.
-    mockSupabaseFrom.mockImplementation((table) => {
-      const successJobs = mockFiles.map(f => ({ file_id: f.file_id }));
-      const mockChain = {
-        select: vi.fn(() => mockChain),
-        eq: vi.fn(() =>
-          table === 'processing_jobs'
-            ? { data: successJobs, error: null }
-            : mockChain
-        ),
-        order: vi.fn(() => ({ data: table === 'uploaded_files' ? mockFiles : [], error: null })),
-        delete: vi.fn(() => mockChain),
-      };
-      return mockChain;
     });
   });
 
@@ -464,34 +439,30 @@ describe('ClassView - FEAT-005 Story 5.3 (File Re-Access)', () => {
       expect(uploadedLabels.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('scopes file list to class via class_id filter and only shows status=success files', async () => {
-      const uploadedFilesEqCalls = [];
-      const processingJobsEqCalls = [];
-      mockSupabaseFrom.mockImplementation((table) => {
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn((col, val) => {
-            if (table === 'uploaded_files') uploadedFilesEqCalls.push([col, val]);
-            if (table === 'processing_jobs') processingJobsEqCalls.push([col, val]);
-            return table === 'processing_jobs' ? { data: [], error: null } : mockChain;
-          }),
-          order: vi.fn(() => ({ data: [], error: null })),
-          delete: vi.fn(() => mockChain),
-        };
-        return mockChain;
+    it('scopes file list to class via the /classes/:id/files route (status=success enforced server-side)', async () => {
+      // Post FEAT-021 layer-boundary migration, ClassView no longer queries
+      // uploaded_files / processing_jobs directly. The /classes/:id/files
+      // backend route applies the class_id + status=success filters.
+      // Test asserts the frontend hits the correctly-scoped URL.
+      const fetchedUrls = [];
+      global.fetch.mockImplementation((url) => {
+        fetchedUrls.push(url);
+        if (/\/classes\/class-123$/.test(url)) {
+          return Promise.resolve({ ok: true, json: async () => mockClassDetail });
+        }
+        if (/\/classes\/class-123\/files$/.test(url)) {
+          return Promise.resolve({ ok: true, json: async () => mockFiles });
+        }
+        return Promise.resolve({ ok: true, json: async () => [] });
       });
 
       renderClassView();
 
       await waitFor(() => {
-        expect(mockSupabaseFrom).toHaveBeenCalledWith('uploaded_files');
-        expect(mockSupabaseFrom).toHaveBeenCalledWith('processing_jobs');
+        expect(
+          fetchedUrls.some((u) => /\/classes\/class-123\/files$/.test(u))
+        ).toBe(true);
       });
-
-      // uploaded_files query is scoped to the class
-      expect(uploadedFilesEqCalls).toContainEqual(['class_id', 'class-123']);
-      // processing_jobs query filters by status=success
-      expect(processingJobsEqCalls).toContainEqual(['status', 'success']);
     });
   });
 
@@ -519,69 +490,49 @@ describe('ClassView - FEAT-005 Story 5.3 (File Re-Access)', () => {
   });
 
   describe('AC-5.3.4: File list scoped to class', () => {
-    it('queries uploaded_files with class_id matching the URL param', async () => {
-      renderClassView('class-123');
-
-      await waitFor(() => {
-        expect(mockSupabaseFrom).toHaveBeenCalledWith('uploaded_files');
-      });
-
-      // Verify the Supabase chain was called with the correct class_id
-      const fromCall = mockSupabaseFrom.mock.calls.find(([table]) => table === 'uploaded_files');
-      expect(fromCall).toBeTruthy();
-      // The eq spy on the chain is captured implicitly — render with a different class ID
-      // to confirm the query uses the param, not a hardcoded value
-      vi.clearAllMocks();
-      mockUseAuth.mockReturnValue({ user: mockUser, profile: mockProfile, loading: false });
-      mockGetSession.mockResolvedValue({ data: { session: { access_token: mockToken } } });
+    it('GET /classes/:id/files uses the class id from the URL param, not a hardcoded value', async () => {
+      // Post FEAT-021, the file list is fetched per-class via
+      // /classes/:id/files. This test renders two different class IDs and
+      // verifies each triggers a fetch keyed on its own class_id.
+      const seenUrls = new Set();
       global.fetch.mockImplementation((url) => {
-        if (url.includes('/classes/other-class')) {
-          return Promise.resolve({ ok: true, json: async () => ({ ...mockClassDetail, id: 'other-class' }) });
+        seenUrls.add(url);
+        if (/\/classes\/[^/]+$/.test(url)) {
+          return Promise.resolve({ ok: true, json: async () => mockClassDetail });
         }
         return Promise.resolve({ ok: true, json: async () => [] });
       });
-      const otherEqCalls = [];
-      mockSupabaseFrom.mockImplementation((table) => {
-        const mockChain = {
-          select: vi.fn(() => mockChain),
-          eq: vi.fn((col, val) => {
-            if (table === 'uploaded_files') otherEqCalls.push([col, val]);
-            return mockChain;
-          }),
-          order: vi.fn(() => ({ data: [], error: null })),
-          delete: vi.fn(() => mockChain),
-        };
-        return mockChain;
-      });
-      renderClassView('other-class');
 
+      const { unmount } = renderClassView('class-123');
       await waitFor(() => {
-        expect(mockSupabaseFrom).toHaveBeenCalledWith('uploaded_files');
+        expect(
+          [...seenUrls].some((u) => /\/classes\/class-123\/files$/.test(u))
+        ).toBe(true);
       });
-      expect(otherEqCalls).toContainEqual(['class_id', 'other-class']);
+      unmount();
+
+      seenUrls.clear();
+      mockUseAuth.mockReturnValue({ user: mockUser, profile: mockProfile, loading: false });
+      mockGetSession.mockResolvedValue({ data: { session: { access_token: mockToken } } });
+
+      renderClassView('other-class');
+      await waitFor(() => {
+        expect(
+          [...seenUrls].some((u) => /\/classes\/other-class\/files$/.test(u))
+        ).toBe(true);
+      });
     });
   });
 
   describe('Empty state', () => {
     it('handles no uploaded files gracefully', async () => {
+      // /classes/:id/files returns [] — page must render without crashing.
       global.fetch.mockImplementation((url) => {
-        if (url.includes('/classes/class-123')) {
-          return Promise.resolve({
-            ok: true,
-            json: async () => mockClassDetail,
-          });
+        if (/\/classes\/class-123$/.test(url)) {
+          return Promise.resolve({ ok: true, json: async () => mockClassDetail });
         }
-        return Promise.resolve({
-          ok: true,
-          json: async () => [],
-        });
+        return Promise.resolve({ ok: true, json: async () => [] });
       });
-
-      mockSupabaseFrom.mockImplementation(() => ({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ data: [] }),
-        }),
-      }));
 
       renderClassView();
 

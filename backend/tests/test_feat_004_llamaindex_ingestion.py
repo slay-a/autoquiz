@@ -57,7 +57,13 @@ def sample_file_id():
 
 
 class TestPDFParserLlamaIndex:
-    """Tests for parse_pdf_llamaindex() using LlamaIndex PDFReader."""
+    """Tests for parse_pdf_llamaindex() using LlamaIndex PDFReader.
+
+    AC-4.1.1 (PDF leg): the @patch("app.utils.parsers.PDFReader") path
+    confirms the module's PDFReader symbol is the LlamaIndex reader; if
+    parsers.py reverted to a custom PDF parser, the patch target wouldn't
+    resolve and the test setup would fail.
+    """
 
     @patch("app.utils.parsers.PDFReader")
     @patch("app.utils.parsers.tempfile.NamedTemporaryFile")
@@ -126,7 +132,11 @@ class TestPDFParserLlamaIndex:
 
 
 class TestDocxParserLlamaIndex:
-    """Tests for parse_docx_llamaindex() using LlamaIndex DocxReader."""
+    """Tests for parse_docx_llamaindex() using LlamaIndex DocxReader.
+
+    AC-4.1.1 (DOCX leg): see PDF class docstring for the same patch-target
+    rationale.
+    """
 
     @patch("app.utils.parsers.DocxReader")
     @patch("app.utils.parsers.tempfile.NamedTemporaryFile")
@@ -214,6 +224,13 @@ class TestDocxParserLlamaIndex:
 
 
 class TestPptxParserLlamaIndex:
+    """Tests for parse_pptx_llamaindex() using LlamaIndex PptxReader.
+
+    AC-4.1.1 (PPTX leg): see PDF class docstring for the same patch-target
+    rationale. The presence of all three reader-class patches across the
+    three TestXxxParserLlamaIndex classes constitutes the AC-4.1.1
+    coverage.
+    """
     """Tests for parse_pptx_llamaindex() using LlamaIndex PptxReader."""
 
     @patch("app.utils.parsers.PptxReader")
@@ -250,7 +267,15 @@ class TestPptxParserLlamaIndex:
 
 
 class TestIngestDocument:
-    """Tests for ingest_document() service function."""
+    """Tests for ingest_document() service function.
+
+    AC-4.2.2: the @patch("app.services.ingestion.SentenceSplitter") path and
+    the use of `mock_splitter.get_nodes_from_documents.return_value` in
+    every happy-path test below confirm `get_nodes_from_documents()` is the
+    chunking entry point. If ingestion.py reverted to custom chunking
+    (clean_text/detect_sections/chunk_sections), neither the patch nor the
+    method assertion would resolve.
+    """
 
     @patch("app.services.ingestion.LLAMAINDEX_PARSERS")
     @patch("app.services.ingestion.SentenceSplitter")

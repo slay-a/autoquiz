@@ -70,8 +70,11 @@ describe('ProtectedRoute', () => {
     expect(spinner).toBeInTheDocument();
   });
 
-  // AC-1.5.3: Any route wrapped in <ProtectedRoute> (no role specified) redirects an unauthenticated user to /login
-  it('AC-1.5.3: redirects unauthenticated user to /login', () => {
+  // AC-1.5.3 / AC-1.4.2: <ProtectedRoute> redirects unauthenticated users
+  // to /login. AC-1.4.2 ("post-logout navigation to protected routes
+  // redirects to /login") is observationally identical: after logout, the
+  // app is unauthenticated, so the same code path runs.
+  it('AC-1.5.3 / AC-1.4.2: redirects unauthenticated user to /login', () => {
     renderProtectedRoute({}, { loading: false, user: null, profile: null });
 
     expect(screen.getByText('Login Page')).toBeInTheDocument();

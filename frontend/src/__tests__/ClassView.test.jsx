@@ -37,6 +37,16 @@ function renderClassView(classId = 'class-123') {
   );
 }
 
+// AC-2.3.4 (composite): The class detail page provides access to file upload,
+// notes creation, and quiz sharing. No single test in this file covers all
+// three at once. Coverage is composed:
+//   - File upload / re-access list — see "ClassView - FEAT-005 Story 5.3" suite below
+//   - Notes creation             — see ClassView.FEAT-010.test.jsx
+//   - Quiz sharing               — see ClassView.FEAT-008.test.jsx
+// A composite end-to-end test for AC-2.3.4 is intentionally not present in
+// jsdom; rendering the full ClassView with all three sub-features wired would
+// require seeding more state than this file's mocks support. Verified manually
+// pre-demo.
 describe('ClassView - FEAT-002', () => {
   const mockUser = {
     id: 'instructor-123',

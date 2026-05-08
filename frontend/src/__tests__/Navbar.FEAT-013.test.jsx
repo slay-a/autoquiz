@@ -14,7 +14,11 @@ import { ThemeProvider } from '../contexts/ThemeContext';
  *
  * Covered:
  *   AC-13.3.1 — avatar_url → <img> ; null → <User> icon fallback
- *   AC-13.3.2 — avatar/name region wraps <Link to="/profile"> ; Logout works
+ *   AC-13.3.2 — avatar/name region wraps <Link to="/profile">
+ *   AC-13.3.3 — Logout button remains functional alongside the avatar link
+ *   AC-1.4.1 (partial) — clicking Logout invokes AuthContext.logout(); the
+ *     downstream signOut() + aq_profile clear + /login redirect live in
+ *     AuthContext.test.jsx, not this file.
  *
  * Fix (FEAT-012): App.jsx now uses TopBar → ThemeToggle → useTheme, so the
  * test wrapper must provide <ThemeProvider>. matchMedia is mocked so
@@ -199,9 +203,11 @@ describe('Navbar — FEAT-013 Story 13.3', () => {
     expect(profileLink.contains(avatar)).toBe(true);
   });
 
-  // AC-13.3.2: Logout button still triggers logout and is separate from the
-  // /profile link (so clicking the avatar doesn't fire logout by accident).
-  it('AC-13.3.2: Logout button is unaffected and triggers logout', async () => {
+  // AC-13.3.3 / AC-1.4.1 (partial): Logout button still triggers logout and
+  // is separate from the /profile link (so clicking the avatar doesn't fire
+  // logout by accident). Verifies AuthContext.logout() is invoked; the
+  // signOut + aq_profile clear + redirect chain is owned by AuthContext.
+  it('AC-13.3.3 / AC-1.4.1 (partial): Logout button is functional alongside avatar link', async () => {
     mockUseAuth.mockReturnValue({
       user: { id: 'u1' },
       profile: {

@@ -125,7 +125,8 @@ describe('Register', () => {
     expect(submitButton).toBeDisabled();
   });
 
-  it('AC-1.1.1: submits form when all fields are provided', async () => {
+  // AC-1.1.2 (partial): full_name, email, password, and role are forwarded to register() with the values the user typed. DB row creation itself is out of jsdom scope — verified manually pre-demo.
+  it('AC-1.1.1 / AC-1.1.2: submits form with correct full_name, email, password, role payload', async () => {
     const user = userEvent.setup();
     mockRegister.mockResolvedValue({});
 

@@ -449,7 +449,11 @@ describe('ClassView - FEAT-010 Instructor Notes System', () => {
   });
 
   describe('Story 10.3 — Publish and unpublish class notes', () => {
-    it('AC-10.3.1: Publish toggle flips is_published via fetch PATCH', async () => {
+    // The test below also covers AC-10.3.4 (partial): an unpublished note
+    // (`is_published=false`) renders a button labelled "Publish" on initial
+    // load — i.e., the toggle reflects current is_published state. The
+    // published→"Unpublish" direction of AC-10.3.4 is not currently covered.
+    it('AC-10.3.1 / AC-10.3.4 (partial): Publish toggle flips is_published via fetch PATCH (and renders "Publish" label for unpublished note on load)', async () => {
       let patchBody = null;
 
       // fetch mock returns draft note; captures PATCH call for publish assertion

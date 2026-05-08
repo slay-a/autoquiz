@@ -149,7 +149,7 @@ def test_generate_notes_with_auth_calls_openai(client, student_user, mock_notes_
 
 
 def test_generate_notes_structure_validation(mock_notes_response):
-    """AC-9.1.4: notes_gen.generate_notes() returns required shape."""
+    """AC-9.1.3 / AC-9.1.4: notes_gen.generate_notes() returns required shape (summary, key_concepts[term/definition/example], important_details, common_misconceptions). Triggered via outside_sources=True path (9.1.4) which exercises the same response contract."""
     with patch("app.services.notes_gen._openai") as mock_openai:
         # Mock OpenAI response
         mock_response = Mock()

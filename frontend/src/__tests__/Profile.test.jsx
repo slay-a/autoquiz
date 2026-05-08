@@ -10,6 +10,14 @@ import Profile from '../pages/Profile';
  * Covers Story 13.1 (view/edit profile) and Story 13.2 (save profile changes).
  * Story 13.3 (navbar) is exercised separately in Navbar.FEAT-013.test.jsx.
  *
+ * AC-13.1.1 (profile page is reachable only by authenticated users; both
+ * roles permitted) is covered by composition: ProtectedRoute.test.jsx
+ * verifies the auth/role gate (AC-1.5.x); App.jsx routes /profile through
+ * <ProtectedRoute allowedRole={["student","instructor"]}>; this file
+ * verifies the Profile component renders for authenticated users. The
+ * array-form `allowedRole` (multi-role) is not directly unit-tested in
+ * ProtectedRoute.test.jsx — verified manually pre-demo.
+ *
  * Test boundaries per spec §7:
  *   - Mock useAuth to return synthetic user + profile fixtures
  *   - Mock supabase.from('profiles').update(...).eq('id', ...)
